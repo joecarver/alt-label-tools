@@ -1,0 +1,50 @@
+---
+import { getReleases } from "@/utils/NotionApi";
+import { Card, Text, Box, Flex } from "@radix-ui/themes";
+
+const clientId = Astro.props.clientId;
+
+const releases = await getReleases(clientId);
+console.log(releases);
+---
+
+<Flex
+    as="ul"
+    css={{ listStyle: "none", padding: 0 }}
+    direction="column"
+    gap="2"
+>
+    {
+        releases.map((release) => (
+            <Card as="li" key={release.id} direction="column">
+                <Text as="span" weight="bold">
+                    {release.catalogNumber} - {release.artist}
+                </Text>
+                <Flex
+                    as="ul"
+                    direction="column"
+                    gap="2"
+                    size="2"
+                    css={{ listStyle: "none", padding: 0 }}
+                >
+                    {release.tasks
+                        .sort(
+                            (a, b) =>
+                                new Date(a.startDate).getTime() -
+                                new Date(b.startDate).getTime(),
+                        )
+                        .map((task) => (
+                            <Flex as="li" key={task.id} direction="column">
+                                <Text as="span" key={task.id}>
+                                    {task.name}
+                                </Text>
+                                <Text as="span" size="2" color="gray">
+                                    {task.startDate} - {task.endDate}
+                                </Text>
+                            </Flex>
+                        ))}
+                </Flex>
+            </Card>
+        ))
+    }
+</Flex>

@@ -1,4 +1,80 @@
-# Astro Starter Kit: Basics
+# Schedule & Workflow Dashboard
+
+A modern dashboard built with Astro that displays schedule data from Notion and workflow data from n8n.
+
+## Features
+
+- 📅 Schedule data integration with Notion
+- 🔄 Workflow status from n8n
+- 🎨 Modern UI with Radix UI components
+- 🌙 Dark mode support
+- ⚡ Fast and responsive
+
+## Prerequisites
+
+- Node.js 18 or later
+- npm or yarn
+- Notion API key and database ID
+- n8n API key and webhook URL
+
+## Setup
+
+1. Clone the repository:
+
+```bash
+git clone <repository-url>
+cd <repository-name>
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Create a `.env` file in the root directory with the following variables:
+
+```env
+NOTION_API_KEY=your_notion_api_key_here
+NOTION_DATABASE_ID=your_notion_database_id_here
+N8N_API_KEY=your_n8n_api_key_here
+N8N_WEBHOOK_URL=your_n8n_webhook_url_here
+```
+
+4. Start the development server:
+
+```bash
+npm run dev
+```
+
+5. Open your browser and navigate to `http://localhost:4321`
+
+## Notion Setup
+
+1. Create a new integration in the [Notion Developers](https://www.notion.so/my-integrations) page
+2. Create a new database in Notion with the following properties:
+   - Name (title)
+   - Date (date)
+   - Description (text)
+3. Share the database with your integration
+4. Copy the database ID from the URL
+
+## n8n Setup
+
+1. Create a new workflow in n8n
+2. Set up a webhook node to expose your workflow data
+3. Configure authentication using an API key
+4. Copy the webhook URL and API key
+
+## Development
+
+- `npm run dev` - Start the development server
+- `npm run build` - Build the project
+- `npm run preview` - Preview the production build
+
+## License
+
+MIT
 
 ```sh
 npm create astro@latest -- --template basics
