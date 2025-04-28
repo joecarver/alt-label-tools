@@ -1,10 +1,34 @@
 ---
 import { getReleases } from "@/utils/NotionApi";
-import { Card, Text, Box, Flex } from "@radix-ui/themes";
+import { Card, Text, Box, Flex, Badge } from "@radix-ui/themes";
+import { ReleaseTaskName } from "@/types/ReleaseTask";
+import { ReleaseTaskStatus } from "@/types/ReleaseTaskStatus";
 
 const clientId = Astro.props.clientId;
 
 const releases = await getReleases(clientId);
+
+const isDetectableTask = (taskName: string) => {
+    return [
+        ReleaseTaskName.ContractCreated,
+        ReleaseTaskName.PreMastersSubmitted,
+        ReleaseTaskName.MasteringSubmitted,
+        ReleaseTaskName.ArtworkCreation,
+    ].includes(taskName as ReleaseTaskName);
+};
+
+const getStatusColor = (status: ReleaseTaskStatus) => {
+    switch (status) {
+        case ReleaseTaskStatus.TODO:
+            return "gray";
+        case ReleaseTaskStatus.IN_PROGRESS:
+            return "blue";
+        case ReleaseTaskStatus.DONE:
+            return "green";
+        default:
+            return "gray";
+    }
+};
 ---
 
 <Flex
@@ -34,9 +58,18 @@ const releases = await getReleases(clientId);
                         )
                         .map((task) => (
                             <Flex as="li" key={task.id} direction="column">
-                                <Text as="span" key={task.id}>
-                                    {task.name}
-                                </Text>
+                                <Flex gap="2" align="center">
+                                    <Text as="span" key={task.id}>
+                                        {task.name}
+                                    </Text>
+                                    {isDetectableTask(task.name) && (
+                                        <Badge
+                                            color={getStatusColor(task.status)}
+                                        >
+                                            {task.status}
+                                        </Badge>
+                                    )}
+                                </Flex>
                                 <Text as="span" size="2" color="gray">
                                     {task.startDate} - {task.endDate}
                                 </Text>
