@@ -8,7 +8,14 @@ const notion = new Client({
     auth: import.meta.env.NOTION_API_KEY,
 });
 
+const cachedReleases: Release[] = [];
+const cachedClients: LabelClient[] = [];
+
 export async function getClients(): Promise<LabelClient[]> {
+    if (cachedClients.length > 0) {
+        return cachedClients;
+    }
+
     const clientsBlockId = "1bcaab79f528805bb18cf74fb628292b";
     const response = await notion.blocks.children.list({
         block_id: clientsBlockId,
@@ -17,13 +24,23 @@ export async function getClients(): Promise<LabelClient[]> {
 
     const results = response.results as BlockObjectResponse[];
 
-    return results.filter((result) => result.type === "child_page").map((result) => ({
+    const clients = results.filter((result) => result.type === "child_page").map((result) => ({
         id: result.id,
         name: result.child_page.title,
     }));
+
+    cachedClients.push(...clients);
+
+    return clients;
 }
 
+
+
 export async function getReleases(clientId: string): Promise<Release[]> {
+    if (cachedReleases.length > 0) {
+        return cachedReleases;
+    }
+
     const clientResponse = await notion.blocks.children.list({
         block_id: clientId,
     });
@@ -83,6 +100,8 @@ export async function getReleases(clientId: string): Promise<Release[]> {
             });
         }
     });
+
+    cachedReleases.push(...releases);
 
     return releases;
 }
