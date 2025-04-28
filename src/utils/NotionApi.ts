@@ -45,7 +45,18 @@ export async function getReleases(clientId: string): Promise<Release[]> {
     const releases: Release[] = [];
 
     releaseScheduleResults.forEach((result) => {
-        const [catalogNumber, artist, taskName] = result.properties.Name.title[0].plain_text.split(" - ");
+        const title = result.properties.Name.title[0];
+        if (!title) {
+            return;
+        }
+
+        const titleString = title.plain_text;
+
+        if (!titleString) {
+            return;
+        }
+
+        const [catalogNumber, artist, taskName] = titleString.split(" - ");
 
 
         const task = {
@@ -63,7 +74,7 @@ export async function getReleases(clientId: string): Promise<Release[]> {
         } else {
             releases.push({
                 id: result.id,
-                name: result.properties.Name.title[0].plain_text,
+                name: titleString,
                 catalogNumber: catalogNumber,
                 artist: artist,
                 tasks: [task],
