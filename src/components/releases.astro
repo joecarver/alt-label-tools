@@ -9,10 +9,11 @@ const clientId = Astro.props.clientId;
 const releases = await getReleases(clientId);
 
 const isDetectableTask = (taskName: string) => {
+    console.log(taskName);
     return [
         ReleaseTaskName.ContractCreated,
         ReleaseTaskName.PreMastersSubmitted,
-        ReleaseTaskName.MasteringSubmitted,
+        ReleaseTaskName.MastersSubmitted,
         ReleaseTaskName.ArtworkCreation,
     ].includes(taskName as ReleaseTaskName);
 };

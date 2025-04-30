@@ -1,8 +1,9 @@
 import { Client } from '@notionhq/client';
 import type { LabelClient } from "@/types/LabelClient";
 import type { Release } from "@/types/Release";
-import type { BlockObjectResponse, DatabaseObjectResponse } from '@notionhq/client/build/src/api-endpoints';
+import type { BlockObjectResponse, DatabaseObjectResponse, PageObjectResponse, TitlePropertyItemObjectResponse, DatePropertyItemObjectResponse, RichTextItemResponse } from '@notionhq/client/build/src/api-endpoints';
 import { ReleaseTaskStatus } from "@/types/ReleaseTaskStatus";
+import { ReleaseTaskName } from "@/types/ReleaseTask";
 
 const notion = new Client({
     auth: import.meta.env.NOTION_API_KEY,
@@ -34,74 +35,66 @@ export async function getClients(): Promise<LabelClient[]> {
     return clients;
 }
 
-
-
 export async function getReleases(clientId: string): Promise<Release[]> {
     if (cachedReleases.length > 0) {
         return cachedReleases;
     }
 
-    const clientResponse = await notion.blocks.children.list({
+    const response = await notion.blocks.children.list({
         block_id: clientId,
+        page_size: 100,
     });
 
-    const clientResults = clientResponse.results as BlockObjectResponse[];
-    const releaseScheduleDatabase = clientResults.find((result) => result.type === "child_database");
-
-
-    if (!releaseScheduleDatabase) {
-        throw new Error("Release schedule database not found");
-    }
-
-    const releaseResponse = await notion.databases.query({
-        database_id: releaseScheduleDatabase.id,
-    });
-
-    const releaseScheduleResults = releaseResponse.results as DatabaseObjectResponse[];
+    const results = response.results as BlockObjectResponse[];
+    const releaseDatabases = results.filter((result) => result.type === "child_database");
 
     const releases: Release[] = [];
 
-    releaseScheduleResults.forEach((result) => {
-        const title = result.properties.Name.title[0];
-        if (!title) {
-            return;
-        }
+    for (const database of releaseDatabases) {
+        const databaseId = database.id;
+        const databaseResponse = await notion.databases.query({
+            database_id: databaseId,
+        });
 
-        const titleString = title.plain_text;
+        const databaseResults = databaseResponse.results as PageObjectResponse[];
 
-        if (!titleString) {
-            return;
-        }
+        // Get the database title which should be the release name
+        const databaseTitle = database.child_database?.title || "Untitled Release";
+        const [catalogNumber, artist] = databaseTitle.split(" - ");
 
-        const [catalogNumber, artist, taskName] = titleString.split(" - ");
+        const tasks = databaseResults.map(result => {
+            const nameProperty = result.properties.Name;
+            const dateProperty = result.properties.Date;
 
+            const title = nameProperty?.type === 'title' ? nameProperty.title[0]?.plain_text || "" : "";
+            const date = dateProperty?.type === 'date' ? dateProperty.date : null;
 
-        const task = {
-            id: result.id,
-            releaseId: catalogNumber,
-            name: taskName,
-            status: ReleaseTaskStatus.UNKNOWN,
-            startDate: result.properties.Date.date.start,
-            endDate: result.properties.Date.date.end,
-        }
+            const taskTitle = title.split(" - ")[2];
 
-        const release = releases.find((release) => release.catalogNumber === catalogNumber);
-        if (release) {
-            release.tasks.push(task);
-        } else {
-            releases.push({
+            return {
                 id: result.id,
-                name: titleString,
-                catalogNumber: catalogNumber,
-                artist: artist,
-                tasks: [task],
-                labelId: clientId,
-                notionUrl: result.url,
-            });
-        }
-    });
+                releaseId: catalogNumber,
+                name: taskTitle as ReleaseTaskName,
+                status: ReleaseTaskStatus.UNKNOWN,
+                startDate: date?.start || "",
+                endDate: date?.end || date?.start || "",
+            };
+        });
+
+        releases.push({
+            id: databaseId,
+            name: databaseTitle,
+            catalogNumber: catalogNumber,
+            artist: artist,
+            tasks: tasks,
+            labelId: clientId,
+            notionUrl: `https://notion.so/${databaseId.replace(/-/g, '')}`,
+            releaseDate: tasks[0]?.startDate || "",
+        });
+    }
 
     cachedReleases.push(...releases);
 
+    console.log(releases);
     return releases;
 }

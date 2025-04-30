@@ -2,12 +2,12 @@ import type { Release } from "./Release";
 import type { ReleaseTaskStatus } from "./ReleaseTaskStatus";
 
 export enum ReleaseTaskName {
+    ReleaseScheduled = "Release Scheduled",
     ContractCreated = "Contract Created",
-    PreMastersSubmitted = "Pre Masters Submitted",
-    MasteringSubmitted = "Mastering Submitted",
+    PreMastersSubmitted = "Pre Master Due",
+    MastersSubmitted = "Mixing and Mastering",
     ArtworkCreation = "Artwork Creation",
     PressRelease = "Press Release",
-    MixingAndMastering = "Mixing and Mastering",
     MarketingDriver = "Marketing Driver",
     SendToRubadub = "Send to Rubadub",
     PressAndPressRelease = "Press and Press Release",
@@ -16,7 +16,7 @@ export enum ReleaseTaskName {
     UpdateScentric = "Update Scentric",
 }
 
-export type DetectableReleaseTask = Extract<ReleaseTaskName, ReleaseTaskName.ContractCreated | ReleaseTaskName.PreMastersSubmitted | ReleaseTaskName.MasteringSubmitted | ReleaseTaskName.ArtworkCreation>;
+export type DetectableReleaseTask = Extract<ReleaseTaskName, ReleaseTaskName.ContractCreated | ReleaseTaskName.PreMastersSubmitted | ReleaseTaskName.MastersSubmitted | ReleaseTaskName.ArtworkCreation>;
 
 export interface ReleaseTask {
     id: string;
