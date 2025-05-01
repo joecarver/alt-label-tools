@@ -9,7 +9,6 @@ const clientId = Astro.props.clientId;
 const releases = await getReleases(clientId);
 
 const isDetectableTask = (taskName: string) => {
-    console.log(taskName);
     return [
         ReleaseTaskName.ContractCreated,
         ReleaseTaskName.PreMastersSubmitted,
@@ -30,6 +29,25 @@ const getStatusColor = (status: ReleaseTaskStatus) => {
             return "gray";
     }
 };
+
+const getDueDateStatus = (endDate: string) => {
+    const today = new Date();
+    const dueDate = new Date(endDate);
+    const daysUntilDue = Math.ceil(
+        (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+    );
+
+    if (daysUntilDue < 0) {
+        return { status: "overdue", color: "red" };
+    } else if (daysUntilDue <= 3) {
+        return { status: "due soon", color: "orange" };
+    }
+    return null;
+};
+
+const TEST_RELEASES = releases.filter(
+    (release) => release.catalogNumber === "BLUNT005",
+);
 ---
 
 <Flex
@@ -39,7 +57,7 @@ const getStatusColor = (status: ReleaseTaskStatus) => {
     gap="2"
 >
     {
-        releases.map((release) => (
+        TEST_RELEASES.map((release) => (
             <Card as="li" key={release.id} direction="column">
                 <Text as="span" weight="bold">
                     {release.catalogNumber} - {release.artist}
@@ -57,25 +75,37 @@ const getStatusColor = (status: ReleaseTaskStatus) => {
                                 new Date(a.startDate).getTime() -
                                 new Date(b.startDate).getTime(),
                         )
-                        .map((task) => (
-                            <Flex as="li" key={task.id} direction="column">
-                                <Flex gap="2" align="center">
-                                    <Text as="span" key={task.id}>
-                                        {task.name}
+                        .map((task) => {
+                            const dueDateStatus = getDueDateStatus(
+                                task.endDate,
+                            );
+                            return (
+                                <Flex as="li" key={task.id} direction="column">
+                                    <Flex gap="2" align="center">
+                                        <Text as="span" key={task.id}>
+                                            {task.name}
+                                        </Text>
+                                        {isDetectableTask(task.name) && (
+                                            <Badge
+                                                color={getStatusColor(
+                                                    task.status,
+                                                )}
+                                            >
+                                                {task.status}
+                                            </Badge>
+                                        )}
+                                        {dueDateStatus && (
+                                            <Badge color={dueDateStatus.color}>
+                                                {dueDateStatus.status}
+                                            </Badge>
+                                        )}
+                                    </Flex>
+                                    <Text as="span" size="2" color="gray">
+                                        {task.startDate} - {task.endDate}
                                     </Text>
-                                    {isDetectableTask(task.name) && (
-                                        <Badge
-                                            color={getStatusColor(task.status)}
-                                        >
-                                            {task.status}
-                                        </Badge>
-                                    )}
                                 </Flex>
-                                <Text as="span" size="2" color="gray">
-                                    {task.startDate} - {task.endDate}
-                                </Text>
-                            </Flex>
-                        ))}
+                            );
+                        })}
                 </Flex>
             </Card>
         ))
