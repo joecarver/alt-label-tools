@@ -16,10 +16,8 @@ const clients = await getClients();
 						clients.map((client) => (
 							<Card key={client.id}>
 								<Flex align="baseline" gap="2">
-									<Text as="span" weight="bold">
-										{client.name}
-									</Text>
-									<Text as="span" size="2" color="gray">
+									<Text weight="bold">{client.name}</Text>
+									<Text size="2" color="gray">
 										{client.id}
 									</Text>
 								</Flex>
