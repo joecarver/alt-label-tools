@@ -1,32 +1,53 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { getClients } from "@/utils/NotionApi";
-import { Card, Text, Grid, Container, Heading, Flex } from "@radix-ui/themes";
+import {
+	Card,
+	Text,
+	Grid,
+	Container,
+	Heading,
+	Flex,
+	Box,
+} from "@radix-ui/themes";
 import Releases from "@/components/releases.astro";
 const clients = await getClients();
 ---
 
 <Layout title="Schedule & Workflow Dashboard">
-	<Container size="2">
-		<Grid columns="1" gap="4">
-			<div>
-				<Heading mb="4">Clients</Heading>
+	<Container size="3">
+		<Grid columns="1" gap="6">
+			<Box>
+				<Flex justify="between" align="center" mb="4">
+					<Heading size="5">Clients</Heading>
+					<Text size="2" color="gray"
+						>{clients.length} active clients</Text
+					>
+				</Flex>
 				<Grid columns="1" gap="4">
 					{
 						clients.map((client) => (
-							<Card key={client.id}>
-								<Flex align="baseline" gap="2">
-									<Text weight="bold">{client.name}</Text>
-									<Text size="2" color="gray">
-										{client.id}
-									</Text>
+							<Card key={client.id} size="2">
+								<Flex direction="column" gap="3">
+									<Flex justify="between" align="center">
+										<Flex direction="column" gap="1">
+											<Text size="4" weight="bold">
+												{client.name}
+											</Text>
+											<Text size="2" color="gray">
+												Client ID: {client.id}
+											</Text>
+										</Flex>
+									</Flex>
+									<Box>
+										<Releases clientId={client.id} />
+									</Box>
 								</Flex>
-								<Releases clientId={client.id} />
 							</Card>
 						))
 					}
 				</Grid>
-			</div>
+			</Box>
 		</Grid>
 	</Container>
 </Layout>

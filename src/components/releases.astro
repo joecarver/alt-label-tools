@@ -1,144 +1,16 @@
 ---
 import { getReleases } from "@/utils/NotionApi";
-import { Card, Text, Flex, Badge } from "@radix-ui/themes";
-import { ReleaseTaskName } from "@/types/ReleaseTask";
-import { ReleaseTaskStatus } from "@/types/ReleaseTaskStatus";
+import { Flex } from "@radix-ui/themes";
+import ReleaseCard from "./ReleaseCard.astro";
 
 const clientId = Astro.props.clientId;
-
 const releases = await getReleases(clientId);
-
-const isDetectableTask = (taskName: string) => {
-    return [
-        ReleaseTaskName.ContractCreated,
-        ReleaseTaskName.PreMastersSubmitted,
-        ReleaseTaskName.MastersSubmitted,
-        ReleaseTaskName.ArtworkCreation,
-    ].includes(taskName as ReleaseTaskName);
-};
-
-const getStatusColor = (status: ReleaseTaskStatus) => {
-    switch (status) {
-        case ReleaseTaskStatus.TODO:
-            return "gray";
-        case ReleaseTaskStatus.IN_PROGRESS:
-            return "blue";
-        case ReleaseTaskStatus.DONE:
-            return "green";
-        default:
-            return "gray";
-    }
-};
-
-const getDueDateStatus = (endDate: string) => {
-    const today = new Date();
-    const dueDate = new Date(endDate);
-    const daysUntilDue = Math.ceil(
-        (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
-    );
-
-    if (daysUntilDue < 0) {
-        return { status: "overdue", color: "red" as const };
-    } else if (daysUntilDue <= 3) {
-        return { status: "due soon", color: "orange" as const };
-    }
-    return null;
-};
-
-const getReleaseSummary = (tasks: any[]) => {
-    const detectableTasks = tasks.filter((task) => isDetectableTask(task.name));
-    const totalTasks = detectableTasks.length;
-    const completedTasks = detectableTasks.filter(
-        (task) => task.status === ReleaseTaskStatus.DONE,
-    ).length;
-    const inProgressTasks = detectableTasks.filter(
-        (task) => task.status === ReleaseTaskStatus.IN_PROGRESS,
-    ).length;
-
-    if (completedTasks === totalTasks) {
-        return { status: "Complete", color: "green" as const };
-    } else if (inProgressTasks > 0 || completedTasks > 0) {
-        return { status: "In Progress", color: "blue" as const };
-    }
-    return { status: "Not Started", color: "gray" as const };
-};
 
 const TEST_RELEASES = releases.filter(
     (release) => release.catalogNumber === "BLUNT005",
 );
 ---
 
-<Flex direction="column" gap="2">
-    {
-        TEST_RELEASES.map((release) => {
-            const summary = getReleaseSummary(release.tasks);
-            return (
-                <Card key={release.id}>
-                    <Flex justify="between" align="center">
-                        <Flex direction="column" gap="1">
-                            <Text weight="bold">
-                                {release.catalogNumber} - {release.artist}
-                            </Text>
-                            <Text size="2" color="gray">
-                                Release Date: {release.releaseDate}
-                            </Text>
-                        </Flex>
-                        <Badge color={summary.color}>{summary.status}</Badge>
-                    </Flex>
-
-                    <details>
-                        <summary>
-                            <Text size="2" color="gray">
-                                View Tasks ({release.tasks.length})
-                            </Text>
-                        </summary>
-                        <Flex direction="column" gap="2" mt="2">
-                            {release.tasks
-                                .sort(
-                                    (a, b) =>
-                                        new Date(a.startDate).getTime() -
-                                        new Date(b.startDate).getTime(),
-                                )
-                                .map((task) => {
-                                    const dueDateStatus = getDueDateStatus(
-                                        task.endDate,
-                                    );
-                                    return (
-                                        <Flex key={task.id} direction="column">
-                                            <Flex gap="2" align="center">
-                                                <Text>{task.name}</Text>
-                                                {isDetectableTask(
-                                                    task.name,
-                                                ) && (
-                                                    <Badge
-                                                        color={getStatusColor(
-                                                            task.status,
-                                                        )}
-                                                    >
-                                                        {task.status}
-                                                    </Badge>
-                                                )}
-                                                {dueDateStatus && (
-                                                    <Badge
-                                                        color={
-                                                            dueDateStatus.color
-                                                        }
-                                                    >
-                                                        {dueDateStatus.status}
-                                                    </Badge>
-                                                )}
-                                            </Flex>
-                                            <Text size="2" color="gray">
-                                                {task.startDate} -{" "}
-                                                {task.endDate}
-                                            </Text>
-                                        </Flex>
-                                    );
-                                })}
-                        </Flex>
-                    </details>
-                </Card>
-            );
-        })
-    }
+<Flex direction="column" gap="4">
+    {TEST_RELEASES.map((release) => <ReleaseCard release={release} />)}
 </Flex>

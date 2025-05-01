@@ -1,0 +1,72 @@
+---
+import { Card, Text, Flex, Badge, Box } from "@radix-ui/themes";
+import TaskList from "./TaskList.astro";
+import { ReleaseTaskStatus } from "@/types/ReleaseTaskStatus";
+import type { ReleaseTask } from "@/types/ReleaseTask";
+
+interface Props {
+    release: {
+        id: string;
+        catalogNumber: string;
+        artist: string;
+        releaseDate: string;
+        tasks: ReleaseTask[];
+    };
+}
+
+const { release } = Astro.props;
+
+const getReleaseSummary = (tasks: any[]) => {
+    const detectableTasks = tasks.filter((task) =>
+        [
+            "Contract Created",
+            "Pre-Masters Submitted",
+            "Masters Submitted",
+            "Artwork Creation",
+        ].includes(task.name),
+    );
+    const totalTasks = detectableTasks.length;
+    const completedTasks = detectableTasks.filter(
+        (task) => task.status === ReleaseTaskStatus.DONE,
+    ).length;
+    const inProgressTasks = detectableTasks.filter(
+        (task) => task.status === ReleaseTaskStatus.IN_PROGRESS,
+    ).length;
+
+    if (completedTasks === totalTasks) {
+        return { status: "Complete", color: "green" as const };
+    } else if (inProgressTasks > 0 || completedTasks > 0) {
+        return { status: "In Progress", color: "blue" as const };
+    }
+    return { status: "Not Started", color: "gray" as const };
+};
+
+const summary = getReleaseSummary(release.tasks);
+---
+
+<Card size="2">
+    <Flex direction="column" gap="3">
+        <Flex justify="between" align="center">
+            <Flex direction="column" gap="1">
+                <Text size="4" weight="bold">
+                    {release.catalogNumber} - {release.artist}
+                </Text>
+                <Text size="2" color="gray">
+                    Release Date: {release.releaseDate}
+                </Text>
+            </Flex>
+            <Badge size="2" color={summary.color} variant="soft">
+                {summary.status}
+            </Badge>
+        </Flex>
+
+        <details>
+            <summary>
+                <Text size="2" color="gray">
+                    View Tasks ({release.tasks.length})
+                </Text>
+            </summary>
+            <TaskList tasks={release.tasks} />
+        </details>
+    </Flex>
+</Card>

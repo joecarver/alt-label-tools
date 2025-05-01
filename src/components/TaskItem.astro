@@ -1,0 +1,79 @@
+---
+import { Text, Flex, Badge, Box } from "@radix-ui/themes";
+import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
+import { ReleaseTaskStatus } from "@/types/ReleaseTaskStatus";
+
+interface Props {
+    task: ReleaseTask;
+}
+
+const { task } = Astro.props;
+
+const isDetectableTask = (taskName: string) => {
+    return [
+        ReleaseTaskName.ContractCreated,
+        ReleaseTaskName.PreMastersSubmitted,
+        ReleaseTaskName.MastersSubmitted,
+        ReleaseTaskName.ArtworkCreation,
+    ].includes(taskName as ReleaseTaskName);
+};
+
+const getStatusColor = (status: ReleaseTaskStatus) => {
+    switch (status) {
+        case ReleaseTaskStatus.TODO:
+            return "gray";
+        case ReleaseTaskStatus.IN_PROGRESS:
+            return "blue";
+        case ReleaseTaskStatus.DONE:
+            return "green";
+        default:
+            return "gray";
+    }
+};
+
+const getDueDateStatus = (endDate: string) => {
+    const today = new Date();
+    const dueDate = new Date(endDate);
+    const daysUntilDue = Math.ceil(
+        (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+    );
+
+    if (daysUntilDue < 0) {
+        return { status: "overdue", color: "red" as const };
+    } else if (daysUntilDue <= 3) {
+        return { status: "due soon", color: "orange" as const };
+    }
+    return null;
+};
+
+const dueDateStatus = getDueDateStatus(task.endDate);
+---
+
+<Box>
+    <Flex direction="column" gap="1">
+        <Flex gap="2" align="center">
+            <Text weight="medium">{task.name}</Text>
+            {
+                isDetectableTask(task.name) && (
+                    <Badge
+                        size="1"
+                        color={getStatusColor(task.status)}
+                        variant="soft"
+                    >
+                        {task.status}
+                    </Badge>
+                )
+            }
+            {
+                dueDateStatus && (
+                    <Badge size="1" color={dueDateStatus.color} variant="soft">
+                        {dueDateStatus.status}
+                    </Badge>
+                )
+            }
+        </Flex>
+        <Text size="1" color="gray">
+            {task.startDate} - {task.endDate}
+        </Text>
+    </Flex>
+</Box>
