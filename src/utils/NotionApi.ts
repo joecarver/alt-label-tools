@@ -9,7 +9,7 @@ const notion = new Client({
     auth: import.meta.env.NOTION_API_KEY,
 });
 
-const cachedReleases: Release[] = [];
+const cachedReleases: Record<string, Release[]> = {};
 const cachedClients: LabelClient[] = [];
 
 export async function getClients(): Promise<LabelClient[]> {
@@ -36,8 +36,8 @@ export async function getClients(): Promise<LabelClient[]> {
 }
 
 export async function getReleases(clientId: string): Promise<Release[]> {
-    if (cachedReleases.length > 0) {
-        return cachedReleases;
+    if (cachedReleases[clientId]) {
+        return cachedReleases[clientId];
     }
 
     const response = await notion.blocks.children.list({
@@ -93,8 +93,8 @@ export async function getReleases(clientId: string): Promise<Release[]> {
         });
     }
 
-    cachedReleases.push(...releases);
+    cachedReleases[clientId] = releases;
 
-    console.log(releases);
+
     return releases;
 }
