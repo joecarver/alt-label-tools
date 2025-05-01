@@ -2,6 +2,8 @@
 import { Text, Flex, Badge, Box } from "@radix-ui/themes";
 import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
 import { ReleaseTaskStatus } from "@/types/ReleaseTaskStatus";
+import { parseISO } from "date-fns";
+import { formatDateRange } from "@/utils/date";
 
 interface Props {
     task: ReleaseTask;
@@ -33,7 +35,7 @@ const getStatusColor = (status: ReleaseTaskStatus) => {
 
 const getDueDateStatus = (endDate: string) => {
     const today = new Date();
-    const dueDate = new Date(endDate);
+    const dueDate = parseISO(endDate);
     const daysUntilDue = Math.ceil(
         (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
     );
@@ -73,7 +75,7 @@ const dueDateStatus = getDueDateStatus(task.endDate);
             }
         </Flex>
         <Text size="1" color="gray">
-            {task.startDate} - {task.endDate}
+            {formatDateRange(task.startDate, task.endDate)}
         </Text>
     </Flex>
 </Box>

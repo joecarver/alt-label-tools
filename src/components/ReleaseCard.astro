@@ -1,28 +1,24 @@
 ---
 import { Card, Text, Flex, Badge, Box } from "@radix-ui/themes";
 import TaskList from "./TaskList.astro";
+import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
 import { ReleaseTaskStatus } from "@/types/ReleaseTaskStatus";
-import type { ReleaseTask } from "@/types/ReleaseTask";
+import type { Release } from "@/types/Release";
+import { formatSingleDate } from "@/utils/date";
 
 interface Props {
-    release: {
-        id: string;
-        catalogNumber: string;
-        artist: string;
-        releaseDate: string;
-        tasks: ReleaseTask[];
-    };
+    release: Release;
 }
 
 const { release } = Astro.props;
 
-const getReleaseSummary = (tasks: any[]) => {
+const getReleaseSummary = (tasks: ReleaseTask[]) => {
     const detectableTasks = tasks.filter((task) =>
         [
-            "Contract Created",
-            "Pre-Masters Submitted",
-            "Masters Submitted",
-            "Artwork Creation",
+            ReleaseTaskName.ContractCreated,
+            ReleaseTaskName.PreMastersSubmitted,
+            ReleaseTaskName.MastersSubmitted,
+            ReleaseTaskName.ArtworkCreation,
         ].includes(task.name),
     );
     const totalTasks = detectableTasks.length;
@@ -49,10 +45,10 @@ const summary = getReleaseSummary(release.tasks);
         <Flex justify="between" align="center">
             <Flex direction="column" gap="1">
                 <Text size="4" weight="bold">
-                    {release.catalogNumber} - {release.artist}
+                    {release.name}
                 </Text>
                 <Text size="2" color="gray">
-                    Release Date: {release.releaseDate}
+                    Release Date: {formatSingleDate(release.releaseDate)}
                 </Text>
             </Flex>
             <Badge size="2" color={summary.color} variant="soft">

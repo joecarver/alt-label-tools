@@ -2,7 +2,7 @@ import type { Release } from "./Release";
 import type { ReleaseTaskStatus } from "./ReleaseTaskStatus";
 
 export enum ReleaseTaskName {
-    ReleaseScheduled = "Release Scheduled",
+    ReleaseDate = "Release Date",
     ContractCreated = "Contract Created",
     PreMastersSubmitted = "Pre Master Due",
     MastersSubmitted = "Mixing and Mastering",
@@ -26,14 +26,6 @@ export interface ReleaseTask {
     startDate: string;
     endDate: string;
 }
-
-/*
-- Release scheduled - Google form submitted / Data in Notion
-- Contract Created - File in Folder 
-- Pre Masters Submitted - File in Folder
-- Mastering Submitted - File in Folder
-- Artwork Creation - File in Folder
-*/
 
 
 

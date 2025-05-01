@@ -5,12 +5,8 @@ import ReleaseCard from "./ReleaseCard.astro";
 
 const clientId = Astro.props.clientId;
 const releases = await getReleases(clientId);
-
-const TEST_RELEASES = releases.filter(
-    (release) => release.catalogNumber === "BLUNT005",
-);
 ---
 
 <Flex direction="column" gap="4">
-    {TEST_RELEASES.map((release) => <ReleaseCard release={release} />)}
+    {releases.map((release) => <ReleaseCard release={release} />)}
 </Flex>
