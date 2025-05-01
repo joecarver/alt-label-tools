@@ -82,17 +82,18 @@ export async function getReleases(clientId: string): Promise<Release[]> {
         });
 
         const releaseDate = tasks.find(task => task.name === ReleaseTaskName.ReleaseDate)?.startDate || "";
-        console.log(databaseTitle);
-        releases.push({
-            id: databaseId,
-            name: databaseTitle,
-            catalogNumber: catalogNumber,
-            artist: artist,
-            tasks: tasks,
-            releaseDate: releaseDate,
-            labelId: clientId,
-            notionUrl: `https://notion.so/${databaseId.replace(/-/g, '')}`,
-        });
+        if (releaseDate) {
+            releases.push({
+                id: databaseId,
+                name: databaseTitle,
+                catalogNumber: catalogNumber,
+                artist: artist,
+                tasks: tasks,
+                releaseDate: releaseDate,
+                labelId: clientId,
+                notionUrl: `https://notion.so/${databaseId.replace(/-/g, '')}`,
+            });
+        }
     }
 
     cachedReleases[clientId] = releases;
