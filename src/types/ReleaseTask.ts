@@ -26,6 +26,3 @@ export interface ReleaseTask {
     startDate: string;
     endDate: string;
 }
-
-
-
