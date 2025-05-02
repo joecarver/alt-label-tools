@@ -4,6 +4,7 @@ import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
 import { ReleaseTaskStatus } from "@/types/ReleaseTaskStatus";
 import { parseISO } from "date-fns";
 import { formatDateRange } from "@/utils/date";
+import { checkFileExists } from "@/utils/drive";
 
 interface Props {
     task: ReleaseTask;
@@ -33,6 +34,26 @@ const getStatusColor = (status: ReleaseTaskStatus) => {
     }
 };
 
+const getTaskStatus = async (task: ReleaseTask) => {
+    if (!isDetectableTask(task.name)) {
+        return null;
+    }
+
+    if (task.name === ReleaseTaskName.ContractCreated) {
+        const contractFileExists = await checkFileExists(
+            "1h8fPUpJ2LUM8KO5GCARzt_DD6CK050VX",
+            "contract",
+            "token",
+        );
+
+        if (contractFileExists) {
+            return { status: "Complete", color: "green" as const };
+        }
+    }
+
+    return { status: task.status, color: getStatusColor(task.status) as const };
+};
+
 const getDueDateStatus = (endDate: string) => {
     const today = new Date();
     const dueDate = parseISO(endDate);
@@ -48,6 +69,8 @@ const getDueDateStatus = (endDate: string) => {
     return null;
 };
 const dueDateStatus = getDueDateStatus(task.endDate);
+
+const taskStatus = await getTaskStatus(task);
 ---
 
 <Box>
@@ -56,12 +79,8 @@ const dueDateStatus = getDueDateStatus(task.endDate);
             <Text weight="medium">{task.name}</Text>
             {
                 isDetectableTask(task.name) && (
-                    <Badge
-                        size="1"
-                        color={getStatusColor(task.status)}
-                        variant="soft"
-                    >
-                        {task.status}
+                    <Badge size="1" color={taskStatus?.color} variant="soft">
+                        {taskStatus?.status}
                     </Badge>
                 )
             }
