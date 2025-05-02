@@ -1,0 +1,31 @@
+---
+import { getAuthTokenFromCookies } from "@/utils/auth";
+import { verifyToken } from "@/utils/auth";
+import LoginComponent from "../components/Login";
+
+// Check if user is already authenticated
+const token = getAuthTokenFromCookies(Astro.cookies);
+if (token) {
+    try {
+        const payload = await verifyToken(token);
+        if (payload) {
+            return Astro.redirect("/");
+        }
+    } catch (error) {
+        console.error("Token verification failed:", error);
+    }
+}
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Login - Alt Label Tools</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body>
+        <LoginComponent client:load />
+    </body>
+</html>

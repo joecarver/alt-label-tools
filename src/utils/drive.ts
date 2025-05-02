@@ -1,5 +1,6 @@
 import { google } from 'googleapis';
 import type { drive_v3 } from 'googleapis';
+import { getAuthClient } from './auth';
 
 // Type for the Google Drive file response
 export interface DriveFile {
@@ -24,8 +25,7 @@ export function convertToDriveFile(file: drive_v3.Schema$File): DriveFile | null
 
 export async function listFilesInFolder(folderId: string, authToken: string): Promise<DriveFile[]> {
     const drive = google.drive('v3');
-    const auth = new google.auth.OAuth2();
-    auth.setCredentials({ access_token: authToken });
+    const auth = getAuthClient(authToken);
 
     const response = await drive.files.list({
         auth,
@@ -39,8 +39,7 @@ export async function listFilesInFolder(folderId: string, authToken: string): Pr
 
 export async function checkFileExists(folderId: string, fileName: string, authToken: string): Promise<boolean> {
     const drive = google.drive('v3');
-    const auth = new google.auth.OAuth2();
-    auth.setCredentials({ access_token: authToken });
+    const auth = getAuthClient(authToken);
 
     const response = await drive.files.list({
         auth,
@@ -53,8 +52,7 @@ export async function checkFileExists(folderId: string, fileName: string, authTo
 
 export async function getFileLink(folderId: string, fileName: string, authToken: string): Promise<string | null> {
     const drive = google.drive('v3');
-    const auth = new google.auth.OAuth2();
-    auth.setCredentials({ access_token: authToken });
+    const auth = getAuthClient(authToken);
 
     const response = await drive.files.list({
         auth,

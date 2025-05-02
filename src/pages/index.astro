@@ -11,6 +11,25 @@ import {
 	Box,
 } from "@radix-ui/themes";
 import Releases from "@/components/releases.astro";
+import { getAuthTokenFromCookies } from "@/utils/auth";
+import { verifyToken } from "@/utils/auth";
+
+// Check if user is authenticated
+const token = getAuthTokenFromCookies(Astro.cookies);
+if (!token) {
+	return Astro.redirect("/login");
+}
+
+try {
+	const payload = await verifyToken(token);
+	if (!payload) {
+		return Astro.redirect("/login");
+	}
+} catch (error) {
+	console.error("Token verification failed:", error);
+	return Astro.redirect("/login");
+}
+
 const clients = await getClients();
 ---
 

@@ -5,10 +5,13 @@ import { ReleaseTaskStatus } from "@/types/ReleaseTaskStatus";
 import { parseISO } from "date-fns";
 import { formatDateRange } from "@/utils/date";
 import { checkFileExists } from "@/utils/drive";
+import { getAuthTokenFromCookies } from "@/utils/auth";
 
 interface Props {
     task: ReleaseTask;
 }
+
+type BadgeColor = "gray" | "blue" | "green" | "red" | "orange";
 
 const { task } = Astro.props;
 
@@ -21,7 +24,7 @@ const isDetectableTask = (taskName: string) => {
     ].includes(taskName as ReleaseTaskName);
 };
 
-const getStatusColor = (status: ReleaseTaskStatus) => {
+const getStatusColor = (status: ReleaseTaskStatus): BadgeColor => {
     switch (status) {
         case ReleaseTaskStatus.TODO:
             return "gray";
@@ -39,19 +42,24 @@ const getTaskStatus = async (task: ReleaseTask) => {
         return null;
     }
 
+    const authToken = getAuthTokenFromCookies(Astro.cookies);
+    if (!authToken) {
+        return { status: "Not authenticated", color: "gray" as BadgeColor };
+    }
+
     if (task.name === ReleaseTaskName.ContractCreated) {
         const contractFileExists = await checkFileExists(
             "1h8fPUpJ2LUM8KO5GCARzt_DD6CK050VX",
             "contract",
-            "token",
+            authToken,
         );
 
         if (contractFileExists) {
-            return { status: "Complete", color: "green" as const };
+            return { status: "Complete", color: "green" as BadgeColor };
         }
     }
 
-    return { status: task.status, color: getStatusColor(task.status) as const };
+    return { status: task.status, color: getStatusColor(task.status) };
 };
 
 const getDueDateStatus = (endDate: string) => {
@@ -62,9 +70,9 @@ const getDueDateStatus = (endDate: string) => {
     );
 
     if (daysUntilDue < 0) {
-        return { status: "overdue", color: "red" as const };
+        return { status: "overdue", color: "red" as BadgeColor };
     } else if (daysUntilDue <= 3) {
-        return { status: "due soon", color: "orange" as const };
+        return { status: "due soon", color: "orange" as BadgeColor };
     }
     return null;
 };

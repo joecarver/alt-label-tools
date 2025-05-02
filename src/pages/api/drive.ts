@@ -2,17 +2,15 @@ import { google } from 'googleapis';
 import type { APIRoute } from 'astro';
 import type { drive_v3 } from 'googleapis';
 import type { DriveFile } from '../../utils/drive';
-import { convertToDriveFile } from '../../utils/drive';
+import { convertToDriveFile, listFilesInFolder, checkFileExists, getFileLink } from '../../utils/drive';
 
 // Initialize the Google Drive API client
 const drive = google.drive('v3');
 
-export const GET: APIRoute = async ({ request }) => {
+export const GET: APIRoute = async ({ request, cookies }) => {
     try {
-        // TODO: Replace with actual authentication token from SSO
-        const authToken = request.headers.get('Authorization')?.split('Bearer ')[1];
-
-        if (!authToken) {
+        const token = cookies.get('auth_token')?.value;
+        if (!token) {
             return new Response(JSON.stringify({ error: 'Unauthorized' }), {
                 status: 401,
                 headers: {
@@ -21,13 +19,9 @@ export const GET: APIRoute = async ({ request }) => {
             });
         }
 
-        // Set up the auth client
-        const auth = new google.auth.OAuth2();
-        auth.setCredentials({ access_token: authToken });
-
-        // Get the folder ID from the query parameters
         const url = new URL(request.url);
         const folderId = url.searchParams.get('folderId');
+        const fileName = url.searchParams.get('fileName');
 
         if (!folderId) {
             return new Response(JSON.stringify({ error: 'Folder ID is required' }), {
@@ -38,19 +32,27 @@ export const GET: APIRoute = async ({ request }) => {
             });
         }
 
-        // List files in the specified folder
-        const response = await drive.files.list({
-            auth,
-            q: `'${folderId}' in parents and trashed = false`,
-            fields: 'files(id, name, webViewLink, mimeType)',
-        });
+        if (fileName) {
+            const exists = await checkFileExists(folderId, fileName, token);
+            if (exists) {
+                const fileLink = await getFileLink(folderId, fileName, token);
+                return new Response(JSON.stringify({ exists: true, fileLink }), {
+                    status: 200,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+            }
+            return new Response(JSON.stringify({ exists: false }), {
+                status: 200,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+        }
 
-        const files = response.data.files || [];
-        const driveFiles: DriveFile[] = files
-            .map(convertToDriveFile)
-            .filter((file): file is DriveFile => file !== null);
-
-        return new Response(JSON.stringify({ files: driveFiles }), {
+        const files = await listFilesInFolder(folderId, token);
+        return new Response(JSON.stringify({ files }), {
             status: 200,
             headers: {
                 'Content-Type': 'application/json',
