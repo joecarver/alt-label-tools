@@ -56,7 +56,7 @@ export function TaskCompletionButton({ taskId, completedAt }: Props) {
                 loading={isLoading}
             >
                 {isHovering ? <Cross2Icon /> : <CheckIcon />}
-                {isHovering ? 'Un-complete' : `Completed: ${formatSingleDate(completionDate!)} (manually)`}
+                {`Completed: ${formatSingleDate(completionDate!)} (manually)`}
             </Button>
         );
     }
