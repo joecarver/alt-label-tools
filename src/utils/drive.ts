@@ -31,14 +31,13 @@ export async function listFilesInFolder(folderId: string, authToken: string): Pr
     return files.map(convertToFileInfo).filter((file): file is FileInfo => file !== null);
 }
 
-export async function getFileInfo(folderName: string, fileName: string, authToken: string): Promise<FileInfo | null> {
-    const drive = google.drive('v3');
-    const auth = getAuthClient(authToken);
-
-    const folderId = await getFolderId(folderName, authToken);
+export async function getFileInfo(folderId: string | null, fileName: string, authToken: string): Promise<FileInfo | null> {
     if (!folderId) {
         return null;
     }
+
+    const drive = google.drive('v3');
+    const auth = getAuthClient(authToken);
 
     const response = await drive.files.list({
         auth,

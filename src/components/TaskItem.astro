@@ -11,7 +11,7 @@ interface Props {
     task: ReleaseTask;
 }
 
-const { clientName, task } = Astro.props;
+const { task } = Astro.props;
 ---
 
 <Box>
@@ -22,7 +22,7 @@ const { clientName, task } = Astro.props;
         <Flex gap="1">
             <Badge
                 size="2"
-                color={getDueDateStatusColor(task.dueDateStatus)}
+                color={getDueDateStatusColor(task.dueDateStatus || undefined)}
                 variant="soft"
             >
                 <ClockIcon />Due: {

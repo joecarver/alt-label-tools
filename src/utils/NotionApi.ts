@@ -7,6 +7,7 @@ import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
 import { getTaskCompletionStatus } from "@/utils/getTaskCompletionStatus";
 import { getDueDateStatus } from "@/utils/getDueDateStatus";
 import { isDetectableTask } from "@/utils/isDetectableTask";
+import { getFolderId } from './drive';
 
 const notion = new Client({
     auth: import.meta.env.NOTION_API_KEY,
@@ -15,7 +16,7 @@ const notion = new Client({
 const cachedReleases: Record<string, Release[]> = {};
 const cachedClients: LabelClient[] = [];
 
-export async function getClients(): Promise<LabelClient[]> {
+export async function getClients(authToken: string): Promise<LabelClient[]> {
     if (cachedClients.length > 0) {
         return cachedClients;
     }
@@ -28,9 +29,13 @@ export async function getClients(): Promise<LabelClient[]> {
 
     const results = response.results as BlockObjectResponse[];
 
-    const clients = results.filter((result) => result.type === "child_page").map((result) => ({
-        id: result.id,
-        name: result.child_page.title,
+    const clients = await Promise.all(results.filter((result) => result.type === "child_page").map(async (result) => {
+        const folderId = await getFolderId(`Clients/${result.child_page.title}`, authToken);
+        return {
+            id: result.id,
+            name: result.child_page.title,
+            folderId,
+        };
     }));
 
     cachedClients.push(...clients);
@@ -51,6 +56,7 @@ export async function getReleases(clientId: string, clientName: string, authToke
     const results = response.results as BlockObjectResponse[];
     const releaseDatabases = results.filter((result) => result.type === "child_database");
 
+
     const releases: Release[] = [];
 
     for (const database of releaseDatabases) {
@@ -64,6 +70,9 @@ export async function getReleases(clientId: string, clientName: string, authToke
         // Get the database title which should be the release name
         const databaseTitle = database.child_database?.title || "Untitled Release";
         const [catalogNumber, artist] = databaseTitle.split(" - ");
+
+        const folderName = `Clients/${clientName}/Releases/${catalogNumber}`;
+        const folderId = await getFolderId(folderName, authToken);
 
         const tasks: ReleaseTask[] = await Promise.all(databaseResults.map(async result => {
             const nameProperty = result.properties.Name;
@@ -83,6 +92,7 @@ export async function getReleases(clientId: string, clientName: string, authToke
                 releaseId: catalogNumber,
                 taskName: taskName,
                 completedAt: completedAt || "",
+                folderId,
                 isDetectable,
                 authToken: authToken,
             });
@@ -118,6 +128,7 @@ export async function getReleases(clientId: string, clientName: string, authToke
                 releaseDate,
                 labelId: clientId,
                 notionUrl: `https://notion.so/${databaseId.replace(/-/g, '')}`,
+                folderId,
             });
         }
     }

@@ -12,6 +12,7 @@ interface TaskCompletionParams {
     completedAt?: string;
     isDetectable: boolean;
     authToken: string | null;
+    folderId: string | null;
 }
 
 export const getTaskCompletionStatus = async (params: TaskCompletionParams): Promise<TaskCompletionStatus | null> => {
@@ -27,7 +28,6 @@ export const getTaskCompletionStatus = async (params: TaskCompletionParams): Pro
         return null;
     }
 
-    const searchFolder = `Clients/${params.clientName}/Releases/${params.releaseId}`;
     let searchFile = "";
 
     if (params.taskName === ReleaseTaskName.ContractCreated) {
@@ -41,11 +41,10 @@ export const getTaskCompletionStatus = async (params: TaskCompletionParams): Pro
     }
 
     const fileInfo = await getFileInfo(
-        searchFolder,
+        params.folderId,
         searchFile,
         params.authToken,
     );
-    console.log({ searchFolder, searchFile, fileInfo });
 
     if (!fileInfo) {
         return { status: CompletionStatus.TODO, color: getCompletionStatusColor(CompletionStatus.TODO), fileInfo: null };

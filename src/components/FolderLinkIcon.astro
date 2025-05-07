@@ -1,0 +1,16 @@
+---
+import { IconButton, Link } from "@radix-ui/themes";
+import { PiFolderFill } from "react-icons/pi";
+
+interface Props {
+    folderUrl: string;
+}
+
+const { folderUrl } = Astro.props;
+---
+
+<Link href={folderUrl} target="_blank">
+    <IconButton size="1" variant="surface" style={{ cursor: "pointer" }}>
+        <PiFolderFill size="14" />
+    </IconButton>
+</Link>

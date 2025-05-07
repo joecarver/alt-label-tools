@@ -13,6 +13,7 @@ import {
 import Releases from "@/components/releases.astro";
 import { getAuthTokenFromCookies } from "@/utils/auth";
 import { verifyToken } from "@/utils/auth";
+import FolderLinkIcon from "@/components/FolderLinkIcon.astro";
 
 // Check if user is authenticated
 const token = getAuthTokenFromCookies(Astro.cookies);
@@ -30,7 +31,7 @@ try {
 	return Astro.redirect("/login");
 }
 
-const clients = await getClients();
+const clients = await getClients(token);
 ---
 
 <Layout title="Schedule & Workflow Dashboard">
@@ -49,13 +50,13 @@ const clients = await getClients();
 							<Card key={client.id} size="2">
 								<Flex direction="column" gap="3">
 									<Flex justify="between" align="center">
-										<Flex direction="column" gap="1">
+										<Flex direction="row" gap="2">
 											<Text size="4" weight="bold">
 												{client.name}
 											</Text>
-											<Text size="2" color="gray">
-												Client ID: {client.id}
-											</Text>
+											<FolderLinkIcon
+												folderUrl={`https://drive.google.com/drive/folders/${client.folderId}`}
+											/>
 										</Flex>
 									</Flex>
 									<Box>

@@ -13,4 +13,5 @@ export interface Release {
     labelId: LabelClient["id"];
     notionUrl: string;
     releaseDate: string;
+    folderId: string | null;
 }
