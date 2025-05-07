@@ -25,4 +25,5 @@ export interface ReleaseTask {
     releaseId: Release["id"];
     startDate: string;
     endDate: string;
+    completedAt: string;
 }

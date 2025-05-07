@@ -9,6 +9,14 @@ import { isDetectableTask } from "./isDetectableTask";
 import { getCompletionStatusColor } from "./getStatusColor";
 
 export const getTaskCompletionStatus = async (clientName: string, task: ReleaseTask, authToken: string | null) => {
+    if (task.completedAt) {
+        return {
+            status: CompletionStatus.DONE_MANUALLY,
+            color: getCompletionStatusColor(CompletionStatus.DONE_MANUALLY),
+            fileInfo: null,
+        };
+    }
+
     if (!authToken || !isDetectableTask(task.name)) {
         return null;
     }
@@ -36,7 +44,7 @@ export const getTaskCompletionStatus = async (clientName: string, task: ReleaseT
         return { status: CompletionStatus.TODO, color: getCompletionStatusColor(CompletionStatus.TODO) };
     }
 
-    const status = CompletionStatus.DONE;
+    const status = CompletionStatus.DONE_DETECTED;
 
     return {
         status,

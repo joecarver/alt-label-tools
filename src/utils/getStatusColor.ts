@@ -8,7 +8,8 @@ export const getCompletionStatusColor = (status: CompletionStatus): BadgeColor =
             return BadgeColor.GRAY;
         case CompletionStatus.IN_PROGRESS:
             return BadgeColor.BLUE;
-        case CompletionStatus.DONE:
+        case CompletionStatus.DONE_DETECTED:
+        case CompletionStatus.DONE_MANUALLY:
             return BadgeColor.GREEN;
         default:
             return BadgeColor.GRAY;

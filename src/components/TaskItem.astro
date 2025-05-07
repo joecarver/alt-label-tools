@@ -1,16 +1,18 @@
 ---
-import { Text, Flex, Badge, Box, Link } from "@radix-ui/themes";
+import { Text, Flex, Badge, Box, Link, Button } from "@radix-ui/themes";
 import { type ReleaseTask } from "@/types/ReleaseTask";
 import { CompletionStatus } from "@/types/CompletionStatus";
 import { formatDateRange, formatSingleDate } from "@/utils/date";
 import { getAuthTokenFromCookies } from "@/utils/auth";
 import { getTaskCompletionStatus } from "@/utils/getTaskCompletionStatus";
 import { getDueDateStatus } from "@/utils/getDueDateStatus";
+import { isDetectableTask } from "@/utils/isDetectableTask";
 import {
     CheckIcon,
     ClockIcon,
     OpenInNewWindowIcon,
 } from "@radix-ui/react-icons";
+import TaskItemCompletionStatus from "./TaskItemCompletionStatus.astro";
 
 interface Props {
     clientName: string;
@@ -23,40 +25,41 @@ const authToken = getAuthTokenFromCookies(Astro.cookies);
 const taskStatus = await getTaskCompletionStatus(clientName, task, authToken);
 const dueDateStatus = getDueDateStatus(
     task.endDate,
-    taskStatus?.status === CompletionStatus.DONE,
+    taskStatus?.status === CompletionStatus.DONE_DETECTED ||
+        taskStatus?.status === CompletionStatus.DONE_MANUALLY,
 );
+const isDetectable = isDetectableTask(task.name);
 ---
 
 <Box>
     <Flex direction="column" gap="1">
-        <Flex gap="2" align="center">
+        <Flex gap="2" align="center" justify="between">
             <Text weight="medium">{task.name}</Text>
-            {
-                taskStatus?.status === CompletionStatus.DONE && (
-                    <Link
-                        href={taskStatus.fileInfo?.webViewLink}
-                        target="_blank"
-                    >
-                        <OpenInNewWindowIcon />
-                        {taskStatus.fileInfo?.name}
-                    </Link>
-                )
-            }
         </Flex>
         <Flex gap="1">
-            <Badge size="1" color={dueDateStatus?.color} variant="soft">
+            <Badge size="2" color={dueDateStatus?.color} variant="soft">
                 <ClockIcon />Due: {
                     formatDateRange(task.startDate, task.endDate)
                 }
             </Badge>
+            <TaskItemCompletionStatus
+                task={task}
+                isDetectable={isDetectable}
+                taskStatus={taskStatus}
+            />
             {
-                taskStatus?.fileInfo?.createdTime && (
-                    <Badge size="1" color="green" variant="soft">
-                        <CheckIcon />
-                        Completed:{" "}
-                        {formatSingleDate(taskStatus.fileInfo.createdTime)}
-                    </Badge>
-                )
+                taskStatus?.status === CompletionStatus.DONE_DETECTED &&
+                    taskStatus?.fileInfo?.webViewLink && (
+                        <Badge size="1" variant="soft">
+                            <Link
+                                href={taskStatus.fileInfo?.webViewLink}
+                                target="_blank"
+                            >
+                                <OpenInNewWindowIcon />
+                                <Text>{taskStatus.fileInfo?.name}</Text>
+                            </Link>
+                        </Badge>
+                    )
             }
         </Flex>
     </Flex>

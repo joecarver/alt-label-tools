@@ -65,9 +65,11 @@ export async function getReleases(clientId: string): Promise<Release[]> {
         const tasks = databaseResults.map(result => {
             const nameProperty = result.properties.Name;
             const dateProperty = result.properties.Date;
+            const completedAtProperty = result.properties.completedAt;
 
             const title = nameProperty?.type === 'title' ? nameProperty.title[0]?.plain_text || "" : "";
             const date = dateProperty?.type === 'date' ? dateProperty.date : null;
+            const completedAt = completedAtProperty?.type === 'date' ? completedAtProperty.date?.start : null;
 
             const taskTitle = title.split(" - ")[2];
 
@@ -78,6 +80,7 @@ export async function getReleases(clientId: string): Promise<Release[]> {
                 status: CompletionStatus.UNKNOWN,
                 startDate: date?.start || "",
                 endDate: date?.end || date?.start || "",
+                completedAt: completedAt || "",
             };
         });
 
@@ -100,4 +103,27 @@ export async function getReleases(clientId: string): Promise<Release[]> {
 
 
     return releases;
+}
+
+export async function updateTaskCompletion(taskId: string, completedAt: string | null): Promise<void> {
+    if (!completedAt) {
+        await notion.pages.update({
+            page_id: taskId,
+            properties: {
+                completedAt: null,
+            },
+        });
+        return;
+    }
+
+    await notion.pages.update({
+        page_id: taskId,
+        properties: {
+            completedAt: {
+                date: {
+                    start: completedAt,
+                },
+            },
+        },
+    });
 }
