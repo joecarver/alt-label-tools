@@ -6,6 +6,8 @@ import { formatDateRange } from "@/utils/date";
 import { ClockIcon, OpenInNewWindowIcon } from "@radix-ui/react-icons";
 import TaskItemCompletionStatus from "./TaskItemCompletionStatus.astro";
 import { getDueDateStatusColor } from "@/utils/getStatusColor";
+import LinkButton from "./LinkButton.astro";
+
 interface Props {
     clientName: string;
     task: ReleaseTask;
@@ -19,7 +21,7 @@ const { task } = Astro.props;
         <Flex gap="2" align="center" justify="between">
             <Text weight="medium">{task.name}</Text>
         </Flex>
-        <Flex gap="1">
+        <Flex gap="1" wrap="wrap">
             <Badge
                 size="2"
                 color={getDueDateStatusColor(task.dueDateStatus || undefined)}
@@ -37,15 +39,10 @@ const { task } = Astro.props;
             {
                 task.taskStatus?.status === CompletionStatus.DONE_DETECTED &&
                     task.taskStatus?.fileInfo?.webViewLink && (
-                        <Badge size="1" variant="soft">
-                            <Link
-                                href={task.taskStatus.fileInfo?.webViewLink}
-                                target="_blank"
-                            >
-                                <OpenInNewWindowIcon />
-                                <Text>{task.taskStatus.fileInfo?.name}</Text>
-                            </Link>
-                        </Badge>
+                        <LinkButton
+                            url={task.taskStatus.fileInfo.webViewLink}
+                            fileName={task.taskStatus.fileInfo.name}
+                        />
                     )
             }
         </Flex>

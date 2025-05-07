@@ -13,7 +13,9 @@ import {
 import Releases from "@/components/releases.astro";
 import { getAuthTokenFromCookies } from "@/utils/auth";
 import { verifyToken } from "@/utils/auth";
-import FolderLinkIcon from "@/components/FolderLinkIcon.astro";
+import LinkButton from "@/components/LinkButton.astro";
+import { PiFolderFill } from "react-icons/pi";
+import ClientCard from "@/components/ClientCard.astro";
 
 // Check if user is authenticated
 const token = getAuthTokenFromCookies(Astro.cookies);
@@ -45,30 +47,7 @@ const clients = await getClients(token);
 					>
 				</Flex>
 				<Grid columns="1" gap="4">
-					{
-						clients.map((client) => (
-							<Card key={client.id} size="2">
-								<Flex direction="column" gap="3">
-									<Flex justify="between" align="center">
-										<Flex direction="row" gap="2">
-											<Text size="4" weight="bold">
-												{client.name}
-											</Text>
-											<FolderLinkIcon
-												folderUrl={`https://drive.google.com/drive/folders/${client.folderId}`}
-											/>
-										</Flex>
-									</Flex>
-									<Box>
-										<Releases
-											clientId={client.id}
-											clientName={client.name}
-										/>
-									</Box>
-								</Flex>
-							</Card>
-						))
-					}
+					{clients.map((client) => <ClientCard client={client} />)}
 				</Grid>
 			</Box>
 		</Grid>

@@ -6,7 +6,7 @@ import { CompletionStatus } from "@/types/CompletionStatus";
 import type { Release } from "@/types/Release";
 import { formatSingleDate } from "@/utils/date";
 import { BadgeColor } from "@/types/BadgeColor";
-import FolderLinkIcon from "./FolderLinkIcon.astro";
+import LinkButton from "./LinkButton.astro";
 
 interface Props {
     release: Release;
@@ -45,13 +45,12 @@ const folderUrl = `https://drive.google.com/drive/folders/${release.folderId}`;
     <Flex direction="column" gap="3">
         <Flex justify="between" align="center">
             <Flex direction="column" gap="1">
-                <Flex align="center" gap="2">
+                <Flex align="center" gap="2" wrap="wrap">
                     <Text size="4" weight="bold">
                         {release.name}
                     </Text>
-                    <FolderLinkIcon folderUrl={folderUrl} />
-                </Flex>
-                <Flex gap="3">
+                    {release.folderId && <LinkButton url={folderUrl} />}
+
                     <Badge size="2" color="blue" variant="soft">
                         Release Date: {formatSingleDate(release.releaseDate)}
                     </Badge>

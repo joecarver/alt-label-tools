@@ -1,0 +1,30 @@
+---
+import { Card, Flex, Text, Box } from "@radix-ui/themes";
+import LinkButton from "./LinkButton.astro";
+import Releases from "./releases.astro";
+import type { LabelClient } from "@/types/LabelClient";
+
+interface Props {
+    client: LabelClient;
+}
+
+const { client } = Astro.props;
+---
+
+<Card key={client.id} size="2">
+    <Flex direction="column" gap="3">
+        <Flex justify="between" align="center">
+            <Flex direction="row" gap="2">
+                <Text size="4" weight="bold">
+                    {client.name}
+                </Text>
+                <LinkButton
+                    url={`https://drive.google.com/drive/folders/${client.folderId}`}
+                />
+            </Flex>
+        </Flex>
+        <Box>
+            <Releases clientId={client.id} clientName={client.name} />
+        </Box>
+    </Flex>
+</Card>
