@@ -1,5 +1,7 @@
 import type { Release } from "./Release";
 import type { CompletionStatus } from "./CompletionStatus";
+import type { TaskCompletionStatus } from "./TaskCompletionStatus";
+import type { DueDateStatus } from "./DueDateStatus";
 
 export enum ReleaseTaskName {
     ReleaseDate = "Release Date",
@@ -25,5 +27,8 @@ export interface ReleaseTask {
     releaseId: Release["id"];
     startDate: string;
     endDate: string;
-    completedAt: string;
+    completedAt: string | null;
+    taskStatus?: TaskCompletionStatus | null;
+    dueDateStatus?: DueDateStatus | null;
+    isDetectable: boolean;
 }

@@ -3,7 +3,10 @@ import type { LabelClient } from "@/types/LabelClient";
 import type { Release } from "@/types/Release";
 import type { BlockObjectResponse, DatabaseObjectResponse, PageObjectResponse, TitlePropertyItemObjectResponse, DatePropertyItemObjectResponse, RichTextItemResponse } from '@notionhq/client/build/src/api-endpoints';
 import { CompletionStatus } from "@/types/CompletionStatus";
-import { ReleaseTaskName } from "@/types/ReleaseTask";
+import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
+import { getTaskCompletionStatus } from "@/utils/getTaskCompletionStatus";
+import { getDueDateStatus } from "@/utils/getDueDateStatus";
+import { isDetectableTask } from "@/utils/isDetectableTask";
 
 const notion = new Client({
     auth: import.meta.env.NOTION_API_KEY,
@@ -35,7 +38,7 @@ export async function getClients(): Promise<LabelClient[]> {
     return clients;
 }
 
-export async function getReleases(clientId: string): Promise<Release[]> {
+export async function getReleases(clientId: string, clientName: string, authToken: string): Promise<Release[]> {
     if (cachedReleases[clientId]) {
         return cachedReleases[clientId];
     }
@@ -62,7 +65,7 @@ export async function getReleases(clientId: string): Promise<Release[]> {
         const databaseTitle = database.child_database?.title || "Untitled Release";
         const [catalogNumber, artist] = databaseTitle.split(" - ");
 
-        const tasks = databaseResults.map(result => {
+        const tasks: ReleaseTask[] = await Promise.all(databaseResults.map(async result => {
             const nameProperty = result.properties.Name;
             const dateProperty = result.properties.Date;
             const completedAtProperty = result.properties.completedAt;
@@ -72,27 +75,47 @@ export async function getReleases(clientId: string): Promise<Release[]> {
             const completedAt = completedAtProperty?.type === 'date' ? completedAtProperty.date?.start : null;
 
             const taskTitle = title.split(" - ")[2];
+            const taskName = taskTitle as ReleaseTaskName;
+            const isDetectable = isDetectableTask(taskName);
+
+            const taskStatus = await getTaskCompletionStatus({
+                clientName,
+                releaseId: catalogNumber,
+                taskName: taskName,
+                completedAt: completedAt || "",
+                isDetectable,
+                authToken: authToken,
+            });
+
+            const dueDateStatus = getDueDateStatus(
+                date?.end || date?.start || "",
+                taskStatus?.status === CompletionStatus.DONE_DETECTED ||
+                taskStatus?.status === CompletionStatus.DONE_MANUALLY,
+            );
 
             return {
                 id: result.id,
                 releaseId: catalogNumber,
-                name: taskTitle as ReleaseTaskName,
-                status: CompletionStatus.UNKNOWN,
+                name: taskName,
+                status: taskStatus?.status || CompletionStatus.UNKNOWN,
                 startDate: date?.start || "",
                 endDate: date?.end || date?.start || "",
                 completedAt: completedAt || "",
+                taskStatus,
+                dueDateStatus,
+                isDetectable,
             };
-        });
+        }));
 
         const releaseDate = tasks.find(task => task.name === ReleaseTaskName.ReleaseDate)?.startDate || "";
         if (releaseDate) {
             releases.push({
                 id: databaseId,
                 name: databaseTitle,
-                catalogNumber: catalogNumber,
-                artist: artist,
-                tasks: tasks,
-                releaseDate: releaseDate,
+                catalogNumber,
+                artist,
+                tasks,
+                releaseDate,
                 labelId: clientId,
                 notionUrl: `https://notion.so/${databaseId.replace(/-/g, '')}`,
             });
@@ -100,7 +123,6 @@ export async function getReleases(clientId: string): Promise<Release[]> {
     }
 
     cachedReleases[clientId] = releases;
-
 
     return releases;
 }

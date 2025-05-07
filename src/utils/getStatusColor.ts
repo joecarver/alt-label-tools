@@ -16,7 +16,11 @@ export const getCompletionStatusColor = (status: CompletionStatus): BadgeColor =
     }
 };
 
-export const getDueDateStatusColor = (status: DueDateStatus): BadgeColor => {
+export const getDueDateStatusColor = (status?: DueDateStatus): BadgeColor => {
+    if (!status) {
+        return BadgeColor.GRAY;
+    }
+
     switch (status) {
         case DueDateStatus.DUE:
             return BadgeColor.ORANGE;

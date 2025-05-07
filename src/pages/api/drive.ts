@@ -1,6 +1,6 @@
 import { google } from 'googleapis';
 import type { APIRoute } from 'astro';
-import { convertToDriveFile, listFilesInFolder, checkFileExists, getFileInfo, getFolderId } from '../../utils/drive';
+import { convertToFileInfo, listFilesInFolder, checkFileExists, getFileInfo, getFolderId } from '../../utils/drive';
 
 // Initialize the Google Drive API client
 const drive = google.drive('v3');

@@ -1,20 +1,11 @@
 import { google } from 'googleapis';
 import type { drive_v3 } from 'googleapis';
 import { getAuthClient } from './auth';
+import type { FileInfo } from '@/types/FileInfo';
 
-// Type for the Google Drive file response
-export interface DriveFile {
-    id: string;
-    name: string;
-    webViewLink: string;
-    mimeType: string;
-    createdTime?: string | null;
-}
 
-// Helper function to safely convert Google Drive API response to our DriveFile type
-export function convertToDriveFile(file: drive_v3.Schema$File): DriveFile | null {
+export function convertToFileInfo(file: drive_v3.Schema$File): FileInfo | null {
     if (!file.id || !file.name || !file.webViewLink || !file.mimeType) {
-        console.error('Invalid file', file);
         return null;
     }
     return {
@@ -26,7 +17,7 @@ export function convertToDriveFile(file: drive_v3.Schema$File): DriveFile | null
     };
 }
 
-export async function listFilesInFolder(folderId: string, authToken: string): Promise<DriveFile[]> {
+export async function listFilesInFolder(folderId: string, authToken: string): Promise<FileInfo[]> {
     const drive = google.drive('v3');
     const auth = getAuthClient(authToken);
 
@@ -37,10 +28,10 @@ export async function listFilesInFolder(folderId: string, authToken: string): Pr
     });
 
     const files = response.data.files || [];
-    return files.map(convertToDriveFile).filter((file): file is DriveFile => file !== null);
+    return files.map(convertToFileInfo).filter((file): file is FileInfo => file !== null);
 }
 
-export async function getFileInfo(folderName: string, fileName: string, authToken: string): Promise<DriveFile | null> {
+export async function getFileInfo(folderName: string, fileName: string, authToken: string): Promise<FileInfo | null> {
     const drive = google.drive('v3');
     const auth = getAuthClient(authToken);
 
@@ -55,7 +46,7 @@ export async function getFileInfo(folderName: string, fileName: string, authToke
         fields: 'files(id, name, webViewLink, mimeType, createdTime)',
     });
 
-    return response.data.files?.[0] ? convertToDriveFile(response.data.files?.[0]) : null;
+    return response.data.files?.[0] ? convertToFileInfo(response.data.files?.[0]) : null;
 }
 
 export async function getFolderId(folderName: string, authToken: string, parentFolderId?: string): Promise<string | null> {
