@@ -1,5 +1,5 @@
 import type { Release } from "./Release";
-import type { ReleaseTaskStatus } from "./ReleaseTaskStatus";
+import type { CompletionStatus } from "./CompletionStatus";
 
 export enum ReleaseTaskName {
     ReleaseDate = "Release Date",
@@ -21,7 +21,7 @@ export type DetectableReleaseTask = Extract<ReleaseTaskName, ReleaseTaskName.Con
 export interface ReleaseTask {
     id: string;
     name: ReleaseTaskName;
-    status: ReleaseTaskStatus;
+    status: CompletionStatus;
     releaseId: Release["id"];
     startDate: string;
     endDate: string;

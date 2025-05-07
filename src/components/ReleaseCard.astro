@@ -2,7 +2,7 @@
 import { Card, Text, Flex, Badge } from "@radix-ui/themes";
 import TaskList from "./TaskList.astro";
 import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
-import { ReleaseTaskStatus } from "@/types/ReleaseTaskStatus";
+import { CompletionStatus } from "@/types/CompletionStatus";
 import type { Release } from "@/types/Release";
 import { formatSingleDate } from "@/utils/date";
 
@@ -24,10 +24,10 @@ const getReleaseSummary = (tasks: ReleaseTask[]) => {
     );
     const totalTasks = detectableTasks.length;
     const completedTasks = detectableTasks.filter(
-        (task) => task.status === ReleaseTaskStatus.DONE,
+        (task) => task.status === CompletionStatus.DONE,
     ).length;
     const inProgressTasks = detectableTasks.filter(
-        (task) => task.status === ReleaseTaskStatus.IN_PROGRESS,
+        (task) => task.status === CompletionStatus.IN_PROGRESS,
     ).length;
 
     if (completedTasks === totalTasks) {
@@ -48,9 +48,9 @@ const summary = getReleaseSummary(release.tasks);
                 <Text size="4" weight="bold">
                     {release.name}
                 </Text>
-                <Text size="2" color="gray">
+                <Badge size="2" color="blue" variant="soft">
                     Release Date: {formatSingleDate(release.releaseDate)}
-                </Text>
+                </Badge>
             </Flex>
             <Badge size="2" color={summary.color} variant="soft">
                 {summary.status}

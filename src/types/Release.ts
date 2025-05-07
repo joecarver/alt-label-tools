@@ -1,5 +1,5 @@
 import type { LabelClient } from "./LabelClient";
-import type { ReleaseStatus } from "./ReleaseStatus";
+import type { CompletionStatus } from "./CompletionStatus";
 import type { ReleaseTask } from "./ReleaseTask";
 
 // Data source: Notion API
@@ -9,7 +9,7 @@ export interface Release {
     catalogNumber: string;
     artist: string;
     tasks: ReleaseTask[];
-    status?: ReleaseStatus;
+    status?: CompletionStatus;
     labelId: LabelClient["id"];
     notionUrl: string;
     releaseDate: string;

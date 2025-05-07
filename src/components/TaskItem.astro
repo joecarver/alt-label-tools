@@ -1,99 +1,30 @@
 ---
-import { Text, Flex, Badge, Box } from "@radix-ui/themes";
-import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
-import { ReleaseTaskStatus } from "@/types/ReleaseTaskStatus";
-import { parseISO } from "date-fns";
-import { formatDateRange } from "@/utils/date";
-import { checkFileExists } from "@/utils/drive";
+import { Text, Flex, Badge, Box, Link } from "@radix-ui/themes";
+import { type ReleaseTask } from "@/types/ReleaseTask";
+import { CompletionStatus } from "@/types/CompletionStatus";
+import { formatDateRange, formatSingleDate } from "@/utils/date";
 import { getAuthTokenFromCookies } from "@/utils/auth";
+import { getTaskCompletionStatus } from "@/utils/getTaskCompletionStatus";
+import { getDueDateStatus } from "@/utils/getDueDateStatus";
+import {
+    CheckIcon,
+    ClockIcon,
+    OpenInNewWindowIcon,
+} from "@radix-ui/react-icons";
 
 interface Props {
     clientName: string;
     task: ReleaseTask;
 }
 
-type BadgeColor = "gray" | "blue" | "green" | "red" | "orange";
-
 const { clientName, task } = Astro.props;
 
-const isDetectableTask = (taskName: string) => {
-    return [
-        ReleaseTaskName.ContractCreated,
-        ReleaseTaskName.PreMastersSubmitted,
-        ReleaseTaskName.MastersSubmitted,
-        ReleaseTaskName.ArtworkCreation,
-    ].includes(taskName as ReleaseTaskName);
-};
-
-const getStatusColor = (status: ReleaseTaskStatus): BadgeColor => {
-    switch (status) {
-        case ReleaseTaskStatus.TODO:
-            return "gray";
-        case ReleaseTaskStatus.IN_PROGRESS:
-            return "blue";
-        case ReleaseTaskStatus.DONE:
-            return "green";
-        default:
-            return "gray";
-    }
-};
-
-const getTaskStatus = async (clientName: string, task: ReleaseTask) => {
-    if (!isDetectableTask(task.name)) {
-        return null;
-    }
-
-    const authToken = getAuthTokenFromCookies(Astro.cookies);
-    if (!authToken) {
-        return { status: "Not authenticated", color: "gray" as BadgeColor };
-    }
-
-    const searchFolder = `Clients/${clientName}/Releases/${task.releaseId}`;
-
-    if (task.name === ReleaseTaskName.ContractCreated) {
-        const contractFileExists = await checkFileExists(
-            searchFolder,
-            "contract",
-            authToken,
-        );
-
-        if (contractFileExists) {
-            return { status: "Complete", color: "green" as BadgeColor };
-        }
-    }
-
-    if (task.name === ReleaseTaskName.PreMastersSubmitted) {
-        const preMastersFileExists = await checkFileExists(
-            searchFolder,
-            "premster.flac",
-            authToken,
-        );
-
-        if (preMastersFileExists) {
-            return { status: "Complete", color: "green" as BadgeColor };
-        }
-    }
-
-    return { status: task.status, color: getStatusColor(task.status) };
-};
-
-const getDueDateStatus = (endDate: string) => {
-    const today = new Date();
-    const dueDate = parseISO(endDate);
-    const daysUntilDue = Math.ceil(
-        (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
-    );
-
-    if (daysUntilDue < 0) {
-        return { status: "overdue", color: "red" as BadgeColor };
-    } else if (daysUntilDue <= 3) {
-        return { status: "due soon", color: "orange" as BadgeColor };
-    }
-    return null;
-};
-const dueDateStatus = getDueDateStatus(task.endDate);
-
-const taskStatus = await getTaskStatus(clientName, task);
+const authToken = getAuthTokenFromCookies(Astro.cookies);
+const taskStatus = await getTaskCompletionStatus(clientName, task, authToken);
+const dueDateStatus = getDueDateStatus(
+    task.endDate,
+    taskStatus?.status === CompletionStatus.DONE,
+);
 ---
 
 <Box>
@@ -101,22 +32,32 @@ const taskStatus = await getTaskStatus(clientName, task);
         <Flex gap="2" align="center">
             <Text weight="medium">{task.name}</Text>
             {
-                isDetectableTask(task.name) && (
-                    <Badge size="1" color={taskStatus?.color} variant="soft">
-                        {taskStatus?.status}
-                    </Badge>
+                taskStatus?.status === CompletionStatus.DONE && (
+                    <Link
+                        href={taskStatus.fileInfo?.webViewLink}
+                        target="_blank"
+                    >
+                        <OpenInNewWindowIcon />
+                        {taskStatus.fileInfo?.name}
+                    </Link>
                 )
             }
+        </Flex>
+        <Flex gap="1">
+            <Badge size="1" color={dueDateStatus?.color} variant="soft">
+                <ClockIcon />Due: {
+                    formatDateRange(task.startDate, task.endDate)
+                }
+            </Badge>
             {
-                dueDateStatus && (
-                    <Badge size="1" color={dueDateStatus.color} variant="soft">
-                        {dueDateStatus.status}
+                taskStatus?.fileInfo?.createdTime && (
+                    <Badge size="1" color="green" variant="soft">
+                        <CheckIcon />
+                        Completed:{" "}
+                        {formatSingleDate(taskStatus.fileInfo.createdTime)}
                     </Badge>
                 )
             }
         </Flex>
-        <Text size="1" color="gray">
-            {formatDateRange(task.startDate, task.endDate)}
-        </Text>
     </Flex>
 </Box>

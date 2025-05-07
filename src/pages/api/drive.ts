@@ -1,6 +1,6 @@
 import { google } from 'googleapis';
 import type { APIRoute } from 'astro';
-import { convertToDriveFile, listFilesInFolder, checkFileExists, getFileLink, getFolderId } from '../../utils/drive';
+import { convertToDriveFile, listFilesInFolder, checkFileExists, getFileInfo, getFolderId } from '../../utils/drive';
 
 // Initialize the Google Drive API client
 const drive = google.drive('v3');
@@ -42,7 +42,7 @@ export const GET: APIRoute = async ({ request, cookies }) => {
                         },
                     });
                 }
-                const fileLink = await getFileLink(folderId, fileName, token);
+                const fileLink = await getFileInfo(folderId, fileName, token);
                 return new Response(JSON.stringify({ exists: true, fileLink }), {
                     status: 200,
                     headers: {

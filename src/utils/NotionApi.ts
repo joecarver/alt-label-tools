@@ -2,7 +2,7 @@ import { Client } from '@notionhq/client';
 import type { LabelClient } from "@/types/LabelClient";
 import type { Release } from "@/types/Release";
 import type { BlockObjectResponse, DatabaseObjectResponse, PageObjectResponse, TitlePropertyItemObjectResponse, DatePropertyItemObjectResponse, RichTextItemResponse } from '@notionhq/client/build/src/api-endpoints';
-import { ReleaseTaskStatus } from "@/types/ReleaseTaskStatus";
+import { CompletionStatus } from "@/types/CompletionStatus";
 import { ReleaseTaskName } from "@/types/ReleaseTask";
 
 const notion = new Client({
@@ -75,7 +75,7 @@ export async function getReleases(clientId: string): Promise<Release[]> {
                 id: result.id,
                 releaseId: catalogNumber,
                 name: taskTitle as ReleaseTaskName,
-                status: ReleaseTaskStatus.UNKNOWN,
+                status: CompletionStatus.UNKNOWN,
                 startDate: date?.start || "",
                 endDate: date?.end || date?.start || "",
             };

@@ -1,5 +1,7 @@
 import { format, isSameDay, parseISO } from "date-fns";
 
+const DATE_FORMAT = "dd/MM/yyyy";
+
 export const formatDateRange = (startDate: string, endDate: string) => {
     if (!startDate || !endDate) {
         return "";
@@ -9,10 +11,10 @@ export const formatDateRange = (startDate: string, endDate: string) => {
     const end = parseISO(endDate);
 
     if (isSameDay(start, end)) {
-        return format(start, "MMM d, yyyy");
+        return format(start, DATE_FORMAT);
     }
 
-    return `${format(start, "MMM d, yyyy")} - ${format(end, "MMM d, yyyy")}`;
+    return `${format(start, DATE_FORMAT)} - ${format(end, DATE_FORMAT)}`;
 };
 
 export const formatSingleDate = (date: string) => {
@@ -20,5 +22,5 @@ export const formatSingleDate = (date: string) => {
         return "";
     }
 
-    return format(parseISO(date), "MMM d, yyyy");
+    return format(parseISO(date), DATE_FORMAT);
 };

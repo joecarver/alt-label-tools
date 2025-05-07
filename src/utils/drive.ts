@@ -8,11 +8,13 @@ export interface DriveFile {
     name: string;
     webViewLink: string;
     mimeType: string;
+    createdTime?: string | null;
 }
 
 // Helper function to safely convert Google Drive API response to our DriveFile type
 export function convertToDriveFile(file: drive_v3.Schema$File): DriveFile | null {
     if (!file.id || !file.name || !file.webViewLink || !file.mimeType) {
+        console.error('Invalid file', file);
         return null;
     }
     return {
@@ -20,6 +22,7 @@ export function convertToDriveFile(file: drive_v3.Schema$File): DriveFile | null
         name: file.name,
         webViewLink: file.webViewLink,
         mimeType: file.mimeType,
+        createdTime: file.createdTime,
     };
 }
 
@@ -37,35 +40,22 @@ export async function listFilesInFolder(folderId: string, authToken: string): Pr
     return files.map(convertToDriveFile).filter((file): file is DriveFile => file !== null);
 }
 
-export async function checkFileExists(folderName: string, fileName: string, authToken: string): Promise<boolean> {
+export async function getFileInfo(folderName: string, fileName: string, authToken: string): Promise<DriveFile | null> {
     const drive = google.drive('v3');
     const auth = getAuthClient(authToken);
 
     const folderId = await getFolderId(folderName, authToken);
     if (!folderId) {
-        return false;
+        return null;
     }
 
     const response = await drive.files.list({
         auth,
         q: `'${folderId}' in parents and name = '${fileName}' and trashed = false`,
-        fields: 'files(id)',
+        fields: 'files(id, name, webViewLink, mimeType, createdTime)',
     });
 
-    return (response.data.files?.length || 0) > 0;
-}
-
-export async function getFileLink(folderId: string, fileName: string, authToken: string): Promise<string | null> {
-    const drive = google.drive('v3');
-    const auth = getAuthClient(authToken);
-
-    const response = await drive.files.list({
-        auth,
-        q: `'${folderId}' in parents and name = '${fileName}' and trashed = false`,
-        fields: 'files(webViewLink)',
-    });
-
-    return response.data.files?.[0]?.webViewLink || null;
+    return response.data.files?.[0] ? convertToDriveFile(response.data.files?.[0]) : null;
 }
 
 export async function getFolderId(folderName: string, authToken: string, parentFolderId?: string): Promise<string | null> {
@@ -78,7 +68,6 @@ export async function getFolderId(folderName: string, authToken: string, parentF
     // Start with the root folder or provided parent folder
     let currentFolderId = parentFolderId || 'root';
 
-    console.log({ pathParts, currentFolderId });
     // Traverse the path
     for (const folderPart of pathParts) {
         const response = await drive.files.list({
