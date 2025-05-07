@@ -8,9 +8,10 @@ import { formatSingleDate } from "@/utils/date";
 
 interface Props {
     release: Release;
+    clientName: string;
 }
 
-const { release } = Astro.props;
+const { release, clientName } = Astro.props;
 
 const getReleaseSummary = (tasks: ReleaseTask[]) => {
     const detectableTasks = tasks.filter((task) =>
@@ -62,7 +63,7 @@ const summary = getReleaseSummary(release.tasks);
                     View Tasks ({release.tasks.length})
                 </Text>
             </summary>
-            <TaskList tasks={release.tasks} />
+            <TaskList clientName={clientName} tasks={release.tasks} />
         </details>
     </Flex>
 </Card>

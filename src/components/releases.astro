@@ -3,10 +3,15 @@ import { getReleases } from "@/utils/NotionApi";
 import { Flex } from "@radix-ui/themes";
 import ReleaseCard from "./ReleaseCard.astro";
 
+const clientName = Astro.props.clientName;
 const clientId = Astro.props.clientId;
 const releases = await getReleases(clientId);
 ---
 
 <Flex direction="column" gap="4">
-    {releases.map((release) => <ReleaseCard release={release} />)}
+    {
+        releases.map((release) => (
+            <ReleaseCard clientName={clientName} release={release} />
+        ))
+    }
 </Flex>

@@ -8,12 +8,13 @@ import { checkFileExists } from "@/utils/drive";
 import { getAuthTokenFromCookies } from "@/utils/auth";
 
 interface Props {
+    clientName: string;
     task: ReleaseTask;
 }
 
 type BadgeColor = "gray" | "blue" | "green" | "red" | "orange";
 
-const { task } = Astro.props;
+const { clientName, task } = Astro.props;
 
 const isDetectableTask = (taskName: string) => {
     return [
@@ -37,7 +38,7 @@ const getStatusColor = (status: ReleaseTaskStatus): BadgeColor => {
     }
 };
 
-const getTaskStatus = async (task: ReleaseTask) => {
+const getTaskStatus = async (clientName: string, task: ReleaseTask) => {
     if (!isDetectableTask(task.name)) {
         return null;
     }
@@ -47,14 +48,28 @@ const getTaskStatus = async (task: ReleaseTask) => {
         return { status: "Not authenticated", color: "gray" as BadgeColor };
     }
 
+    const searchFolder = `Clients/${clientName}/Releases/${task.releaseId}`;
+
     if (task.name === ReleaseTaskName.ContractCreated) {
         const contractFileExists = await checkFileExists(
-            "1h8fPUpJ2LUM8KO5GCARzt_DD6CK050VX",
+            searchFolder,
             "contract",
             authToken,
         );
 
         if (contractFileExists) {
+            return { status: "Complete", color: "green" as BadgeColor };
+        }
+    }
+
+    if (task.name === ReleaseTaskName.PreMastersSubmitted) {
+        const preMastersFileExists = await checkFileExists(
+            searchFolder,
+            "premster.flac",
+            authToken,
+        );
+
+        if (preMastersFileExists) {
             return { status: "Complete", color: "green" as BadgeColor };
         }
     }
@@ -78,7 +93,7 @@ const getDueDateStatus = (endDate: string) => {
 };
 const dueDateStatus = getDueDateStatus(task.endDate);
 
-const taskStatus = await getTaskStatus(task);
+const taskStatus = await getTaskStatus(clientName, task);
 ---
 
 <Box>

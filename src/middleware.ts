@@ -1,27 +1,28 @@
 import type { APIContext } from 'astro';
 import { verifyToken } from './utils/auth';
 
-export async function onRequest({ request, cookies, redirect }: APIContext) {
-    const url = new URL(request.url);
+export async function onRequest(context: APIContext, next: () => Promise<Response>) {
+    const url = new URL(context.request.url);
 
     // Skip auth check for login page and auth endpoints
     if (url.pathname === '/login' || url.pathname.startsWith('/api/auth')) {
-        return;
+        return next();
     }
 
-    const token = cookies.get('auth_token')?.value;
+    const token = context.cookies.get('auth_token')?.value;
 
     if (!token) {
-        return redirect('/login');
+        return context.redirect('/login');
     }
 
     try {
         const payload = await verifyToken(token);
         if (!payload) {
-            return redirect('/login');
+            return context.redirect('/login');
         }
+        return next();
     } catch (error) {
         console.error('Token verification failed:', error);
-        return redirect('/login');
+        return context.redirect('/login');
     }
 } 

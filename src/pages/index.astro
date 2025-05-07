@@ -59,7 +59,10 @@ const clients = await getClients();
 										</Flex>
 									</Flex>
 									<Box>
-										<Releases clientId={client.id} />
+										<Releases
+											clientId={client.id}
+											clientName={client.name}
+										/>
 									</Box>
 								</Flex>
 							</Card>

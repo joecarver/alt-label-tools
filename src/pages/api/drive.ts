@@ -1,8 +1,6 @@
 import { google } from 'googleapis';
 import type { APIRoute } from 'astro';
-import type { drive_v3 } from 'googleapis';
-import type { DriveFile } from '../../utils/drive';
-import { convertToDriveFile, listFilesInFolder, checkFileExists, getFileLink } from '../../utils/drive';
+import { convertToDriveFile, listFilesInFolder, checkFileExists, getFileLink, getFolderId } from '../../utils/drive';
 
 // Initialize the Google Drive API client
 const drive = google.drive('v3');
@@ -20,11 +18,11 @@ export const GET: APIRoute = async ({ request, cookies }) => {
         }
 
         const url = new URL(request.url);
-        const folderId = url.searchParams.get('folderId');
+        const folderName = url.searchParams.get('folderName');
         const fileName = url.searchParams.get('fileName');
 
-        if (!folderId) {
-            return new Response(JSON.stringify({ error: 'Folder ID is required' }), {
+        if (!folderName) {
+            return new Response(JSON.stringify({ error: 'Folder name is required' }), {
                 status: 400,
                 headers: {
                     'Content-Type': 'application/json',
@@ -33,8 +31,17 @@ export const GET: APIRoute = async ({ request, cookies }) => {
         }
 
         if (fileName) {
-            const exists = await checkFileExists(folderId, fileName, token);
+            const exists = await checkFileExists(folderName, fileName, token);
             if (exists) {
+                const folderId = await getFolderId(folderName, token);
+                if (!folderId) {
+                    return new Response(JSON.stringify({ error: 'Folder not found' }), {
+                        status: 404,
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    });
+                }
                 const fileLink = await getFileLink(folderId, fileName, token);
                 return new Response(JSON.stringify({ exists: true, fileLink }), {
                     status: 200,
@@ -45,6 +52,16 @@ export const GET: APIRoute = async ({ request, cookies }) => {
             }
             return new Response(JSON.stringify({ exists: false }), {
                 status: 200,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+        }
+
+        const folderId = await getFolderId(folderName, token);
+        if (!folderId) {
+            return new Response(JSON.stringify({ error: 'Folder not found' }), {
+                status: 404,
                 headers: {
                     'Content-Type': 'application/json',
                 },

@@ -5,9 +5,10 @@ import type { ReleaseTask } from "@/types/ReleaseTask";
 
 interface Props {
     tasks: ReleaseTask[];
+    clientName: string;
 }
 
-const { tasks } = Astro.props;
+const { tasks, clientName } = Astro.props;
 ---
 
 <Box mt="3">
@@ -20,7 +21,7 @@ const { tasks } = Astro.props;
                         new Date(a.startDate).getTime() -
                         new Date(b.startDate).getTime(),
                 )
-                .map((task) => <TaskItem task={task} />)
+                .map((task) => <TaskItem clientName={clientName} task={task} />)
         }
     </Flex>
 </Box>
