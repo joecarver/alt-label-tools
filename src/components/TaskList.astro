@@ -11,8 +11,10 @@ interface Props {
 const { tasks, clientName } = Astro.props;
 ---
 
-<Box mt="3">
-    <Separator size="2" mb="3" />
+<Box
+    style={{ padding: "0.5rem 1rem", backgroundColor: "var(--gray-2)" }}
+    className="task-list"
+>
     <Flex direction="column" gap="3">
         {
             tasks

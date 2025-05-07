@@ -4,4 +4,5 @@ export enum BadgeColor {
     GREEN = "green",
     RED = "red",
     ORANGE = "orange",
+    YELLOW = "yellow",
 }

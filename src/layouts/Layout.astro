@@ -138,24 +138,33 @@ const { title } = Astro.props;
 		text-transform: capitalize;
 	}
 
-	/* Details styles */
-	details {
-		transition: background 0.2s;
-		padding: 1rem;
-	}
-
-	details[open] {
+	details[open] .task-list {
 		background: rgb(var(--gray-50));
 		border-radius: 0.5rem;
+		margin-top: 0.5rem;
 	}
 
 	summary {
 		cursor: pointer;
 		user-select: none;
+
+		&:hover {
+			color: rgb(var(--primary));
+		}
+
+		&::marker,
+		&::-webkit-details-marker {
+			display: none;
+		}
 	}
 
-	summary:hover {
-		color: rgb(var(--primary));
+	summary::marker,
+	summary::-webkit-details-marker {
+		display: none;
+	}
+
+	::-webkit-details-marker {
+		display: none;
 	}
 
 	/* Animations */

@@ -5,6 +5,7 @@ import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
 import { CompletionStatus } from "@/types/CompletionStatus";
 import type { Release } from "@/types/Release";
 import { formatSingleDate } from "@/utils/date";
+import { BadgeColor } from "@/types/BadgeColor";
 
 interface Props {
     release: Release;
@@ -14,28 +15,25 @@ interface Props {
 const { release, clientName } = Astro.props;
 
 const getReleaseSummary = (tasks: ReleaseTask[]) => {
-    const detectableTasks = tasks.filter((task) =>
-        [
-            ReleaseTaskName.ContractCreated,
-            ReleaseTaskName.PreMastersSubmitted,
-            ReleaseTaskName.MastersSubmitted,
-            ReleaseTaskName.ArtworkCreation,
-        ].includes(task.name),
-    );
-    const totalTasks = detectableTasks.length;
-    const completedTasks = detectableTasks.filter(
-        (task) => task.status === CompletionStatus.DONE,
-    ).length;
-    const inProgressTasks = detectableTasks.filter(
-        (task) => task.status === CompletionStatus.IN_PROGRESS,
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(
+        (task) =>
+            task.status === CompletionStatus.DONE_DETECTED ||
+            task.status === CompletionStatus.DONE_MANUALLY,
     ).length;
 
-    if (completedTasks === totalTasks) {
-        return { status: "Complete", color: "green" as const };
-    } else if (inProgressTasks > 0 || completedTasks > 0) {
-        return { status: "In Progress", color: "blue" as const };
-    }
-    return { status: "Not Started", color: "gray" as const };
+    return {
+        totalTasks,
+        completedTasks,
+        color:
+            completedTasks === totalTasks
+                ? BadgeColor.GREEN
+                : completedTasks > totalTasks / 2
+                  ? BadgeColor.YELLOW
+                  : completedTasks > 0
+                    ? BadgeColor.ORANGE
+                    : BadgeColor.RED,
+    };
 };
 
 const summary = getReleaseSummary(release.tasks);
@@ -52,16 +50,13 @@ const summary = getReleaseSummary(release.tasks);
                     Release Date: {formatSingleDate(release.releaseDate)}
                 </Badge>
             </Flex>
-            <Badge size="2" color={summary.color} variant="soft">
-                {summary.status}
-            </Badge>
         </Flex>
 
         <details>
             <summary>
-                <Text size="2" color="gray">
-                    View Tasks ({release.tasks.length})
-                </Text>
+                <Badge size="2" color={summary.color} variant="soft">
+                    {summary.completedTasks} / {summary.totalTasks} tasks completed
+                </Badge>
             </summary>
             <TaskList clientName={clientName} tasks={release.tasks} />
         </details>
