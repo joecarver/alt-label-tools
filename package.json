@@ -22,8 +22,5 @@
   },
   "devDependencies": {
     "@types/react": "^19.1.2"
-  },
-  "overrides": {
-    "gtoken": "github:BjornTheProgrammer/node-gtoken"
   }
 }
