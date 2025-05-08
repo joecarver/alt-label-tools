@@ -1,5 +1,11 @@
 import { google } from 'googleapis';
-import { OAuth2Client } from 'google-auth-library';
+import { JWT, OAuth2Client } from 'google-auth-library';
+
+// List of allowed email addresses
+const ALLOWED_EMAILS = [
+    'joe.crvr1@gmail.com',
+    'altlabeltools@gmail.com'
+];
 
 // Get the base URL for the current environment
 const getBaseUrl = () => {
@@ -9,18 +15,31 @@ const getBaseUrl = () => {
     return 'http://localhost:4321';
 };
 
-// Initialize OAuth2 client
+// Initialize OAuth2 client for user authentication
 const oauth2Client = new OAuth2Client(
     import.meta.env.GOOGLE_CLIENT_ID,
     import.meta.env.GOOGLE_CLIENT_SECRET,
     `${getBaseUrl()}/api/auth`
 );
 
-// Scopes required for Google Drive access
-const SCOPES = [
-    'https://www.googleapis.com/auth/drive.readonly',
-    'https://www.googleapis.com/auth/drive.file',
-    'https://www.googleapis.com/auth/drive.metadata.readonly',
+// Format the private key by replacing literal \n with actual newlines
+const formatPrivateKey = (key: string) => {
+    return key.replace(/\\n/g, '\n');
+};
+
+// Initialize service account client for Drive access
+const serviceAccount = new JWT({
+    email: import.meta.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+    key: formatPrivateKey(import.meta.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY),
+    scopes: [
+        'https://www.googleapis.com/auth/drive.readonly',
+        'https://www.googleapis.com/auth/drive.file',
+        'https://www.googleapis.com/auth/drive.metadata.readonly'
+    ]
+});
+
+// Scopes required for user authentication
+const USER_SCOPES = [
     'https://www.googleapis.com/auth/userinfo.email',
     'https://www.googleapis.com/auth/userinfo.profile'
 ];
@@ -28,7 +47,7 @@ const SCOPES = [
 export function generateAuthUrl(): string {
     return oauth2Client.generateAuthUrl({
         access_type: 'offline',
-        scope: SCOPES,
+        scope: USER_SCOPES,
         prompt: 'consent',
         redirect_uri: `${getBaseUrl()}/api/auth`
     });
@@ -42,28 +61,34 @@ export async function getTokens(code: string) {
     return tokens;
 }
 
+// Get service account client for Drive operations
+export function getAuthClient() {
+    return serviceAccount;
+}
+
+// Helper function to get auth token from cookies (for user session only)
+export function getAuthTokenFromCookies(cookies: any): string | null {
+    return cookies.get('auth_token')?.value || null;
+}
+
+// Verify user session token and check if email is allowed
 export async function verifyToken(token: string) {
     try {
-        // Instead of verifying the token, we'll try to use it to get user info
         const oauth2 = google.oauth2('v2');
         const auth = new OAuth2Client();
         auth.setCredentials({ access_token: token });
 
         const userInfo = await oauth2.userinfo.get({ auth });
+
+        // Check if the user's email is in the allowed list
+        if (!userInfo.data.email || !ALLOWED_EMAILS.includes(userInfo.data.email)) {
+            console.error('Unauthorized email attempt:', userInfo.data.email);
+            return null;
+        }
+
         return userInfo.data;
     } catch (error) {
         console.error('Token verification failed:', error);
         return null;
     }
-}
-
-export function getAuthClient(token: string) {
-    const client = new OAuth2Client();
-    client.setCredentials({ access_token: token });
-    return client;
-}
-
-// Helper function to get auth token from cookies
-export function getAuthTokenFromCookies(cookies: any): string | null {
-    return cookies.get('auth_token')?.value || null;
 } 

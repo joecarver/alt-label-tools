@@ -1,4 +1,3 @@
-
 import { CompletionStatus } from "@/types/CompletionStatus";
 import { getFileInfo } from "./drive";
 import { ReleaseTaskName } from "@/types/ReleaseTask";
@@ -11,12 +10,18 @@ interface TaskCompletionParams {
     releaseId: string;
     completedAt?: string;
     isDetectable: boolean;
-    authToken: string | null;
     folderId: string | null;
 }
 
-export const getTaskCompletionStatus = async (params: TaskCompletionParams): Promise<TaskCompletionStatus | null> => {
-    if (params.completedAt) {
+export async function getTaskCompletionStatus({
+    clientName,
+    taskName,
+    releaseId,
+    completedAt,
+    isDetectable,
+    folderId,
+}: TaskCompletionParams): Promise<TaskCompletionStatus> {
+    if (completedAt) {
         return {
             status: CompletionStatus.DONE_MANUALLY,
             color: getCompletionStatusColor(CompletionStatus.DONE_MANUALLY),
@@ -24,26 +29,25 @@ export const getTaskCompletionStatus = async (params: TaskCompletionParams): Pro
         };
     }
 
-    if (!params.authToken || !params.isDetectable) {
-        return null;
+    if (!isDetectable) {
+        return { status: CompletionStatus.TODO, color: getCompletionStatusColor(CompletionStatus.TODO), fileInfo: null };
     }
 
     let searchFile = "";
 
-    if (params.taskName === ReleaseTaskName.ContractCreated) {
+    if (taskName === ReleaseTaskName.ContractCreated) {
         searchFile = "contract";
-    } else if (params.taskName === ReleaseTaskName.PreMastersSubmitted) {
+    } else if (taskName === ReleaseTaskName.PreMastersSubmitted) {
         searchFile = "premaster.flac";
-    } else if (params.taskName === ReleaseTaskName.MastersSubmitted) {
+    } else if (taskName === ReleaseTaskName.MastersSubmitted) {
         searchFile = "master.flac";
-    } else if (params.taskName === ReleaseTaskName.ArtworkCreation) {
+    } else if (taskName === ReleaseTaskName.ArtworkCreation) {
         searchFile = "artwork.png";
     }
 
     const fileInfo = await getFileInfo(
-        params.folderId,
+        folderId,
         searchFile,
-        params.authToken,
     );
 
     if (!fileInfo) {
@@ -57,4 +61,4 @@ export const getTaskCompletionStatus = async (params: TaskCompletionParams): Pro
         color: getCompletionStatusColor(status),
         fileInfo,
     };
-};
+}

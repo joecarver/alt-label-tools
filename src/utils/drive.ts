@@ -17,61 +17,105 @@ export function convertToFileInfo(file: drive_v3.Schema$File): FileInfo | null {
     };
 }
 
-export async function listFilesInFolder(folderId: string, authToken: string): Promise<FileInfo[]> {
+export async function listFilesInFolder(folderId: string): Promise<FileInfo[]> {
     const drive = google.drive('v3');
-    const auth = getAuthClient(authToken);
+    const auth = getAuthClient();
 
-    const response = await drive.files.list({
-        auth,
-        q: `'${folderId}' in parents and trashed = false`,
-        fields: 'files(id, name, webViewLink, mimeType)',
-    });
+    try {
+        const response = await drive.files.list({
+            auth,
+            q: `'${folderId}' in parents and trashed = false`,
+            fields: 'files(id, name, webViewLink, mimeType)'
+        });
 
-    const files = response.data.files || [];
-    return files.map(convertToFileInfo).filter((file): file is FileInfo => file !== null);
+        const files = response.data.files || [];
+        return files.map(convertToFileInfo).filter((file): file is FileInfo => file !== null);
+    } catch (error) {
+        console.error('Error listing files:', error);
+        throw error;
+    }
 }
 
-export async function getFileInfo(folderId: string | null, fileName: string, authToken: string): Promise<FileInfo | null> {
+export async function getFileInfo(folderId: string | null, fileName: string): Promise<FileInfo | null> {
     if (!folderId) {
         return null;
     }
 
     const drive = google.drive('v3');
-    const auth = getAuthClient(authToken);
+    const auth = getAuthClient();
 
-    const response = await drive.files.list({
-        auth,
-        q: `'${folderId}' in parents and name = '${fileName}' and trashed = false`,
-        fields: 'files(id, name, webViewLink, mimeType, createdTime)',
-    });
+    try {
+        // Search for the file in the specified folder
+        const response = await drive.files.list({
+            auth,
+            q: `'${folderId}' in parents and name contains '${fileName}' and trashed = false`,
+            fields: 'files(id, name, webViewLink, mimeType, createdTime)'
+        });
 
-    return response.data.files?.[0] ? convertToFileInfo(response.data.files?.[0]) : null;
+        // If no exact match, try a more flexible search
+        if (!response.data.files?.length) {
+            const flexibleResponse = await drive.files.list({
+                auth,
+                q: `'${folderId}' in parents and name contains '${fileName.toLowerCase()}' and trashed = false`,
+                fields: 'files(id, name, webViewLink, mimeType, createdTime)'
+            });
+
+            return flexibleResponse.data.files?.[0] ? convertToFileInfo(flexibleResponse.data.files[0]) : null;
+        }
+
+        return response.data.files[0] ? convertToFileInfo(response.data.files[0]) : null;
+    } catch (error) {
+        console.error('Error getting file info:', error);
+        throw error;
+    }
 }
 
-export async function getFolderId(folderName: string, authToken: string, parentFolderId?: string): Promise<string | null> {
+export async function getFolderId(folderName: string): Promise<string | null> {
     const drive = google.drive('v3');
-    const auth = getAuthClient(authToken);
+    const auth = getAuthClient();
 
     // If the folderName contains slashes, it's a path
     const pathParts = folderName.split('/').filter(part => part.trim() !== '');
 
-    // Start with the root folder or provided parent folder
-    let currentFolderId = parentFolderId || 'root';
+    // For the first part of the path, we need to search in shared folders
+    if (pathParts.length > 0) {
+        try {
+            // First, find the root folder that was shared with the service account
+            const rootResponse = await drive.files.list({
+                auth,
+                q: `name = '${pathParts[0]}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false and sharedWithMe = true`,
+                fields: 'files(id)'
+            });
 
-    // Traverse the path
-    for (const folderPart of pathParts) {
-        const response = await drive.files.list({
-            auth,
-            q: `'${currentFolderId}' in parents and name = '${folderPart}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
-            fields: 'files(id)',
-        });
+            if (!rootResponse.data.files?.length) {
+                return null;
+            }
 
-        if (!response.data.files?.length) {
-            return null; // Folder not found
+            let currentFolderId = rootResponse.data.files[0].id!;
+
+            // Now traverse the rest of the path
+            for (let i = 1; i < pathParts.length; i++) {
+                const folderPart = pathParts[i];
+
+                const response = await drive.files.list({
+                    auth,
+                    q: `'${currentFolderId}' in parents and name = '${folderPart}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+                    fields: 'files(id)'
+                });
+
+                if (!response.data.files?.length) {
+                    return null;
+                }
+
+                currentFolderId = response.data.files[0].id!;
+            }
+
+            return currentFolderId;
+        } catch (error) {
+            console.error('Error searching for folders:', error);
+            throw error;
         }
-
-        currentFolderId = response.data.files[0].id!;
     }
 
-    return currentFolderId;
+    return null;
 } 

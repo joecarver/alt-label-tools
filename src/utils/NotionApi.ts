@@ -16,7 +16,7 @@ const notion = new Client({
 const cachedReleases: Record<string, Release[]> = {};
 const cachedClients: LabelClient[] = [];
 
-export async function getClients(authToken: string): Promise<LabelClient[]> {
+export async function getClients(): Promise<LabelClient[]> {
     if (cachedClients.length > 0) {
         return cachedClients;
     }
@@ -30,7 +30,7 @@ export async function getClients(authToken: string): Promise<LabelClient[]> {
     const results = response.results as BlockObjectResponse[];
 
     const clients = await Promise.all(results.filter((result) => result.type === "child_page").map(async (result) => {
-        const folderId = await getFolderId(`Clients/${result.child_page.title}`, authToken);
+        const folderId = await getFolderId(`Clients/${result.child_page.title}`);
         return {
             id: result.id,
             name: result.child_page.title,
@@ -43,7 +43,7 @@ export async function getClients(authToken: string): Promise<LabelClient[]> {
     return clients;
 }
 
-export async function getReleases(clientId: string, clientName: string, authToken: string): Promise<Release[]> {
+export async function getReleases(clientId: string, clientName: string): Promise<Release[]> {
     if (cachedReleases[clientId]) {
         return cachedReleases[clientId];
     }
@@ -72,7 +72,7 @@ export async function getReleases(clientId: string, clientName: string, authToke
         const [catalogNumber, artist] = databaseTitle.split(" - ");
 
         const folderName = `Clients/${clientName}/Releases/${catalogNumber}`;
-        const folderId = await getFolderId(folderName, authToken);
+        const folderId = await getFolderId(folderName);
 
         const tasks: ReleaseTask[] = await Promise.all(databaseResults.map(async result => {
             const nameProperty = result.properties.Name;
@@ -94,7 +94,6 @@ export async function getReleases(clientId: string, clientName: string, authToke
                 completedAt: completedAt || "",
                 folderId,
                 isDetectable,
-                authToken: authToken,
             });
 
             const dueDateStatus = getDueDateStatus(
