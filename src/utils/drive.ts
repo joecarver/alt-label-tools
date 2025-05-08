@@ -3,6 +3,8 @@ import type { drive_v3 } from 'googleapis';
 import { getAuthClient } from './auth';
 import type { FileInfo } from '@/types/FileInfo';
 
+// Cache for storing folder paths to their IDs
+const folderIdCache: Record<string, string> = {};
 
 export function convertToFileInfo(file: drive_v3.Schema$File): FileInfo | null {
     if (!file.id || !file.name || !file.webViewLink || !file.mimeType) {
@@ -71,6 +73,11 @@ export async function getFileInfo(folderId: string | null, fileName: string): Pr
 }
 
 export async function getFolderId(folderName: string): Promise<string | null> {
+    // Check cache first
+    if (folderIdCache[folderName]) {
+        return folderIdCache[folderName];
+    }
+
     const drive = google.drive('v3');
     const auth = getAuthClient();
 
@@ -92,10 +99,21 @@ export async function getFolderId(folderName: string): Promise<string | null> {
             }
 
             let currentFolderId = rootResponse.data.files[0].id!;
+            let currentPath = pathParts[0];
+
+            // Cache the root folder
+            folderIdCache[currentPath] = currentFolderId;
 
             // Now traverse the rest of the path
             for (let i = 1; i < pathParts.length; i++) {
                 const folderPart = pathParts[i];
+                currentPath += '/' + folderPart;
+
+                // Check cache for this subpath
+                if (folderIdCache[currentPath]) {
+                    currentFolderId = folderIdCache[currentPath];
+                    continue;
+                }
 
                 const response = await drive.files.list({
                     auth,
@@ -108,6 +126,8 @@ export async function getFolderId(folderName: string): Promise<string | null> {
                 }
 
                 currentFolderId = response.data.files[0].id!;
+                // Cache this subpath
+                folderIdCache[currentPath] = currentFolderId;
             }
 
             return currentFolderId;

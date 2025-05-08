@@ -14,7 +14,7 @@ const notion = new Client({
 });
 
 const cachedReleases: Record<string, Release[]> = {};
-const cachedClients: LabelClient[] = [];
+let cachedClients: LabelClient[] = [];
 
 export async function getClients(): Promise<LabelClient[]> {
     if (cachedClients.length > 0) {
@@ -38,7 +38,7 @@ export async function getClients(): Promise<LabelClient[]> {
         };
     }));
 
-    cachedClients.push(...clients);
+    cachedClients = clients;
 
     return clients;
 }
