@@ -1,6 +1,26 @@
 name = "alt-label-tools"
 compatibility_date = "2024-01-01"
 
+# Build output directory for Astro
+pages_build_output_dir = "dist"
+
+# Environment variables
+[vars]
+NODE_ENV = "production"
+PRODUCTION_URL = "https://alt-label-tools.pages.dev"
+
+# Secret environment variables
+# These should be set using `wrangler secret put` command
+# wrangler secret put GOOGLE_CLIENT_ID
+# wrangler secret put GOOGLE_CLIENT_SECRET
+# wrangler secret put GOOGLE_SERVICE_ACCOUNT_EMAIL
+# wrangler secret put GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
+# wrangler secret put GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_ID
+# wrangler secret put NOTION_API_KEY
+# wrangler secret put NOTION_DATABASE_ID
+# wrangler secret put N8N_WEBHOOK_URL
+# wrangler secret put N8N_API_KEY
+
 [[kv_namespaces]]
 binding = "ALT_LABEL_TOOLS_SESSION"
 id = "486f471ab5be48df802ef5cec49d9235"
