@@ -8,7 +8,7 @@ const ALLOWED_EMAILS = [
 const getBaseUrl = () => {
     if (import.meta.env.NODE_ENV === 'production') {
         const url = import.meta.env.PRODUCTION_URL;
-        console.log('Production URL:', url);
+        console.log('Production URL:', url, import.meta.env.NODE_ENV);
         return url;
     }
     return 'http://localhost:4321';
