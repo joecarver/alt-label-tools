@@ -1,5 +1,3 @@
-
-import { oauth2 } from 'googleapis/build/src/apis/oauth2';
 import { JWT, OAuth2Client } from 'google-auth-library';
 
 // List of allowed email addresses
@@ -75,19 +73,29 @@ export function getAuthTokenFromCookies(cookies: any): string | null {
 // Verify user session token and check if email is allowed
 export async function verifyToken(token: string) {
     try {
-        const oauth2Helper = oauth2('v2');
         const auth = new OAuth2Client();
         auth.setCredentials({ access_token: token });
 
-        const userInfo = await oauth2Helper.userinfo.get({ auth });
+        // Use fetch directly to call the userinfo endpoint
+        const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch user info');
+        }
+
+        const userInfo = await response.json();
 
         // Check if the user's email is in the allowed list
-        if (!userInfo.data.email || !ALLOWED_EMAILS.includes(userInfo.data.email)) {
-            console.error('Unauthorized email attempt:', userInfo.data.email);
+        if (!userInfo.email || !ALLOWED_EMAILS.includes(userInfo.email)) {
+            console.error('Unauthorized email attempt:', userInfo.email);
             return null;
         }
 
-        return userInfo.data;
+        return userInfo;
     } catch (error) {
         console.error('Token verification failed:', error);
         return null;
