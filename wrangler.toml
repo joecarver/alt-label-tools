@@ -8,6 +8,9 @@ pages_build_output_dir = "dist"
 [vars]
 NODE_ENV = "production"
 PRODUCTION_URL = "https://alt-label-tools.pages.dev"
+YARN_VERSION = "1"
+NODE_VERSION = "22.14.0"
+GOOGLE_SERVICE_ACCOUNT_EMAIL="alt-frontend@n8n-v2-454309.iam.gserviceaccount.com"
 
 # Secret environment variables
 # These should be set using `wrangler secret put` command
