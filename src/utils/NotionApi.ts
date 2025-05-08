@@ -5,24 +5,24 @@ import type { BlockObjectResponse, PageObjectResponse } from '@notionhq/client/b
 import { CompletionStatus } from "@/types/CompletionStatus";
 import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
 import { getTaskCompletionStatus } from "@/utils/getTaskCompletionStatus";
+import type { TaskCompletionStatus } from "@/types/TaskCompletionStatus";
 import { getDueDateStatus } from "@/utils/getDueDateStatus";
 import { isDetectableTask } from "@/utils/isDetectableTask";
 import { getFolderId } from './drive';
 import { getSecret } from 'astro:env/server';
+import { CacheManager, CACHE_TTL, getCachedClients, getCachedReleases, getCachedTaskStatus } from './cache';
 
-console.log('getSecret', getSecret('NOTION_API_KEY'));
 const notion = new Client({
     auth: getSecret('NOTION_API_KEY'),
 });
 
-const cachedReleases: Record<string, Release[]> = {};
-let cachedClients: LabelClient[] = [];
+let cacheManager: CacheManager | null = null;
 
-export async function getClients(): Promise<LabelClient[]> {
-    if (cachedClients.length > 0) {
-        return cachedClients;
-    }
+export function initializeCache(kv: any) {
+    cacheManager = new CacheManager(kv);
+}
 
+async function getClientsFromNotion(): Promise<LabelClient[]> {
     const clientsBlockId = "1bcaab79f528805bb18cf74fb628292b";
     const response = await notion.blocks.children.list({
         block_id: clientsBlockId,
@@ -40,16 +40,50 @@ export async function getClients(): Promise<LabelClient[]> {
         };
     }));
 
-    cachedClients = clients;
-
     return clients;
 }
 
-export async function getReleases(clientId: string, clientName: string): Promise<Release[]> {
-    if (cachedReleases[clientId]) {
-        return cachedReleases[clientId];
+export async function getClients(): Promise<LabelClient[]> {
+    if (!cacheManager) {
+        return getClientsFromNotion();
     }
 
+    return await getCachedClients(
+        cacheManager,
+        getClientsFromNotion
+    );
+}
+
+async function getTaskStatus(
+    taskId: string,
+    clientName: string,
+    catalogNumber: string,
+    taskName: ReleaseTaskName,
+    completedAt: string | null | undefined,
+    folderId: string | null,
+    isDetectable: boolean
+): Promise<TaskCompletionStatus> {
+    const params = {
+        clientName,
+        releaseId: catalogNumber,
+        taskName,
+        completedAt: typeof completedAt === 'string' ? completedAt : undefined,
+        folderId,
+        isDetectable,
+    };
+
+    if (!cacheManager) {
+        return getTaskCompletionStatus(params);
+    }
+
+    return await getCachedTaskStatus(
+        cacheManager,
+        taskId,
+        () => getTaskCompletionStatus(params)
+    );
+}
+
+async function getReleasesFromNotion(clientId: string, clientName: string): Promise<Release[]> {
     const response = await notion.blocks.children.list({
         block_id: clientId,
         page_size: 100,
@@ -57,7 +91,6 @@ export async function getReleases(clientId: string, clientName: string): Promise
 
     const results = response.results as BlockObjectResponse[];
     const releaseDatabases = results.filter((result) => result.type === "child_database");
-
 
     const releases: Release[] = [];
 
@@ -69,7 +102,6 @@ export async function getReleases(clientId: string, clientName: string): Promise
 
         const databaseResults = databaseResponse.results as PageObjectResponse[];
 
-        // Get the database title which should be the release name
         const databaseTitle = database.child_database?.title || "Untitled Release";
         const [catalogNumber, artist] = databaseTitle.split(" - ");
 
@@ -89,26 +121,27 @@ export async function getReleases(clientId: string, clientName: string): Promise
             const taskName = taskTitle as ReleaseTaskName;
             const isDetectable = isDetectableTask(taskName);
 
-            const taskStatus = await getTaskCompletionStatus({
+            const taskStatus = await getTaskStatus(
+                result.id,
                 clientName,
-                releaseId: catalogNumber,
-                taskName: taskName,
-                completedAt: completedAt || "",
+                catalogNumber,
+                taskName,
+                completedAt,
                 folderId,
-                isDetectable,
-            });
+                isDetectable
+            );
 
             const dueDateStatus = getDueDateStatus(
                 date?.end || date?.start || "",
-                taskStatus?.status === CompletionStatus.DONE_DETECTED ||
-                taskStatus?.status === CompletionStatus.DONE_MANUALLY,
+                taskStatus.status === CompletionStatus.DONE_DETECTED ||
+                taskStatus.status === CompletionStatus.DONE_MANUALLY,
             );
 
             return {
                 id: result.id,
                 releaseId: catalogNumber,
                 name: taskName,
-                status: taskStatus?.status || CompletionStatus.UNKNOWN,
+                status: taskStatus.status,
                 startDate: date?.start || "",
                 endDate: date?.end || date?.start || "",
                 completedAt: completedAt || "",
@@ -134,9 +167,49 @@ export async function getReleases(clientId: string, clientName: string): Promise
         }
     }
 
-    cachedReleases[clientId] = releases;
-
     return releases;
+}
+
+async function getReleasesWithFreshTaskStatuses(releases: Release[], clientName: string): Promise<Release[]> {
+    return Promise.all(releases.map(async (release) => {
+        const tasks = await Promise.all(release.tasks.map(async (task) => {
+            const taskStatus = await getTaskStatus(
+                task.id,
+                clientName,
+                release.catalogNumber,
+                task.name,
+                task.completedAt,
+                release.folderId,
+                task.isDetectable
+            );
+
+            return {
+                ...task,
+                taskStatus,
+                status: taskStatus.status,
+            };
+        }));
+
+        return {
+            ...release,
+            tasks,
+        };
+    }));
+}
+
+export async function getReleases(clientId: string, clientName: string): Promise<Release[]> {
+    if (!cacheManager) {
+        const releases = await getReleasesFromNotion(clientId, clientName);
+        return getReleasesWithFreshTaskStatuses(releases, clientName);
+    }
+
+    const releases = await getCachedReleases(
+        cacheManager,
+        clientId,
+        () => getReleasesFromNotion(clientId, clientName)
+    );
+
+    return getReleasesWithFreshTaskStatuses(releases, clientName);
 }
 
 export async function updateTaskCompletion(taskId: string, completedAt: string | null): Promise<void> {
@@ -147,17 +220,30 @@ export async function updateTaskCompletion(taskId: string, completedAt: string |
                 completedAt: null,
             },
         });
-        return;
-    }
-
-    await notion.pages.update({
-        page_id: taskId,
-        properties: {
-            completedAt: {
-                date: {
-                    start: completedAt,
+    } else {
+        await notion.pages.update({
+            page_id: taskId,
+            properties: {
+                completedAt: {
+                    date: {
+                        start: completedAt,
+                    },
                 },
             },
-        },
-    });
+        });
+    }
+
+    // Invalidate relevant caches
+    if (cacheManager) {
+        // Invalidate the task status cache
+        await cacheManager.invalidateCache('taskStatus', taskId);
+
+        // Find the release this task belongs to and invalidate its cache
+        const task = await notion.pages.retrieve({ page_id: taskId });
+        const parentId = (task as any).parent?.type === 'database_id' ? (task as any).parent.database_id : null;
+
+        if (parentId) {
+            await cacheManager.invalidateCache('releases', parentId);
+        }
+    }
 }

@@ -27,4 +27,12 @@ declare global {
     const N8N_WEBHOOK_URL: string;
     const N8N_API_KEY: string;
     const GOOGLE_SERVICE_ACCOUNT_EMAIL: string;
+    const ALT_LABEL_TOOLS_METADATA: KVNamespace;
+}
+
+// Add KVNamespace type if not already defined
+interface KVNamespace {
+    get(key: string): Promise<string | null>;
+    put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>;
+    delete(key: string): Promise<void>;
 } 
