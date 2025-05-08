@@ -16,7 +16,7 @@ export const GET: APIRoute = async ({ request, cookies, redirect }) => {
             cookies.set('auth_token', tokens.access_token, {
                 path: '/',
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
+                secure: import.meta.env.NODE_ENV === 'production',
                 maxAge: 60 * 60 * 24 * 7, // 1 week
             });
 

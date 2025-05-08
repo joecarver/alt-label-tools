@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const notion = new Client({
-    auth: process.env.NOTION_API_KEY,
+    auth: import.meta.env.NOTION_API_KEY,
 });
 
 export interface ScheduleItem {
@@ -26,7 +26,7 @@ export interface WorkflowItem {
 export async function getScheduleData(): Promise<ScheduleItem[]> {
     try {
         const response = await notion.databases.query({
-            database_id: process.env.NOTION_DATABASE_ID!,
+            database_id: import.meta.env.NOTION_DATABASE_ID!,
         });
 
         return response.results.map((page: any) => ({
@@ -43,9 +43,9 @@ export async function getScheduleData(): Promise<ScheduleItem[]> {
 
 export async function getWorkflowData(): Promise<WorkflowItem[]> {
     try {
-        const response = await fetch(process.env.N8N_WEBHOOK_URL!, {
+        const response = await fetch(import.meta.env.N8N_WEBHOOK_URL!, {
             headers: {
-                'Authorization': `Bearer ${process.env.N8N_API_KEY}`,
+                'Authorization': `Bearer ${import.meta.env.N8N_API_KEY}`,
             },
         });
 
