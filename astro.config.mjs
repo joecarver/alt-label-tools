@@ -15,6 +15,11 @@ export default defineConfig({
         session: true,
     },
     vite: {
+        resolve: {
+            alias: import.meta.env.PROD ? {
+                "react-dom/server": "react-dom/server.edge",
+            } : {},
+        },
         ssr: {
             external: [
                 'events',
