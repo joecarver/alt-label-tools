@@ -1,11 +1,12 @@
 import type { FileInfo } from '@/types/FileInfo';
+import { getEnv } from './env';
 
 // Cache for storing folder paths to their IDs
 const folderIdCache: Record<string, string> = {};
 
 // Service account credentials
-const serviceAccountEmail = import.meta.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-const serviceAccountKey = import.meta.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
+const serviceAccountEmail = getEnv('GOOGLE_SERVICE_ACCOUNT_EMAIL');
+const serviceAccountKey = getEnv('GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY');
 
 // Format the private key by replacing literal \n with actual newlines
 const formatPrivateKey = (key: string) => {
@@ -20,7 +21,7 @@ async function generateServiceAccountToken() {
     const header = {
         alg: 'RS256',
         typ: 'JWT',
-        kid: import.meta.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_ID
+        kid: getEnv('GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_ID')
     };
 
     const claim = {
@@ -42,7 +43,7 @@ async function generateServiceAccountToken() {
     // Convert PEM to raw key format
     const pemHeader = '-----BEGIN PRIVATE KEY-----';
     const pemFooter = '-----END PRIVATE KEY-----';
-    const pemContents = formatPrivateKey(serviceAccountKey)
+    const pemContents = formatPrivateKey(serviceAccountKey || '')
         .replace(pemHeader, '')
         .replace(pemFooter, '')
         .replace(/\s/g, '');

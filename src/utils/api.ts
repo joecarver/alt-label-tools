@@ -1,10 +1,8 @@
 import { Client } from '@notionhq/client';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import { getEnv } from './env';
 
 const notion = new Client({
-    auth: import.meta.env.NOTION_API_KEY,
+    auth: getEnv('NOTION_API_KEY'),
 });
 
 export interface ScheduleItem {
@@ -21,12 +19,15 @@ export interface WorkflowItem {
     lastRun: string;
 }
 
-
-
 export async function getScheduleData(): Promise<ScheduleItem[]> {
     try {
+        const databaseId = getEnv('NOTION_DATABASE_ID');
+        if (!databaseId) {
+            throw new Error('NOTION_DATABASE_ID is not set');
+        }
+
         const response = await notion.databases.query({
-            database_id: import.meta.env.NOTION_DATABASE_ID!,
+            database_id: databaseId,
         });
 
         return response.results.map((page: any) => ({
@@ -43,9 +44,16 @@ export async function getScheduleData(): Promise<ScheduleItem[]> {
 
 export async function getWorkflowData(): Promise<WorkflowItem[]> {
     try {
-        const response = await fetch(import.meta.env.N8N_WEBHOOK_URL!, {
+        const webhookUrl = getEnv('N8N_WEBHOOK_URL');
+        const apiKey = getEnv('N8N_API_KEY');
+
+        if (!webhookUrl || !apiKey) {
+            throw new Error('N8N_WEBHOOK_URL or N8N_API_KEY is not set');
+        }
+
+        const response = await fetch(webhookUrl, {
             headers: {
-                'Authorization': `Bearer ${import.meta.env.N8N_API_KEY}`,
+                'Authorization': `Bearer ${apiKey}`,
             },
         });
 

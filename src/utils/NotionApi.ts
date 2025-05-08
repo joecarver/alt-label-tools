@@ -8,9 +8,10 @@ import { getTaskCompletionStatus } from "@/utils/getTaskCompletionStatus";
 import { getDueDateStatus } from "@/utils/getDueDateStatus";
 import { isDetectableTask } from "@/utils/isDetectableTask";
 import { getFolderId } from './drive';
+import { getEnv } from './env';
 
 const notion = new Client({
-    auth: import.meta.env.NOTION_API_KEY,
+    auth: getEnv('NOTION_API_KEY'),
 });
 
 const cachedReleases: Record<string, Release[]> = {};

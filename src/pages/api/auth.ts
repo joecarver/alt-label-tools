@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { generateAuthUrl, getTokens, verifyToken } from '../../utils/auth';
+import { getEnv } from '../../utils/env';
 
 export const GET: APIRoute = async ({ request, cookies, redirect }) => {
     const url = new URL(request.url);
@@ -16,7 +17,7 @@ export const GET: APIRoute = async ({ request, cookies, redirect }) => {
             cookies.set('auth_token', tokens.access_token, {
                 path: '/',
                 httpOnly: true,
-                secure: import.meta.env.NODE_ENV === 'production',
+                secure: getEnv('NODE_ENV') === 'production',
                 maxAge: 60 * 60 * 24 * 7, // 1 week
             });
 

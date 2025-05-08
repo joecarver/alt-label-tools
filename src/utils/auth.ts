@@ -1,3 +1,5 @@
+import { getEnv } from './env';
+
 // List of allowed email addresses
 const ALLOWED_EMAILS = [
     'joe.crvr1@gmail.com',
@@ -6,9 +8,11 @@ const ALLOWED_EMAILS = [
 
 // Get the base URL for the current environment
 const getBaseUrl = () => {
-    if (import.meta.env.NODE_ENV === 'production') {
-        const url = import.meta.env.PRODUCTION_URL;
-        console.log('Production URL:', url, import.meta.env.NODE_ENV);
+    if (getEnv('NODE_ENV') === 'production') {
+        const url = getEnv('PRODUCTION_URL');
+        if (!url) {
+            throw new Error('PRODUCTION_URL environment variable is not set');
+        }
         return url;
     }
     return 'http://localhost:4321';
@@ -23,11 +27,17 @@ const USER_SCOPES = [
 export function generateAuthUrl(): string {
     const baseUrl = getBaseUrl();
     const redirectUri = `${baseUrl}/api/auth`;
+    const clientId = getEnv('GOOGLE_CLIENT_ID');
+
+    if (!clientId) {
+        throw new Error('GOOGLE_CLIENT_ID environment variable is not set');
+    }
+
     console.log('Generating auth URL with redirect URI:', redirectUri);
-    console.log('Client ID:', import.meta.env.GOOGLE_CLIENT_ID);
+    console.log('Client ID:', clientId);
 
     const params = new URLSearchParams({
-        client_id: import.meta.env.GOOGLE_CLIENT_ID,
+        client_id: clientId,
         redirect_uri: redirectUri,
         response_type: 'code',
         scope: USER_SCOPES.join(' '),
@@ -41,12 +51,19 @@ export function generateAuthUrl(): string {
 export async function getTokens(code: string) {
     const baseUrl = getBaseUrl();
     const redirectUri = `${baseUrl}/api/auth`;
+    const clientId = getEnv('GOOGLE_CLIENT_ID');
+    const clientSecret = getEnv('GOOGLE_CLIENT_SECRET');
+
+    if (!clientId || !clientSecret) {
+        throw new Error('GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET environment variables are not set');
+    }
+
     console.log('Getting tokens with redirect URI:', redirectUri);
 
     const params = new URLSearchParams({
         code,
-        client_id: import.meta.env.GOOGLE_CLIENT_ID,
-        client_secret: import.meta.env.GOOGLE_CLIENT_SECRET,
+        client_id: clientId,
+        client_secret: clientSecret,
         redirect_uri: redirectUri,
         grant_type: 'authorization_code'
     });
