@@ -24,7 +24,7 @@ export interface ReleaseTask {
     id: string;
     name: ReleaseTaskName;
     status: CompletionStatus;
-    releaseId: Release["id"];
+    releaseId: string | null;
     startDate: string;
     endDate: string;
     completedAt: string | null;

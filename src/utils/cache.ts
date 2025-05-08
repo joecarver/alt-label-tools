@@ -1,22 +1,23 @@
-import { CompletionStatus } from "@/types/CompletionStatus";
+import type { CachedRelease } from "@/types/CachedRelease";
 import type { LabelClient } from "@/types/LabelClient";
-import type { Release } from "@/types/Release";
 import type { ReleaseTask } from "@/types/ReleaseTask";
 import type { TaskCompletionStatus } from "@/types/TaskCompletionStatus";
 
+
 // Cache keys structure
 export const CACHE_KEYS = {
-    clients: 'ALT_LABEL_TOOLS_clients',
-    releases: (clientId: string) => `ALT_LABEL_TOOLS_releases:${clientId}`,
-    taskStatus: (taskId: string) => `ALT_LABEL_TOOLS_taskStatus:${taskId}`,
+    clients: 'clients',
+    releases: (clientId: string) => `releases:${clientId}`,
+    task: (taskId: string) => `task:${taskId}`,
+    taskStatus: (taskId: string) => `taskStatus:${taskId}`,
 };
 
 // Cache TTLs in seconds
 export const CACHE_TTL = {
     clients: 60 * 15, // 15 minutes
     releases: 60 * 10, // 10 minutes
-    tasks: 60 * 5,    // 5 minutes
-    taskStatus: 60 * 5 // 5 minutes
+    task: 60 * 10,    // 10 minutes (same as releases)
+    taskStatus: 60 * 5, // 5 minutes
 };
 
 // Cache interface
@@ -56,7 +57,7 @@ export class CacheManager {
         return data;
     }
 
-    async invalidateCache(type: 'clients' | 'releases' | 'taskStatus', id?: string) {
+    async invalidateCache(type: 'clients' | 'releases' | 'task' | 'taskStatus', id?: string) {
         if (type === 'clients') {
             await this.kv.delete(CACHE_KEYS.clients);
             return;
@@ -65,6 +66,14 @@ export class CacheManager {
         if (id) {
             await this.kv.delete(CACHE_KEYS[type](id));
         }
+    }
+
+    async updateTask(task: ReleaseTask) {
+        const key = CACHE_KEYS.task(task.id);
+        await this.kv.put(key, JSON.stringify(task), {
+            expirationTtl: CACHE_TTL.task
+        });
+        console.log(`📝 Updated task cache: ${task.id}`);
     }
 }
 
@@ -79,9 +88,17 @@ export async function getCachedClients(
 export async function getCachedReleases(
     cacheManager: CacheManager,
     clientId: string,
-    fetchFn: () => Promise<Release[]>
-): Promise<Release[]> {
+    fetchFn: () => Promise<CachedRelease[]>
+): Promise<CachedRelease[]> {
     return cacheManager.getWithTTL(CACHE_KEYS.releases(clientId), CACHE_TTL.releases, fetchFn);
+}
+
+export async function getCachedTask(
+    cacheManager: CacheManager,
+    taskId: string,
+    fetchFn: () => Promise<ReleaseTask>
+): Promise<ReleaseTask> {
+    return cacheManager.getWithTTL(CACHE_KEYS.task(taskId), CACHE_TTL.task, fetchFn);
 }
 
 export async function getCachedTaskStatus(
@@ -90,4 +107,14 @@ export async function getCachedTaskStatus(
     fetchFn: () => Promise<TaskCompletionStatus | null>
 ): Promise<TaskCompletionStatus | null> {
     return cacheManager.getWithTTL(CACHE_KEYS.taskStatus(taskId), CACHE_TTL.taskStatus, fetchFn);
+}
+
+export async function getCachedTasks(
+    cacheManager: CacheManager,
+    taskIds: string[],
+    fetchFn: (taskId: string) => Promise<ReleaseTask>
+): Promise<ReleaseTask[]> {
+    return Promise.all(taskIds.map(taskId =>
+        getCachedTask(cacheManager, taskId, () => fetchFn(taskId))
+    ));
 } 

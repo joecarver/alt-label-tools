@@ -9,6 +9,7 @@ export interface Release {
     catalogNumber: string;
     artist: string;
     tasks: ReleaseTask[];
+    taskIds?: string[]; // Optional for backward compatibility
     status?: CompletionStatus;
     labelId: LabelClient["id"];
     notionUrl: string;
