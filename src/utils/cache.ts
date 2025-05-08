@@ -35,13 +35,21 @@ export class CacheManager {
         ttl: number,
         fetchFn: () => Promise<T>
     ): Promise<T> {
-        const cached = await this.kv.get<T>(key);
+        const cached = await this.kv.get<string>(key);
         if (cached) {
-            return cached;
+            try {
+                const parsed = JSON.parse(cached) as T;
+                console.log(`📦 Cache HIT: ${key}`);
+                return parsed;
+            } catch (error) {
+                console.error(`Error parsing cached data for ${key}:`, error);
+                // If parsing fails, continue to fetch fresh data
+            }
         }
 
+        console.log(`❌ Cache MISS: ${key}`);
         const data = await fetchFn();
-        await this.kv.put(key, data, {
+        await this.kv.put(key, JSON.stringify(data), {
             expirationTtl: ttl
         });
 
@@ -65,14 +73,7 @@ export async function getCachedClients(
     cacheManager: CacheManager,
     fetchFn: () => Promise<LabelClient[]>
 ): Promise<LabelClient[]> {
-    const cached = await cacheManager.getWithTTL(CACHE_KEYS.clients, CACHE_TTL.clients, async () => {
-        console.log('❌ Cache MISS: Clients');
-        return fetchFn();
-    });
-    if (cached) {
-        console.log('📦 Cache HIT: Clients');
-    }
-    return cached;
+    return cacheManager.getWithTTL(CACHE_KEYS.clients, CACHE_TTL.clients, fetchFn);
 }
 
 export async function getCachedReleases(
@@ -80,27 +81,13 @@ export async function getCachedReleases(
     clientId: string,
     fetchFn: () => Promise<Release[]>
 ): Promise<Release[]> {
-    const cached = await cacheManager.getWithTTL(CACHE_KEYS.releases(clientId), CACHE_TTL.releases, async () => {
-        console.log(`❌ Cache MISS: Releases for client ${clientId}`);
-        return fetchFn();
-    });
-    if (cached) {
-        console.log(`📦 Cache HIT: Releases for client ${clientId}`);
-    }
-    return cached;
+    return cacheManager.getWithTTL(CACHE_KEYS.releases(clientId), CACHE_TTL.releases, fetchFn);
 }
 
 export async function getCachedTaskStatus(
     cacheManager: CacheManager,
     taskId: string,
-    fetchFn: () => Promise<TaskCompletionStatus>
-): Promise<TaskCompletionStatus> {
-    const cached = await cacheManager.getWithTTL(CACHE_KEYS.taskStatus(taskId), CACHE_TTL.taskStatus, async () => {
-        console.log(`❌ Cache MISS: Task status for task ${taskId}`);
-        return fetchFn();
-    });
-    if (cached) {
-        console.log(`📦 Cache HIT: Task status for task ${taskId}`);
-    }
-    return cached;
+    fetchFn: () => Promise<TaskCompletionStatus | null>
+): Promise<TaskCompletionStatus | null> {
+    return cacheManager.getWithTTL(CACHE_KEYS.taskStatus(taskId), CACHE_TTL.taskStatus, fetchFn);
 } 
