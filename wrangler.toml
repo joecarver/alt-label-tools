@@ -11,15 +11,12 @@ PRODUCTION_URL = "https://alt-label-tools.pages.dev"
 YARN_VERSION = "1"
 NODE_VERSION = "22.14.0"
 GOOGLE_SERVICE_ACCOUNT_EMAIL="alt-frontend@n8n-v2-454309.iam.gserviceaccount.com"
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-GOOGLE_SERVICE_ACCOUNT_EMAIL=
-GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY=
-GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_ID=
-NOTION_API_KEY=
-NOTION_DATABASE_ID=
-N8N_WEBHOOK_URL=
-N8N_API_KEY=
+
+# Development configuration
+[dev]
+port = 8787
+local_protocol = "http"
+upstream_protocol = "http"
 
 [[kv_namespaces]]
 binding = "ALT_LABEL_TOOLS_SESSION"
