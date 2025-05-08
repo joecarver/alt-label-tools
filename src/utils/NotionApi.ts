@@ -8,10 +8,11 @@ import { getTaskCompletionStatus } from "@/utils/getTaskCompletionStatus";
 import { getDueDateStatus } from "@/utils/getDueDateStatus";
 import { isDetectableTask } from "@/utils/isDetectableTask";
 import { getFolderId } from './drive';
-import { getEnv } from './env';
+import { getSecret } from 'astro:env/server';
 
+console.log('getSecret', getSecret('NOTION_API_KEY'));
 const notion = new Client({
-    auth: getEnv('NOTION_API_KEY'),
+    auth: getSecret('NOTION_API_KEY'),
 });
 
 const cachedReleases: Record<string, Release[]> = {};

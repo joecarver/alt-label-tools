@@ -1,12 +1,12 @@
 import type { FileInfo } from '@/types/FileInfo';
-import { getEnv } from './env';
+import { getSecret } from 'astro:env/server';
 
 // Cache for storing folder paths to their IDs
 const folderIdCache: Record<string, string> = {};
 
 // Service account credentials
-const serviceAccountEmail = getEnv('GOOGLE_SERVICE_ACCOUNT_EMAIL');
-const serviceAccountKey = getEnv('GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY');
+const serviceAccountEmail = getSecret('GOOGLE_SERVICE_ACCOUNT_EMAIL');
+const serviceAccountKey = getSecret('GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY');
 
 // Format the private key by replacing literal \n with actual newlines
 const formatPrivateKey = (key: string) => {
@@ -21,7 +21,7 @@ async function generateServiceAccountToken() {
     const header = {
         alg: 'RS256',
         typ: 'JWT',
-        kid: getEnv('GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_ID')
+        kid: getSecret('GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_ID')
     };
 
     const claim = {

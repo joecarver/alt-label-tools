@@ -26,3 +26,5 @@ pnpm-debug.log*
 secrets/
 
 .wrangler/
+
+.dev.vars

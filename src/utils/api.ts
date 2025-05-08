@@ -1,8 +1,8 @@
 import { Client } from '@notionhq/client';
-import { getEnv } from './env';
+import { getSecret } from 'astro:env/server';
 
 const notion = new Client({
-    auth: getEnv('NOTION_API_KEY'),
+    auth: getSecret('NOTION_API_KEY'),
 });
 
 export interface ScheduleItem {
@@ -21,7 +21,7 @@ export interface WorkflowItem {
 
 export async function getScheduleData(): Promise<ScheduleItem[]> {
     try {
-        const databaseId = getEnv('NOTION_DATABASE_ID');
+        const databaseId = getSecret('NOTION_DATABASE_ID');
         if (!databaseId) {
             throw new Error('NOTION_DATABASE_ID is not set');
         }
@@ -44,8 +44,8 @@ export async function getScheduleData(): Promise<ScheduleItem[]> {
 
 export async function getWorkflowData(): Promise<WorkflowItem[]> {
     try {
-        const webhookUrl = getEnv('N8N_WEBHOOK_URL');
-        const apiKey = getEnv('N8N_API_KEY');
+        const webhookUrl = getSecret('N8N_WEBHOOK_URL');
+        const apiKey = getSecret('N8N_API_KEY');
 
         if (!webhookUrl || !apiKey) {
             throw new Error('N8N_WEBHOOK_URL or N8N_API_KEY is not set');

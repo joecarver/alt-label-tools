@@ -1,4 +1,4 @@
-import { getEnv } from './env';
+import { getSecret } from 'astro:env/server';
 
 // List of allowed email addresses
 const ALLOWED_EMAILS = [
@@ -8,8 +8,8 @@ const ALLOWED_EMAILS = [
 
 // Get the base URL for the current environment
 const getBaseUrl = () => {
-    if (getEnv('NODE_ENV') === 'production') {
-        const url = getEnv('PRODUCTION_URL');
+    if (getSecret('NODE_ENV') === 'production') {
+        const url = getSecret('PRODUCTION_URL');
         if (!url) {
             throw new Error('PRODUCTION_URL environment variable is not set');
         }
@@ -27,7 +27,7 @@ const USER_SCOPES = [
 export function generateAuthUrl(): string {
     const baseUrl = getBaseUrl();
     const redirectUri = `${baseUrl}/api/auth`;
-    const clientId = getEnv('GOOGLE_CLIENT_ID');
+    const clientId = getSecret('GOOGLE_CLIENT_ID');
 
     if (!clientId) {
         throw new Error('GOOGLE_CLIENT_ID environment variable is not set');
@@ -51,8 +51,8 @@ export function generateAuthUrl(): string {
 export async function getTokens(code: string) {
     const baseUrl = getBaseUrl();
     const redirectUri = `${baseUrl}/api/auth`;
-    const clientId = getEnv('GOOGLE_CLIENT_ID');
-    const clientSecret = getEnv('GOOGLE_CLIENT_SECRET');
+    const clientId = getSecret('GOOGLE_CLIENT_ID');
+    const clientSecret = getSecret('GOOGLE_CLIENT_SECRET');
 
     if (!clientId || !clientSecret) {
         throw new Error('GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET environment variables are not set');
