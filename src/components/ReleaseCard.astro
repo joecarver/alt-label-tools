@@ -1,11 +1,8 @@
 ---
-import { Card, Text, Flex, Badge } from "@radix-ui/themes";
+import { Card, Text, Flex, Badge, Spinner } from "@radix-ui/themes";
 import TaskList from "./TaskList.astro";
-import { type ReleaseTask } from "@/types/ReleaseTask";
-import { CompletionStatus } from "@/types/CompletionStatus";
 import type { Release } from "@/types/Release";
-import { formatSingleDate } from "@/utils/date";
-import { BadgeColor } from "@/types/BadgeColor";
+
 import LinkButton from "./LinkButton.astro";
 
 interface Props {
@@ -15,29 +12,6 @@ interface Props {
 
 const { release, clientName } = Astro.props;
 
-const getReleaseSummary = (tasks: ReleaseTask[]) => {
-    const totalTasks = tasks.length;
-    const completedTasks = tasks.filter(
-        (task) =>
-            task.status === CompletionStatus.DONE_DETECTED ||
-            task.status === CompletionStatus.DONE_MANUALLY,
-    ).length;
-
-    return {
-        totalTasks,
-        completedTasks,
-        color:
-            completedTasks === totalTasks
-                ? BadgeColor.GREEN
-                : completedTasks > totalTasks / 2
-                  ? BadgeColor.YELLOW
-                  : completedTasks > 0
-                    ? BadgeColor.ORANGE
-                    : BadgeColor.RED,
-    };
-};
-
-const summary = getReleaseSummary(release.tasks);
 const folderUrl = `https://drive.google.com/drive/folders/${release.folderId}`;
 ---
 
@@ -50,21 +24,25 @@ const folderUrl = `https://drive.google.com/drive/folders/${release.folderId}`;
                         {release.name}
                     </Text>
                     {release.folderId && <LinkButton url={folderUrl} />}
-
-                    <Badge size="2" color="blue" variant="soft">
-                        Release Date: {formatSingleDate(release.releaseDate)}
-                    </Badge>
                 </Flex>
             </Flex>
         </Flex>
-
-        <details>
-            <summary>
-                <Badge size="2" color={summary.color} variant="soft">
-                    {summary.completedTasks} / {summary.totalTasks} tasks completed
-                </Badge>
-            </summary>
-            <TaskList clientName={clientName} tasks={release.tasks} />
-        </details>
+        <TaskList
+            clientName={clientName}
+            catalogNumber={release.catalogNumber}
+            releaseId={release.id}
+            server:defer
+        >
+            <Badge
+                color="gray"
+                variant="soft"
+                size="2"
+                style={{ width: "fit-content" }}
+                slot="fallback"
+            >
+                <Spinner size="1" />
+                Loading tasks...
+            </Badge>
+        </TaskList>
     </Flex>
 </Card>

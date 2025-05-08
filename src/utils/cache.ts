@@ -1,7 +1,7 @@
 import type { CachedRelease } from "@/types/CachedRelease";
 import type { LabelClient } from "@/types/LabelClient";
 import type { ReleaseTask } from "@/types/ReleaseTask";
-import type { TaskCompletionStatus } from "@/types/TaskCompletionStatus";
+import type { TaskStatus } from "@/types/TaskCompletionStatus";
 
 
 // Cache keys structure
@@ -104,8 +104,8 @@ export async function getCachedTask(
 export async function getCachedTaskStatus(
     cacheManager: CacheManager,
     taskId: string,
-    fetchFn: () => Promise<TaskCompletionStatus | null>
-): Promise<TaskCompletionStatus | null> {
+    fetchFn: () => Promise<TaskStatus | null>
+): Promise<TaskStatus | null> {
     return cacheManager.getWithTTL(CACHE_KEYS.taskStatus(taskId), CACHE_TTL.taskStatus, fetchFn);
 }
 

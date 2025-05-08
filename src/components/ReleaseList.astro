@@ -1,5 +1,5 @@
 ---
-import { getReleases } from "@/utils/NotionApi";
+import { getReleases } from "@/utils/NotionApi/api";
 import { Flex } from "@radix-ui/themes";
 import ReleaseCard from "./ReleaseCard.astro";
 import { getAuthTokenFromCookies } from "@/utils/auth";
@@ -10,7 +10,7 @@ const authToken = getAuthTokenFromCookies(Astro.cookies);
 if (!authToken) {
     throw new Error("No auth token found");
 }
-const releases = await getReleases(clientId, clientName, authToken);
+const releases = await getReleases(clientId, clientName);
 ---
 
 <Flex direction="column" gap="4">

@@ -1,4 +1,4 @@
-import { initializeCache } from './utils/NotionApi';
+import { initializeCache } from './utils/NotionApi/api';
 import type { APIContext } from 'astro';
 import { verifyToken } from './utils/auth';
 import { getSecret } from 'astro:env/server';

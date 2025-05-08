@@ -1,29 +1,55 @@
 ---
-import { Box, Flex, Separator, Text } from "@radix-ui/themes";
+import { Badge, Box, Flex, Separator, Text } from "@radix-ui/themes";
 import TaskItem from "./TaskItem.astro";
-import type { ReleaseTask } from "@/types/ReleaseTask";
+
+import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
+import { getTasksFromNotion } from "@/utils/NotionApi/api";
+import { getTaskSummary } from "@/utils/getTaskSummary";
+import { formatSingleDate } from "@/utils/date";
 
 interface Props {
-    tasks: ReleaseTask[];
+    releaseId: string;
     clientName: string;
+    catalogNumber: string;
 }
 
-const { tasks, clientName } = Astro.props;
+const { releaseId, clientName, catalogNumber } = Astro.props;
+
+const tasks = await getTasksFromNotion(releaseId, clientName, catalogNumber);
+const taskSummary = getTaskSummary(tasks);
+
+const releaseDate =
+    tasks.find((task) => task.name === ReleaseTaskName.ReleaseDate)
+        ?.startDate || "";
 ---
 
-<Box
-    style={{ padding: "0.5rem 1rem", backgroundColor: "var(--gray-2)" }}
-    className="task-list"
->
-    <Flex direction="column" gap="4">
-        {
-            tasks
-                .sort(
-                    (a, b) =>
-                        new Date(a.startDate).getTime() -
-                        new Date(b.startDate).getTime(),
-                )
-                .map((task) => <TaskItem clientName={clientName} task={task} />)
-        }
-    </Flex>
-</Box>
+<details>
+    <summary>
+        <Badge size="2" color={taskSummary.color} variant="soft">
+            {taskSummary.completedTasks} / {taskSummary.totalTasks} tasks completed
+        </Badge>
+
+        <Badge size="2" color="blue" variant="soft">
+            Release Date: {releaseDate ? formatSingleDate(releaseDate) : "TBD"}
+        </Badge>
+    </summary>
+
+    <Box
+        style={{ padding: "0.5rem 1rem", backgroundColor: "var(--gray-2)" }}
+        className="task-list"
+    >
+        <Flex direction="column" gap="4">
+            {
+                tasks
+                    .sort(
+                        (a, b) =>
+                            new Date(a.startDate).getTime() -
+                            new Date(b.startDate).getTime(),
+                    )
+                    .map((task) => (
+                        <TaskItem clientName={clientName} task={task} />
+                    ))
+            }
+        </Flex>
+    </Box>
+</details>

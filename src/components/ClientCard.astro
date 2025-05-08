@@ -1,8 +1,9 @@
 ---
 import { Card, Flex, Text, Box } from "@radix-ui/themes";
 import LinkButton from "./LinkButton.astro";
-import Releases from "./releases.astro";
+import ReleaseList from "./ReleaseList.astro";
 import type { LabelClient } from "@/types/LabelClient";
+import LoadingSpinner from "./LoadingSpinner.astro";
 
 interface Props {
     client: LabelClient;
@@ -24,7 +25,13 @@ const { client } = Astro.props;
             </Flex>
         </Flex>
         <Box>
-            <Releases clientId={client.id} clientName={client.name} />
+            <ReleaseList
+                clientId={client.id}
+                clientName={client.name}
+                server:defer
+            >
+                <LoadingSpinner text="Loading releases..." slot="fallback" />
+            </ReleaseList>
         </Box>
     </Flex>
 </Card>

@@ -33,9 +33,6 @@ export function generateAuthUrl(): string {
         throw new Error('GOOGLE_CLIENT_ID environment variable is not set');
     }
 
-    console.log('Generating auth URL with redirect URI:', redirectUri);
-    console.log('Client ID:', clientId);
-
     const params = new URLSearchParams({
         client_id: clientId,
         redirect_uri: redirectUri,
@@ -57,8 +54,6 @@ export async function getTokens(code: string) {
     if (!clientId || !clientSecret) {
         throw new Error('GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET environment variables are not set');
     }
-
-    console.log('Getting tokens with redirect URI:', redirectUri);
 
     const params = new URLSearchParams({
         code,

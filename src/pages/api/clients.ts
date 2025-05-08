@@ -1,4 +1,4 @@
-import { getClients } from "@/utils/NotionApi";
+import { getClients } from "@/utils/NotionApi/api";
 
 export async function GET() {
     const clients = await getClients();

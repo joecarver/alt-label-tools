@@ -1,0 +1,36 @@
+---
+const { text = "Loading..." } = Astro.props;
+---
+
+<div class="loading-spinner">
+    <div class="spinner"></div>
+    <span class="loading-text">{text}</span>
+</div>
+
+<style>
+    .loading-spinner {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 1rem;
+    }
+
+    .spinner {
+        width: 2rem;
+        height: 2rem;
+        border: 3px solid rgb(var(--gray-200));
+        border-top: 3px solid rgb(var(--primary));
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>

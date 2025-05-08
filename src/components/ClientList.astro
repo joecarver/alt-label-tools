@@ -1,0 +1,24 @@
+---
+import { Grid, Container, Box } from "@radix-ui/themes";
+import ClientCard from "./ClientCard.astro";
+
+import { getClients } from "@/utils/NotionApi/api";
+import type { LabelClient } from "@/types/LabelClient";
+import LoadingSpinner from "./LoadingSpinner.astro";
+
+const clients = await getClients();
+---
+
+<Container size="3">
+    <Grid columns="1" gap="6">
+        <Box>
+            <Grid columns="1" gap="4">
+                {
+                    clients.map((client: LabelClient) => (
+                        <ClientCard client={client} />
+                    ))
+                }
+            </Grid>
+        </Box>
+    </Grid>
+</Container>

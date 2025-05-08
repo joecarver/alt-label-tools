@@ -2,9 +2,9 @@
 import { DueDateStatus } from "@/types/DueDateStatus";
 import { parseISO } from "date-fns";
 
-export const getDueDateStatus = (endDate: string, isCompleted: boolean): DueDateStatus | null => {
+export const getDueDateStatus = (endDate: string, isCompleted: boolean): DueDateStatus => {
     if (isCompleted) {
-        return null;
+        return DueDateStatus.DONE;
     }
 
     const today = new Date();

@@ -24,7 +24,9 @@ const { task } = Astro.props;
         <Flex gap="1" wrap="wrap">
             <Badge
                 size="2"
-                color={getDueDateStatusColor(task.dueDateStatus || undefined)}
+                color={getDueDateStatusColor(
+                    task.taskStatus.dueDateStatus || undefined,
+                )}
                 variant="soft"
             >
                 <ClockIcon />Due: {
@@ -37,7 +39,8 @@ const { task } = Astro.props;
                 taskStatus={task.taskStatus}
             />
             {
-                task.taskStatus?.status === CompletionStatus.DONE_DETECTED &&
+                task.taskStatus?.completionStatus ===
+                    CompletionStatus.DONE_DETECTED &&
                     task.taskStatus?.fileInfo?.webViewLink && (
                         <LinkButton
                             url={task.taskStatus.fileInfo.webViewLink}

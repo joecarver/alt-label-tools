@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { updateTaskCompletion } from '@/utils/NotionApi';
+import { updateTaskCompletion } from '@/utils/NotionApi/api';
 
 export const POST: APIRoute = async ({ request }) => {
     try {
