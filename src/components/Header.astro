@@ -1,0 +1,53 @@
+---
+import { Text } from "@radix-ui/themes";
+import { getAuthTokenFromCookies } from "@/utils/auth";
+import { verifyToken } from "@/utils/auth";
+import Avatar from "./Avatar.astro";
+
+// Get user info
+const token = getAuthTokenFromCookies(Astro.cookies);
+let userInfo = null;
+if (token) {
+    userInfo = await verifyToken(token);
+    console.log("User info:", {
+        name: userInfo?.name,
+        email: userInfo?.email,
+        picture: userInfo?.picture,
+    });
+}
+---
+
+<header>
+    <div class="header-content">
+        <Text as="div" className="header-title"
+            >ALT ~ Automated Label Tools</Text
+        >
+        {userInfo && <Avatar userInfo={userInfo} />}
+    </div>
+</header>
+
+<style>
+    header {
+        background: white;
+        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+        padding: 1rem 0;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .header-content {
+        margin: 0 auto;
+        padding: 0 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .header-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: rgb(var(--gray-900));
+        margin: 0;
+    }
+</style>

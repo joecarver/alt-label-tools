@@ -1,0 +1,140 @@
+---
+interface Props {
+    userInfo: {
+        name?: string | null;
+        email?: string | null;
+        picture?: string | null;
+    };
+}
+
+const { userInfo } = Astro.props;
+---
+
+<div class="avatar-container">
+    <details class="dropdown">
+        <summary class="avatar">
+            <img
+                src={userInfo.picture}
+                alt={userInfo.name || userInfo.email || "User"}
+                onerror="this.onerror=null; this.src=''; this.classList.add('fallback')"
+            />
+            <div class="fallback">
+                {userInfo.name?.charAt(0) || userInfo.email?.charAt(0) || "U"}
+            </div>
+        </summary>
+        <div class="dropdown-content">
+            <div class="user-info">
+                {userInfo.name && <div class="name">{userInfo.name}</div>}
+                {userInfo.email && <div class="email">{userInfo.email}</div>}
+            </div>
+            <div class="divider"></div>
+            <form action="/api/auth/logout" method="POST">
+                <button type="submit" class="logout-button"> Sign out </button>
+            </form>
+        </div>
+    </details>
+</div>
+
+<style>
+    .avatar-container {
+        position: relative;
+    }
+
+    .dropdown {
+        position: relative;
+    }
+
+    .dropdown summary {
+        list-style: none;
+        cursor: pointer;
+    }
+
+    .dropdown summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        overflow: hidden;
+        background: var(--blue-9);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 500;
+        position: relative;
+        transition: transform 0.2s ease;
+    }
+
+    .dropdown[open] .avatar {
+        transform: scale(1.05);
+    }
+
+    .avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar .fallback {
+        display: none;
+        font-size: 1.2rem;
+    }
+
+    .avatar img.fallback + .fallback {
+        display: flex;
+    }
+
+    .dropdown-content {
+        position: absolute;
+        right: 0;
+        top: calc(100% + 8px);
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        min-width: 240px;
+        padding: 12px;
+        z-index: 100;
+        text-align: right;
+    }
+
+    .user-info {
+        padding: 8px;
+    }
+
+    .name {
+        font-weight: 600;
+        color: var(--gray-12);
+        margin-bottom: 4px;
+    }
+
+    .email {
+        font-size: 0.875rem;
+        color: var(--gray-11);
+    }
+
+    .divider {
+        height: 1px;
+        background: var(--gray-5);
+        margin: 8px 0;
+    }
+
+    .logout-button {
+        width: 100%;
+        padding: 8px 12px;
+        border: none;
+        background: none;
+        color: var(--red-11);
+        font-size: 0.875rem;
+        text-align: right;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+    }
+
+    .logout-button:hover {
+        background: var(--red-3);
+    }
+</style>
