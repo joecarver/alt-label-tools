@@ -3,8 +3,8 @@ import type { APIContext } from 'astro';
 import { verifyToken } from './utils/auth';
 import { getSecret } from 'astro:env/server';
 export async function onRequest(context: APIContext, next: () => Promise<Response>) {
-    // Initialize cache for all requests
-    const kv = getSecret("ALT_LABEL_TOOLS_METADATA") as unknown as KVNamespace;
+    // @ts-ignore
+    const kv = context.locals.runtime.env.ALT_LABEL_TOOLS_METADATA as unknown as KVNamespace;
     if (kv) {
         initializeCache(kv);
     }
