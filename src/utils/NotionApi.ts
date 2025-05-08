@@ -1,7 +1,7 @@
 import { Client } from '@notionhq/client';
 import type { LabelClient } from "@/types/LabelClient";
 import type { Release } from "@/types/Release";
-import type { BlockObjectResponse, DatabaseObjectResponse, PageObjectResponse, TitlePropertyItemObjectResponse, DatePropertyItemObjectResponse, RichTextItemResponse } from '@notionhq/client/build/src/api-endpoints';
+import type { BlockObjectResponse, PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 import { CompletionStatus } from "@/types/CompletionStatus";
 import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
 import { getTaskCompletionStatus } from "@/utils/getTaskCompletionStatus";
