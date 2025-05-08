@@ -1,7 +1,18 @@
 ---
 import { getAuthTokenFromCookies } from "@/utils/auth";
 import { verifyToken } from "@/utils/auth";
-import LoginComponent from "../components/Login";
+import {
+    Box,
+    Button,
+    Flex,
+    Heading,
+    Link,
+    Text,
+    Theme,
+} from "@radix-ui/themes";
+import "@radix-ui/themes/styles.css";
+import { BsGoogle } from "react-icons/bs";
+import { FaGoogle } from "react-icons/fa";
 
 // Check if user is already authenticated
 const token = getAuthTokenFromCookies(Astro.cookies);
@@ -15,6 +26,10 @@ if (token) {
         console.error("Token verification failed:", error);
     }
 }
+
+// Get the auth URL server-side
+const response = await fetch(`${Astro.url.origin}/api/auth`);
+const { authUrl } = await response.json();
 ---
 
 <!doctype html>
@@ -23,9 +38,64 @@ if (token) {
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Login - Alt Label Tools</title>
-        <script src="https://cdn.tailwindcss.com"></script>
     </head>
     <body>
-        <LoginComponent client:load />
+        <Theme>
+            <Box className="login-container">
+                <Flex direction="column" gap="4" className="login-card">
+                    <Heading as="h1" size="9"> ALT </Heading>
+                    <Heading as="h2" size="4"> Automated Label Tools </Heading>
+
+                    <Link href={authUrl}>
+                        <Button
+                            type="button"
+                            color="blue"
+                            variant="surface"
+                            size="4"
+                            style={{
+                                cursor: "pointer",
+                            }}
+                        >
+                            <FaGoogle /> Sign in with Google
+                        </Button>
+                    </Link>
+                </Flex>
+            </Box>
+        </Theme>
     </body>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f9fafb;
+        }
+
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            max-width: 28rem;
+            width: 100%;
+            padding: 2rem;
+            background-color: rgb(248, 248, 248);
+            border-radius: 0.5rem;
+            box-shadow:
+                0 4px 6px -1px rgb(0 0 0 / 0.1),
+                0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        .login-header {
+            text-align: center;
+        }
+
+        .login-button {
+            width: 100%;
+        }
+    </style>
 </html>
