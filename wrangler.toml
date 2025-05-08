@@ -1,0 +1,7 @@
+name = "alt-label-tools"
+compatibility_date = "2024-01-01"
+
+[[kv_namespaces]]
+binding = "ALT_LABEL_TOOLS_SESSION"
+id = "486f471ab5be48df802ef5cec49d9235"
+preview_id = "0727860cf16d4f4b8e3ac66a1597472a" 

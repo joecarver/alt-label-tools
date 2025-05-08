@@ -8,7 +8,9 @@ import cloudflare from '@astrojs/cloudflare';
 export default defineConfig({
     integrations: [react()],
     output: "server",
-    adapter: cloudflare(),
+    adapter: cloudflare({
+        sessionKVBindingName: 'ALT_LABEL_TOOLS_SESSION',
+    }),
     experimental: {
         session: true,
     },
