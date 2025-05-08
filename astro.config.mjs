@@ -14,4 +14,40 @@ export default defineConfig({
     experimental: {
         session: true,
     },
+    vite: {
+        ssr: {
+            external: [
+                'events',
+                'child_process',
+                'fs',
+                'os',
+                'path',
+                'querystring',
+                'stream',
+                'https',
+                'url',
+                'util',
+                'crypto',
+                'net',
+                'tls',
+                'assert',
+                'buffer',
+                'http',
+                'http2',
+                'zlib',
+                'process'
+            ]
+        },
+        build: {
+            rollupOptions: {
+                output: {
+                    manualChunks: {
+                        'googleapis': ['googleapis'],
+                        'react-vendor': ['react', 'react-dom'],
+                        'radix': ['@radix-ui/themes', '@radix-ui/react-icons'],
+                    }
+                }
+            }
+        }
+    }
 });

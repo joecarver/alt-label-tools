@@ -9,11 +9,6 @@ const token = getAuthTokenFromCookies(Astro.cookies);
 let userInfo = null;
 if (token) {
     userInfo = await verifyToken(token);
-    console.log("User info:", {
-        name: userInfo?.name,
-        email: userInfo?.email,
-        picture: userInfo?.picture,
-    });
 }
 ---
 

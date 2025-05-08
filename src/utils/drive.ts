@@ -1,7 +1,8 @@
-import { google } from 'googleapis';
 import type { drive_v3 } from 'googleapis';
 import { getAuthClient } from './auth';
 import type { FileInfo } from '@/types/FileInfo';
+import { drive as driveClient } from 'googleapis/build/src/apis/drive';
+
 
 // Cache for storing folder paths to their IDs
 const folderIdCache: Record<string, string> = {};
@@ -20,7 +21,7 @@ export function convertToFileInfo(file: drive_v3.Schema$File): FileInfo | null {
 }
 
 export async function listFilesInFolder(folderId: string): Promise<FileInfo[]> {
-    const drive = google.drive('v3');
+    const drive = driveClient("v3");
     const auth = getAuthClient();
 
     try {
@@ -43,7 +44,7 @@ export async function getFileInfo(folderId: string | null, fileName: string): Pr
         return null;
     }
 
-    const drive = google.drive('v3');
+    const drive = driveClient("v3");
     const auth = getAuthClient();
 
     try {
@@ -78,7 +79,7 @@ export async function getFolderId(folderName: string): Promise<string | null> {
         return folderIdCache[folderName];
     }
 
-    const drive = google.drive('v3');
+    const drive = driveClient("v3");
     const auth = getAuthClient();
 
     // If the folderName contains slashes, it's a path

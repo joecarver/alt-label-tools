@@ -1,4 +1,5 @@
-import { google } from 'googleapis';
+
+import { oauth2 } from 'googleapis/build/src/apis/oauth2';
 import { JWT, OAuth2Client } from 'google-auth-library';
 
 // List of allowed email addresses
@@ -74,11 +75,11 @@ export function getAuthTokenFromCookies(cookies: any): string | null {
 // Verify user session token and check if email is allowed
 export async function verifyToken(token: string) {
     try {
-        const oauth2 = google.oauth2('v2');
+        const oauth2Helper = oauth2('v2');
         const auth = new OAuth2Client();
         auth.setCredentials({ access_token: token });
 
-        const userInfo = await oauth2.userinfo.get({ auth });
+        const userInfo = await oauth2Helper.userinfo.get({ auth });
 
         // Check if the user's email is in the allowed list
         if (!userInfo.data.email || !ALLOWED_EMAILS.includes(userInfo.data.email)) {
