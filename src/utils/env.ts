@@ -26,7 +26,7 @@ export function getEnv(key: string, defaultValue?: string): string | undefined {
     }
 
     // Try Astro's import.meta.env
-    console.log('import.meta', import.meta);
+    console.log('import.meta', import.meta.env);
     if (typeof import.meta !== 'undefined' && import.meta.env?.[key]) {
         return import.meta.env[key];
     }
