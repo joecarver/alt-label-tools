@@ -7,7 +7,9 @@ const ALLOWED_EMAILS = [
 // Get the base URL for the current environment
 const getBaseUrl = () => {
     if (import.meta.env.NODE_ENV === 'production') {
-        return import.meta.env.PRODUCTION_URL || 'https://your-production-url.com';
+        const url = import.meta.env.PRODUCTION_URL;
+        console.log('Production URL:', url);
+        return url;
     }
     return 'http://localhost:4321';
 };
@@ -19,9 +21,14 @@ const USER_SCOPES = [
 ];
 
 export function generateAuthUrl(): string {
+    const baseUrl = getBaseUrl();
+    const redirectUri = `${baseUrl}/api/auth`;
+    console.log('Generating auth URL with redirect URI:', redirectUri);
+    console.log('Client ID:', import.meta.env.GOOGLE_CLIENT_ID);
+
     const params = new URLSearchParams({
         client_id: import.meta.env.GOOGLE_CLIENT_ID,
-        redirect_uri: `${getBaseUrl()}/api/auth`,
+        redirect_uri: redirectUri,
         response_type: 'code',
         scope: USER_SCOPES.join(' '),
         access_type: 'offline',
@@ -32,11 +39,15 @@ export function generateAuthUrl(): string {
 }
 
 export async function getTokens(code: string) {
+    const baseUrl = getBaseUrl();
+    const redirectUri = `${baseUrl}/api/auth`;
+    console.log('Getting tokens with redirect URI:', redirectUri);
+
     const params = new URLSearchParams({
         code,
         client_id: import.meta.env.GOOGLE_CLIENT_ID,
         client_secret: import.meta.env.GOOGLE_CLIENT_SECRET,
-        redirect_uri: `${getBaseUrl()}/api/auth`,
+        redirect_uri: redirectUri,
         grant_type: 'authorization_code'
     });
 
@@ -49,7 +60,13 @@ export async function getTokens(code: string) {
     });
 
     if (!response.ok) {
-        throw new Error('Failed to get tokens');
+        const errorText = await response.text();
+        console.error('Token request failed:', {
+            status: response.status,
+            statusText: response.statusText,
+            error: errorText
+        });
+        throw new Error(`Failed to get tokens: ${errorText}`);
     }
 
     return response.json();
