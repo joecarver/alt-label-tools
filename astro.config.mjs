@@ -40,7 +40,10 @@ export default defineConfig({
                 'http',
                 'http2',
                 'zlib',
-                'process'
+                'process',
+                'node:events',
+                'node:process',
+                'node:util'
             ]
         },
         build: {
