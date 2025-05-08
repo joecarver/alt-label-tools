@@ -1,3 +1,7 @@
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 /**
  * Get an environment variable, trying multiple sources in order:
  * 1. Wrangler's env binding
