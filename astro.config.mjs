@@ -50,7 +50,6 @@ export default defineConfig({
             rollupOptions: {
                 output: {
                     manualChunks: {
-                        'googleapis': ['googleapis'],
                         'react-vendor': ['react', 'react-dom'],
                         'radix': ['@radix-ui/themes', '@radix-ui/react-icons'],
                     }
