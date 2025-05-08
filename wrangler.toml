@@ -11,18 +11,15 @@ PRODUCTION_URL = "https://alt-label-tools.pages.dev"
 YARN_VERSION = "1"
 NODE_VERSION = "22.14.0"
 GOOGLE_SERVICE_ACCOUNT_EMAIL="alt-frontend@n8n-v2-454309.iam.gserviceaccount.com"
-
-# Secret environment variables
-# These should be set using `wrangler secret put` command
-# wrangler secret put GOOGLE_CLIENT_ID
-# wrangler secret put GOOGLE_CLIENT_SECRET
-# wrangler secret put GOOGLE_SERVICE_ACCOUNT_EMAIL
-# wrangler secret put GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
-# wrangler secret put GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_ID
-# wrangler secret put NOTION_API_KEY
-# wrangler secret put NOTION_DATABASE_ID
-# wrangler secret put N8N_WEBHOOK_URL
-# wrangler secret put N8N_API_KEY
+GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET
+GOOGLE_SERVICE_ACCOUNT_EMAIL
+GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
+GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_ID
+NOTION_API_KEY
+NOTION_DATABASE_ID
+N8N_WEBHOOK_URL
+N8N_API_KEY
 
 [[kv_namespaces]]
 binding = "ALT_LABEL_TOOLS_SESSION"
