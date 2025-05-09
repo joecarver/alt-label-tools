@@ -88,7 +88,7 @@ async function convertNotionTaskToReleaseTask(
     const taskName = taskTitle as ReleaseTaskName;
     const isDetectable = isDetectableTask(taskName);
 
-    const taskStatus = await getTaskStatus(result.id, clientName, catalogNumber, taskName, completedAt, isDetectable);
+    const taskStatus = await getTaskStatus(result.id, clientName, catalogNumber, taskName, completedAt, isDetectable, date?.end || date?.start || null);
 
     return {
         id: result.id,

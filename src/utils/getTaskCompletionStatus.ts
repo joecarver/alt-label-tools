@@ -3,7 +3,7 @@ import { getFileInfo } from "./drive";
 import { ReleaseTaskName } from "@/types/ReleaseTask";
 import { getCompletionStatusColor } from "./getStatusColor";
 import type { TaskStatus } from "@/types/TaskCompletionStatus";
-import { DueDateStatus } from "@/types/DueDateStatus";
+
 import { getDueDateStatus } from "./getDueDateStatus";
 
 interface TaskCompletionParams {
@@ -21,7 +21,7 @@ export async function getTaskCompletionStatus({
     folderId,
     dueDate,
 }: TaskCompletionParams): Promise<TaskStatus> {
-    const dueDateStatus = dueDate ? getDueDateStatus(dueDate, !!completedAt) : DueDateStatus.UNKNOWN;
+    const dueDateStatus = getDueDateStatus(dueDate, !!completedAt);
 
     if (completedAt) {
         return {
