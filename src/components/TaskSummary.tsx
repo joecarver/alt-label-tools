@@ -1,8 +1,10 @@
-import { Badge } from "@radix-ui/themes";
+import { Badge, Flex } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import { formatSingleDate } from "@/utils/date";
 import { type ReleaseTask } from "@/types/ReleaseTask";
 import { getTaskSummary } from "@/utils/getTaskSummary";
+import { BiExpand } from "react-icons/bi";
+import { LuListTree } from "react-icons/lu";
 
 type BadgeColor = "green" | "yellow" | "ruby" | "gray" | "gold" | "bronze" | "brown" | "amber" | "orange" | "tomato" | "red" | "crimson" | "pink" | "plum" | "purple" | "violet" | "iris" | "indigo" | "blue" | "cyan" | "teal" | "jade" | "grass" | "mint" | "lime" | "sky";
 
@@ -47,13 +49,16 @@ export function TaskSummary({ releaseId, clientName, catalogNumber, initialTasks
 
     return (
         <div id={`task-summary-${releaseId}`} data-release-id={releaseId}>
-            <Badge size="2" color={taskSummary.color} variant="soft">
-                {taskSummary.completedTasks} / {taskSummary.totalTasks} tasks completed
-            </Badge>
+            <Flex gap="2">
+                <Badge size="2" color={taskSummary.color} variant="soft">
+                    <LuListTree size={16} />
+                    {taskSummary.completedTasks} / {taskSummary.totalTasks} tasks completed
+                </Badge>
 
-            <Badge size="2" color="blue" variant="soft">
-                Release Date: {taskSummary.releaseDate ? formatSingleDate(taskSummary.releaseDate) : "TBD"}
-            </Badge>
+                <Badge size="2" color="blue" variant="soft">
+                    Release Date: {taskSummary.releaseDate ? formatSingleDate(taskSummary.releaseDate) : "TBD"}
+                </Badge>
+            </Flex>
         </div>
     );
 } 
