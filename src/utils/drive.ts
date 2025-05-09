@@ -187,6 +187,12 @@ export async function getFileInfo(folderId: string | null, fileName: string): Pr
     }
 }
 
+interface DriveFolder {
+    id: string;
+    name: string;
+    parents: string[];
+}
+
 export async function getFolderId(folderName: string): Promise<string | null> {
     // Check cache first
     if (folderIdCache[folderName]) {
@@ -195,77 +201,101 @@ export async function getFolderId(folderName: string): Promise<string | null> {
 
     // If the folderName contains slashes, it's a path
     const pathParts = folderName.split('/').filter(part => part.trim() !== '');
+    if (pathParts.length === 0) {
+        return null;
+    }
 
-    // For the first part of the path, we need to search in shared folders
-    if (pathParts.length > 0) {
-        try {
-            const token = await generateServiceAccountToken();
+    try {
+        const token = await generateServiceAccountToken();
+        let currentFolderId: string | null = null;
+        let currentPath = '';
 
-            // First, find the root folder that was shared with the service account
-            const rootResponse = await fetch(
-                `https://www.googleapis.com/drive/v3/files?q=name+=+'${pathParts[0]}'+and+mimeType+=+'application/vnd.google-apps.folder'+and+trashed+=+false+and+sharedWithMe+=+true&fields=files(id)`,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+        // First, find the root folder that was shared with the service account
+        const rootResponse = await fetch(
+            `https://www.googleapis.com/drive/v3/files?q=name+=+'${pathParts[0]}'+and+mimeType+=+'application/vnd.google-apps.folder'+and+trashed+=+false+and+sharedWithMe+=+true&fields=files(id)`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
                 }
-            );
-
-            if (!rootResponse.ok) {
-                throw new Error('Failed to search for root folder');
             }
+        );
 
-            const rootData = await rootResponse.json();
-            if (!rootData.files?.length) {
+        if (!rootResponse.ok) {
+            if (rootResponse.status === 429) { // Rate limit error
+                console.warn('Rate limit hit, retrying after delay...');
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+                return getFolderId(folderName); // Retry the entire operation
+            }
+            throw new Error('Failed to search for root folder');
+        }
+
+        const rootData = await rootResponse.json();
+        if (!rootData.files?.length) {
+            return null;
+        }
+
+        currentFolderId = rootData.files[0].id;
+        if (!currentFolderId) {
+            return null;
+        }
+
+        currentPath = pathParts[0];
+        folderIdCache[currentPath] = currentFolderId;
+
+        // If there's only one part in the path, we're done
+        if (pathParts.length === 1) {
+            return currentFolderId;
+        }
+
+        // For the remaining parts, build a query that searches for all remaining folders at once
+        const remainingParts = pathParts.slice(1);
+        const folderNames = remainingParts.map(name => `name+=+'${name}'`).join('+or+');
+
+        const response = await fetch(
+            `https://www.googleapis.com/drive/v3/files?q=(${folderNames})+and+mimeType+=+'application/vnd.google-apps.folder'+and+trashed+=+false&fields=files(id,name,parents)`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
+
+        if (!response.ok) {
+            if (response.status === 429) { // Rate limit error
+                console.warn('Rate limit hit, retrying after delay...');
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+                return getFolderId(folderName); // Retry the entire operation
+            }
+            throw new Error('Failed to search for subfolders');
+        }
+
+        const data = await response.json();
+        if (!data.files?.length) {
+            return null;
+        }
+
+        // Build a map of folder names to their IDs and parents
+        const folderMap = new Map<string, DriveFolder>(
+            data.files.map((file: DriveFolder) => [file.name, file])
+        );
+
+        // Traverse the path using the map
+        for (let i = 1; i < pathParts.length; i++) {
+            const folderPart = pathParts[i];
+            currentPath += '/' + folderPart;
+
+            const folderInfo = folderMap.get(folderPart);
+            if (!folderInfo || !folderInfo.parents.includes(currentFolderId)) {
                 return null;
             }
 
-            let currentFolderId = rootData.files[0].id;
-            let currentPath = pathParts[0];
-
-            // Cache the root folder
+            currentFolderId = folderInfo.id;
             folderIdCache[currentPath] = currentFolderId;
-
-            // Now traverse the rest of the path
-            for (let i = 1; i < pathParts.length; i++) {
-                const folderPart = pathParts[i];
-                currentPath += '/' + folderPart;
-
-                // Check cache for this subpath
-                if (folderIdCache[currentPath]) {
-                    currentFolderId = folderIdCache[currentPath];
-                    continue;
-                }
-
-                const response = await fetch(
-                    `https://www.googleapis.com/drive/v3/files?q='${currentFolderId}'+in+parents+and+name+=+'${folderPart}'+and+mimeType+=+'application/vnd.google-apps.folder'+and+trashed+=+false&fields=files(id)`,
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
-                    }
-                );
-
-                if (!response.ok) {
-                    throw new Error('Failed to search for subfolder');
-                }
-
-                const data = await response.json();
-                if (!data.files?.length) {
-                    return null;
-                }
-
-                currentFolderId = data.files[0].id;
-                // Cache this subpath
-                folderIdCache[currentPath] = currentFolderId;
-            }
-
-            return currentFolderId;
-        } catch (error) {
-            console.error('Error searching for folders:', error);
-            throw error;
         }
-    }
 
-    return null;
+        return currentFolderId;
+    } catch (error) {
+        console.error('Error searching for folders:', error);
+        throw error;
+    }
 } 
