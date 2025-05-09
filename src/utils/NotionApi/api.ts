@@ -24,5 +24,4 @@ export function initializeCache(kv: any) {
 export const getClients = clientsModule.getClients;
 export const getReleases = releasesModule.getReleases;
 export const getTasksFromNotion = tasksModule.getTasksFromNotion;
-export const getTaskStatus = taskStatusModule.getTaskStatus;
 export const updateTaskCompletion = taskStatusModule.updateTaskCompletion; 

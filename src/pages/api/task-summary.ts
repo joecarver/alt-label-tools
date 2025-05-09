@@ -1,8 +1,7 @@
 import type { APIRoute } from 'astro';
-import { getTasksFromNotion } from '@/utils/NotionApi/api';
 import { getTaskSummary } from '@/utils/getTaskSummary';
-import { formatSingleDate } from '@/utils/date';
 import { ReleaseTaskName } from '@/types/ReleaseTask';
+import { getTasks } from '@/utils/NotionApi/tasks';
 
 export const GET: APIRoute = async ({ url }) => {
     const releaseId = url.searchParams.get('releaseId');
@@ -19,7 +18,8 @@ export const GET: APIRoute = async ({ url }) => {
     }
 
     try {
-        const tasks = await getTasksFromNotion(releaseId, clientName, catalogNumber);
+        const taskIds = url.searchParams.get('taskIds')?.split(';') || [];
+        const tasks = await getTasks(releaseId, taskIds, clientName, catalogNumber);
         const taskSummary = getTaskSummary(tasks);
         const releaseDate = tasks.find((task) => task.name === ReleaseTaskName.ReleaseDate)?.startDate || "";
 

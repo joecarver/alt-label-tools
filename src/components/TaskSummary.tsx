@@ -29,7 +29,7 @@ export function TaskSummary({ releaseId, clientName, catalogNumber, initialTasks
             if (customEvent.detail?.releaseId === releaseId) {
                 try {
                     const response = await fetch(
-                        `/api/task-summary?releaseId=${releaseId}&clientName=${clientName}&catalogNumber=${catalogNumber}`
+                        `/api/task-summary?releaseId=${releaseId}&taskIds=${initialTasks.map((task) => task.id).join(";")}&clientName=${clientName}&catalogNumber=${catalogNumber}`
                     );
                     const data = await response.json();
                     setTaskSummary(data);

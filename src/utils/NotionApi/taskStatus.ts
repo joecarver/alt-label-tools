@@ -1,6 +1,5 @@
 import type { TaskStatus } from "@/types/TaskCompletionStatus";
 import { getTaskCompletionStatus } from "@/utils/getTaskCompletionStatus";
-import { getCachedTaskStatus } from '../cache';
 import { ReleaseTaskName } from "@/types/ReleaseTask";
 import { getFolderId } from '../drive';
 import { notion, cacheManager } from './api';
@@ -28,20 +27,8 @@ export async function getTaskStatus(
         isDetectable,
     };
 
-    if (!cacheManager) {
-        const status = await getTaskCompletionStatus(params);
-        if (!status) {
-            throw new Error(`Failed to get task status for task ${taskId}`);
-        }
-        return status;
-    }
 
-    const status = await getCachedTaskStatus(
-        cacheManager,
-        taskId,
-        () => getTaskCompletionStatus(params)
-    );
-
+    const status = await getTaskCompletionStatus(params);
     if (!status) {
         throw new Error(`Failed to get task status for task ${taskId}`);
     }
@@ -72,7 +59,6 @@ export async function updateTaskCompletion(taskId: string, completedAt: string |
     // Invalidate relevant caches
     if (cacheManager) {
         // Invalidate the task status cache
-        await cacheManager.invalidateCache('taskStatus', taskId);
         await cacheManager.invalidateCache('task', taskId);
     }
 } 

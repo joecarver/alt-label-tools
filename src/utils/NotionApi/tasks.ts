@@ -3,7 +3,7 @@ import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
 import { isDetectableTask } from '../isDetectableTask';
 import { getTaskStatus } from './taskStatus';
 import { notion, cacheManager } from './api';
-import { getCachedTasks } from '../cache';
+import { getCachedTask } from '../cache';
 
 async function getTaskFromNotion(
     taskId: string,
@@ -29,27 +29,21 @@ export async function getTasksFromNotion(
         convertNotionTaskToReleaseTask(result, clientName, catalogNumber)
     ));
 
-    // Cache each task individually
-    const currentCacheManager = cacheManager;
-    if (currentCacheManager) {
-        await Promise.all(tasks.map((task: ReleaseTask) =>
-            currentCacheManager.updateTask(task)
-        ));
-    }
-
     return tasks;
 }
 
-export async function getTasks(releaseId: string, clientName: string, catalogNumber: string) {
+export async function getTasks(releaseId: string, taskIds: string[], clientName: string, catalogNumber: string) {
     if (!cacheManager) {
         return getTasksFromNotion(releaseId, clientName, catalogNumber);
     }
 
-    return await getCachedTasks(
-        cacheManager,
-        getTasksFromNotion
-    );
-    const tasks = await getTasksFromNotion(releaseId, clientName, catalogNumber);
+    const tasks = await Promise.all(taskIds.map((taskId) =>
+        getCachedTask(
+            cacheManager!,
+            taskId,
+            () => getTaskFromNotion(taskId, clientName, catalogNumber)
+        )
+    ));
     return tasks;
 }
 
