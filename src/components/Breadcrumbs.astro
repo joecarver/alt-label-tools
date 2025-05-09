@@ -20,28 +20,39 @@ const breadcrumbLinks = breadcrumbs.map((crumb, index) => {
 ---
 
 <Flex className="breadcrumbs" gap="2">
-    <Button variant="soft" color="gray" size="1">
-        <Link
-            href="/"
-            style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "0.5rem",
-            }}
-        >
+    <Link
+        href="/"
+        style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "0.3rem",
+        }}
+    >
+        <Button variant="surface" color="blue" size="1" className="back-button">
             <BiArrowBack />Clients
-        </Link>
-    </Button>
+        </Button>
+    </Link>
 </Flex>
 
 <style>
     .breadcrumbs {
-        position: absolute;
+        position: sticky;
         top: var(--header-height);
+        height: 0;
         background-color: var(--background);
         z-index: 100;
-        padding: 0.5rem 1rem;
+        padding-top: 0.5rem;
+        padding-left: 1rem;
         border-bottom: 1px solid var(--gray-200);
+    }
+
+    .back-button {
+        border-radius: 0;
+        cursor: pointer;
+
+        &:hover {
+            background-color: rgb(var(--primary-light));
+        }
     }
 </style>
