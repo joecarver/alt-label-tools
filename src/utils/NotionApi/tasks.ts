@@ -1,13 +1,9 @@
 import type { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
-import { getCachedTasks } from '../cache';
 import { isDetectableTask } from '../isDetectableTask';
 import { getTaskStatus } from './taskStatus';
 import { notion, cacheManager } from './api';
-
-export function initializeCache(kv: any) {
-    // This is now handled by the main api.ts
-}
+import { getCachedTasks } from '../cache';
 
 async function getTaskFromNotion(
     taskId: string,
@@ -41,6 +37,19 @@ export async function getTasksFromNotion(
         ));
     }
 
+    return tasks;
+}
+
+export async function getTasks(releaseId: string, clientName: string, catalogNumber: string) {
+    if (!cacheManager) {
+        return getTasksFromNotion(releaseId, clientName, catalogNumber);
+    }
+
+    return await getCachedTasks(
+        cacheManager,
+        getTasksFromNotion
+    );
+    const tasks = await getTasksFromNotion(releaseId, clientName, catalogNumber);
     return tasks;
 }
 

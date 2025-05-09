@@ -4,9 +4,6 @@ import { getFolderId } from '../drive';
 import { getCachedClients } from '../cache';
 import { notion, cacheManager } from './api';
 
-export function initializeCache(kv: any) {
-    // This is now handled by the main api.ts
-}
 
 async function getClientsFromNotion(): Promise<LabelClient[]> {
     const clientsBlockId = "1bcaab79f528805bb18cf74fb628292b";

@@ -18,12 +18,6 @@ import * as taskStatusModule from './taskStatus';
 // Initialize cache for all modules
 export function initializeCache(kv: any) {
     cacheManager = new CacheManager(kv);
-
-    // Initialize cache in all modules
-    clientsModule.initializeCache(kv);
-    releasesModule.initializeCache(kv);
-    tasksModule.initializeCache(kv);
-    taskStatusModule.initializeCache(kv);
 }
 
 // Re-export all functions with shared instances

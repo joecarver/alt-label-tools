@@ -11,9 +11,10 @@ import LinkButton from "./LinkButton.astro";
 interface Props {
     clientName: string;
     task: ReleaseTask;
+    releaseId: string;
 }
 
-const { task } = Astro.props;
+const { task, releaseId } = Astro.props;
 ---
 
 <Box>
@@ -37,6 +38,7 @@ const { task } = Astro.props;
                 task={task}
                 isDetectable={task.isDetectable}
                 taskStatus={task.taskStatus}
+                releaseId={releaseId}
             />
             {
                 task.taskStatus?.completionStatus ===

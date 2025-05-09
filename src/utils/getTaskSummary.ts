@@ -1,6 +1,6 @@
 import { BadgeColor } from "@/types/BadgeColor";
 import { CompletionStatus } from "@/types/CompletionStatus";
-import type { ReleaseTask } from "@/types/ReleaseTask";
+import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
 
 export const getTaskSummary = (tasks: ReleaseTask[]) => {
     const totalTasks = tasks.length;
@@ -9,6 +9,10 @@ export const getTaskSummary = (tasks: ReleaseTask[]) => {
             task.taskStatus.completionStatus === CompletionStatus.DONE_DETECTED ||
             task.taskStatus.completionStatus === CompletionStatus.DONE_MANUALLY,
     ).length;
+
+    const releaseDate = tasks.find(
+        (task) => task.name === ReleaseTaskName.ReleaseDate,
+    )?.startDate;
 
     return {
         totalTasks,
@@ -21,5 +25,6 @@ export const getTaskSummary = (tasks: ReleaseTask[]) => {
                     : completedTasks > 0
                         ? BadgeColor.ORANGE
                         : BadgeColor.RED,
+        releaseDate,
     };
 };

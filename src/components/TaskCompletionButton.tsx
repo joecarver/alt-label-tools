@@ -1,4 +1,4 @@
-import { Button, Badge } from "@radix-ui/themes";
+import { Button } from "@radix-ui/themes";
 import { CheckIcon, Cross2Icon } from "@radix-ui/react-icons";
 import { formatSingleDate } from "@/utils/date";
 import { useState } from "react";
@@ -6,9 +6,10 @@ import { useState } from "react";
 interface Props {
     taskId: string;
     completedAt?: string;
+    releaseId: string;
 }
 
-export function TaskCompletionButton({ taskId, completedAt }: Props) {
+export function TaskCompletionButton({ taskId, completedAt, releaseId }: Props) {
     const [isLoading, setIsLoading] = useState(false);
     const [isCompleted, setIsCompleted] = useState(!!completedAt);
     const [completionDate, setCompletionDate] = useState(completedAt);
@@ -33,6 +34,17 @@ export function TaskCompletionButton({ taskId, completedAt }: Props) {
 
             setIsCompleted(!isCompleted);
             setCompletionDate(isCompleted ? undefined : new Date().toISOString());
+
+            // Trigger update event
+            const event = new CustomEvent("taskCompletionUpdated", {
+                bubbles: true,
+                composed: true,
+                detail: {
+                    taskId,
+                    releaseId,
+                },
+            });
+            document.body.dispatchEvent(event);
         } catch (error) {
             console.error('Failed to update task completion:', error);
             alert('Failed to update task completion. Please try again.');
