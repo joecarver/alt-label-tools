@@ -3,7 +3,6 @@ import { DueDateStatus } from "@/types/DueDateStatus";
 import { parseISO } from "date-fns";
 
 export const getDueDateStatus = (endDate: string | null | undefined, isCompleted: boolean): DueDateStatus => {
-    console.log("endDate", endDate);
     if (!endDate) {
         return DueDateStatus.UNKNOWN;
     }
