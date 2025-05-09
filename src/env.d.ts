@@ -35,4 +35,15 @@ interface KVNamespace {
     get(key: string): Promise<string | null>;
     put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>;
     delete(key: string): Promise<void>;
+}
+
+// Extend Astro's Locals interface
+declare namespace App {
+    interface Locals {
+        runtime?: {
+            env?: {
+                ALT_LABEL_TOOLS_METADATA?: KVNamespace;
+            };
+        };
+    }
 } 
