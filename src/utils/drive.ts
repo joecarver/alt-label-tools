@@ -131,8 +131,8 @@ export async function listFilesInFolder(folderId: string): Promise<FileInfo[]> {
         }
 
         const data = await response.json();
-        const files = data.files || [];
-        return files.map(convertToFileInfo).filter((file): file is FileInfo => file !== null);
+        const files: DriveFile[] = data.files || [];
+        return files.map(convertToFileInfo).filter((file) => file !== null);
     } catch (error) {
         console.error('Error listing files:', error);
         throw error;

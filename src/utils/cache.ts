@@ -1,14 +1,13 @@
-import type { CachedRelease } from "@/types/CachedRelease";
 import type { LabelClient } from "@/types/LabelClient";
+import type { Release } from "@/types/Release";
 import type { ReleaseTask } from "@/types/ReleaseTask";
-import type { TaskStatus } from "@/types/TaskCompletionStatus";
-
 
 // Cache keys structure
 export const CACHE_KEYS = {
     clients: 'clients',
     releases: (clientId: string) => `releases:${clientId}`,
     task: (taskId: string) => `task:${taskId}`,
+    taskIdsForRelease: (releaseId: string) => `taskIdsForRelease:${releaseId}`,
 };
 
 // Cache TTLs in seconds
@@ -73,6 +72,14 @@ export class CacheManager {
         });
         console.log(`📝 Updated task cache: ${task.id}`);
     }
+
+    async updateTasksForRelease(releaseId: string, tasks: ReleaseTask[]) {
+        const key = CACHE_KEYS.taskIdsForRelease(releaseId);
+        await this.kv.put(key, JSON.stringify(tasks.map((task) => task.id)), {
+            expirationTtl: CACHE_TTL.releases
+        });
+        console.log(`📝 Updated tasks for release cache: ${releaseId}`);
+    }
 }
 
 // Helper functions for type-safe cache operations
@@ -86,8 +93,8 @@ export async function getCachedClients(
 export async function getCachedReleases(
     cacheManager: CacheManager,
     clientId: string,
-    fetchFn: () => Promise<CachedRelease[]>
-): Promise<CachedRelease[]> {
+    fetchFn: () => Promise<Release[]>
+): Promise<Release[]> {
     return cacheManager.getWithTTL(CACHE_KEYS.releases(clientId), CACHE_TTL.releases, fetchFn);
 }
 
@@ -97,4 +104,12 @@ export async function getCachedTask(
     fetchFn: () => Promise<ReleaseTask>
 ): Promise<ReleaseTask> {
     return cacheManager.getWithTTL(CACHE_KEYS.task(taskId), CACHE_TTL.task, fetchFn);
+}
+
+export async function getCachedTaskIdsForRelease(
+    cacheManager: CacheManager,
+    releaseId: string,
+    fetchFn: () => Promise<string[]>
+): Promise<string[]> {
+    return cacheManager.getWithTTL(CACHE_KEYS.taskIdsForRelease(releaseId), CACHE_TTL.releases, fetchFn);
 }

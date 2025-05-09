@@ -2,7 +2,7 @@
 import { Box, Flex } from "@radix-ui/themes";
 import TaskItem from "./TaskItem.astro";
 import { TaskSummary } from "./TaskSummary";
-import { getTasksFromNotion } from "@/utils/NotionApi/api";
+import { getTasksForRelease } from "@/utils/NotionApi/tasks";
 
 interface Props {
     releaseId: string;
@@ -12,7 +12,7 @@ interface Props {
 
 const { releaseId, clientName, catalogNumber } = Astro.props;
 
-const tasks = await getTasksFromNotion(releaseId, clientName, catalogNumber);
+const tasks = await getTasksForRelease(releaseId, clientName, catalogNumber);
 ---
 
 <details>

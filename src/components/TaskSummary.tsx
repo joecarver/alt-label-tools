@@ -1,7 +1,7 @@
 import { Badge } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import { formatSingleDate } from "@/utils/date";
-import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
+import { type ReleaseTask } from "@/types/ReleaseTask";
 import { getTaskSummary } from "@/utils/getTaskSummary";
 
 type BadgeColor = "green" | "yellow" | "ruby" | "gray" | "gold" | "bronze" | "brown" | "amber" | "orange" | "tomato" | "red" | "crimson" | "pink" | "plum" | "purple" | "violet" | "iris" | "indigo" | "blue" | "cyan" | "teal" | "jade" | "grass" | "mint" | "lime" | "sky";
