@@ -1,9 +1,7 @@
 ---
-import { Card, Flex, Text, Box } from "@radix-ui/themes";
+import { Card, Flex, Text } from "@radix-ui/themes";
 import LinkButton from "./LinkButton.astro";
-import ReleaseList from "./ReleaseList.astro";
 import type { LabelClient } from "@/types/LabelClient";
-import LoadingSpinner from "./LoadingSpinner.astro";
 
 interface Props {
     client: LabelClient;
@@ -13,25 +11,19 @@ const { client } = Astro.props;
 ---
 
 <Card key={client.id} size="2">
-    <Flex direction="column" gap="3">
-        <Flex justify="between" align="center">
-            <Flex direction="row" gap="2">
+    <Flex justify="between" align="center">
+        <Flex direction="row" gap="2">
+            <a
+                href={`/client/${client.id}`}
+                style="text-decoration: none; color: inherit;"
+            >
                 <Text size="4" weight="bold">
                     {client.name}
                 </Text>
-                <LinkButton
-                    url={`https://drive.google.com/drive/folders/${client.folderId}`}
-                />
-            </Flex>
+            </a>
+            <LinkButton
+                url={`https://drive.google.com/drive/folders/${client.folderId}`}
+            />
         </Flex>
-        <Box>
-            <ReleaseList
-                clientId={client.id}
-                clientName={client.name}
-                server:defer
-            >
-                <LoadingSpinner text="Loading releases..." slot="fallback" />
-            </ReleaseList>
-        </Box>
     </Flex>
 </Card>

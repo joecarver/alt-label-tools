@@ -1,0 +1,47 @@
+---
+import { Button, Flex, Link, Text } from "@radix-ui/themes";
+import { BiArrowBack } from "react-icons/bi";
+
+const location = Astro.url.pathname;
+const breadcrumbs = location.split("/").filter((crumb) => crumb !== "");
+
+console.log(breadcrumbs);
+
+if (breadcrumbs.length === 0) {
+    return;
+}
+const breadcrumbLinks = breadcrumbs.map((crumb, index) => {
+    const path = `/${breadcrumbs.slice(0, index + 1).join("/")}`;
+    return {
+        label: crumb,
+        href: path,
+    };
+});
+---
+
+<Flex className="breadcrumbs" gap="2">
+    <Button variant="soft" color="gray" size="1">
+        <Link
+            href="/"
+            style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.5rem",
+            }}
+        >
+            <BiArrowBack />Clients
+        </Link>
+    </Button>
+</Flex>
+
+<style>
+    .breadcrumbs {
+        position: absolute;
+        top: var(--header-height);
+        background-color: var(--background);
+        z-index: 100;
+        padding: 0.5rem 1rem;
+        border-bottom: 1px solid var(--gray-200);
+    }
+</style>

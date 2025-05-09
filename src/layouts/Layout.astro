@@ -3,6 +3,7 @@ import "@radix-ui/themes/styles.css";
 import { Theme } from "@radix-ui/themes";
 import { ClientRouter } from "astro:transitions";
 import Header from "@/components/Header.astro";
+import Breadcrumbs from "@/components/Breadcrumbs.astro";
 interface Props {
 	title: string;
 }
@@ -30,7 +31,8 @@ const { title } = Astro.props;
 	<body>
 		<Theme>
 			<Header />
-			<main class="main-content">
+			<Breadcrumbs />
+			<main>
 				<slot />
 			</main>
 		</Theme>
@@ -39,6 +41,7 @@ const { title } = Astro.props;
 
 <style is:global>
 	:root {
+		--header-height: 3rem;
 		--primary: 59, 130, 246;
 		--primary-light: 147, 197, 253;
 		--primary-dark: 30, 64, 175;
@@ -55,6 +58,10 @@ const { title } = Astro.props;
 		--gray-700: 55, 65, 81;
 		--gray-800: 31, 41, 55;
 		--gray-900: 17, 24, 39;
+	}
+
+	* {
+		box-sizing: border-box;
 	}
 
 	html {
@@ -113,9 +120,9 @@ const { title } = Astro.props;
 		color: rgb(var(--primary));
 	}
 
-	.main-content {
+	main {
 		max-width: 1200px;
-		margin: 2rem auto;
+		margin: 2.5rem auto;
 		padding: 0 1rem;
 	}
 
