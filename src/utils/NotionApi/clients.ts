@@ -5,7 +5,7 @@ import { getCachedClients } from '../cache';
 import { notion, cacheManager } from './api';
 
 
-async function getClientsFromNotion(): Promise<LabelClient[]> {
+export async function getClientsFromNotion(): Promise<LabelClient[]> {
     const clientsBlockId = "1bcaab79f528805bb18cf74fb628292b";
     const response = await notion.blocks.children.list({
         block_id: clientsBlockId,

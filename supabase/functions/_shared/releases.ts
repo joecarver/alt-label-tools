@@ -1,13 +1,15 @@
-import type { BlockObjectResponse, PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
-import type { Release } from "@/types/Release";
-import { ReleaseTaskName } from "@/types/ReleaseTask";
-import type { ReleaseTask } from "@/types/ReleaseTask";
-import { getFolderId } from '../drive';
-import { getCachedReleases } from '../cache';
-import { notion, cacheManager } from './api';
+import type { BlockObjectResponse } from "@notionhq/client/build/src/api-endpoints";
+import { notion } from "./notion.ts";
+import { getFolderId } from "./drive.ts";
 
-export function initializeCache(kv: any) {
-    // This is now handled by the main api.ts
+export interface Release {
+    id: string;
+    name: string;
+    catalogNumber: string;
+    artist: string;
+    labelId: string;
+    notionUrl: string;
+    folderId: string;
 }
 
 export async function getReleasesFromNotion(clientId: string, clientName: string): Promise<Release[]> {
@@ -23,7 +25,6 @@ export async function getReleasesFromNotion(clientId: string, clientName: string
 
     for (const database of releaseDatabases) {
         const databaseId = database.id;
-
         const databaseTitle = database.child_database?.title || "Untitled Release";
         const [catalogNumber, artist] = databaseTitle.split(" - ");
 
@@ -36,22 +37,10 @@ export async function getReleasesFromNotion(clientId: string, clientName: string
             catalogNumber,
             artist,
             labelId: clientId,
-            notionUrl: `https://notion.so/${databaseId.replace(/-/g, '')}`,
-            folderId,
+            notionUrl: `https://notion.so/${databaseId.replace(/-/g, "")}`,
+            folderId: folderId ?? "",
         });
     }
 
     return releases;
 }
-
-export async function getReleases(clientId: string, clientName: string): Promise<Release[]> {
-    if (!cacheManager) {
-        return getReleasesFromNotion(clientId, clientName);
-    }
-
-    return getCachedReleases(
-        cacheManager,
-        clientId,
-        () => getReleasesFromNotion(clientId, clientName)
-    );
-} 

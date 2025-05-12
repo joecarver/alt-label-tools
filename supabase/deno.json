@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "lib": [
+            "deno.window"
+        ],
+        "strict": true
+    },
+    "imports": {
+        "@notionhq/client": "https://esm.sh/@notionhq/client@2.2.14",
+        "@notionhq/client/build/src/api-endpoints": "https://esm.sh/@notionhq/client@2.2.14/build/src/api-endpoints",
+        "@supabase/supabase-js": "npm:@supabase/supabase-js@^2.49.4"
+    },
+    "nodeModulesDir": "auto",
+    "tasks": {
+        "start": "deno run --allow-net --allow-env --allow-read --allow-write index.ts"
+    }
+}

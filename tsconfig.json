@@ -14,5 +14,11 @@
   ],
   "exclude": [
     "dist"
-  ]
+  ],
+  "lib": [
+    "deno.window",
+    "deno.ns",
+    "dom",
+    "esnext"
+  ],
 }

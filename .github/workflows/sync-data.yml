@@ -1,0 +1,43 @@
+# .github/workflows/sync-data.yml
+name: Sync Data
+
+on:
+  schedule:
+    - cron: '*/1 * * * *'  # Every minute
+  workflow_dispatch:  # Allow manual triggers
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      # ... previous steps ...
+
+      - name: Check sync health
+        id: check-health
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X POST "https://${{ secrets.SUPABASE_PROJECT_REF }}.supabase.co/functions/v1/monitor-sync-health" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Content-Type: application/json")
+          status_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+          echo "status_code=$status_code" >> $GITHUB_OUTPUT
+          echo "body=$body" >> $GITHUB_OUTPUT
+          
+          # Check if there are any unhealthy syncs
+          unhealthy_count=$(echo "$body" | jq '.data.unhealthySyncs | length')
+          if [ "$unhealthy_count" -gt 0 ]; then
+            echo "::warning::Found $unhealthy_count unhealthy syncs"
+            echo "unhealthy_syncs=$body" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Send health check notification
+        if: always()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+          SLACK_COLOR: ${{ steps.check-health.outputs.unhealthy_syncs != '' && 'warning' || 'good' }}
+          SLACK_TITLE: Sync Health Check
+          SLACK_MESSAGE: |
+            ${{ steps.check-health.outputs.unhealthy_syncs != '' && '⚠️ Found unhealthy syncs:' || '✅ All syncs healthy' }}
+            ${{ steps.check-health.outputs.body }}

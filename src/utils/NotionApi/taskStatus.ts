@@ -10,18 +10,14 @@ export function initializeCache(kv: any) {
 
 export async function getTaskStatus(
     taskId: string,
-    clientName: string,
-    catalogNumber: string,
+    folderId: string,
     taskName: ReleaseTaskName,
     completedAt: string | null | undefined,
     isDetectable: boolean,
     dueDate: string | null | undefined
 ): Promise<TaskStatus> {
-    const folderId = await getFolderId(`Clients/${clientName}/Releases/${catalogNumber}`);
 
     const params = {
-        clientName,
-        releaseId: catalogNumber,
         taskName,
         completedAt: typeof completedAt === 'string' ? completedAt : undefined,
         folderId,
