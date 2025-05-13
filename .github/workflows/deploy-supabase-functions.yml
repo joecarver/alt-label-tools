@@ -6,47 +6,21 @@ on:
       - 'supabase/**'
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      PROJECT_ID: qxvnzkcsfygovclpdxzp
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install Supabase CLI
-        run: |
-          # Remove any existing files
-          rm -f supabase_linux_amd64.tar.gz
-          rm -rf supabase
-          
-          # Download and install
-          wget -q https://github.com/supabase/cli/releases/download/v1.142.0/supabase_linux_amd64.tar.gz
-          tar xzf supabase_linux_amd64.tar.gz
-          sudo mv supabase /usr/local/bin/
-          rm supabase_linux_amd64.tar.gz
-          
-          # Verify installation
-          supabase --version
-        shell: bash
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
 
-      - name: Initialize Supabase Project
-        run: |
-          supabase init
-          supabase link --project-ref "qxvnzkcsfygovclpdxzp"
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        shell: bash
-
-      - name: Deploy Supabase Functions
-        run: |
-          supabase functions deploy monitor-sync-health --project-ref "qxvnzkcsfygovclpdxzp"
-          supabase functions deploy sync-clients --project-ref "qxvnzkcsfygovclpdxzp"
-          supabase functions deploy sync-releases --project-ref "qxvnzkcsfygovclpdxzp"
-          supabase functions deploy sync-tasks --project-ref "qxvnzkcsfygovclpdxzp"
-          supabase functions deploy sync-task-statuses --project-ref "qxvnzkcsfygovclpdxzp"
-        env:
-          # Use a Supabase access token from https://supabase.com/dashboard/account/tokens
-          # This is different from the service_role key and is specifically for CLI operations
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        shell: bash 
+      - run: supabase functions deploy --project-ref $PROJECT_ID 
