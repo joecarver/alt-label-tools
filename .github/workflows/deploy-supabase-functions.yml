@@ -16,8 +16,9 @@ jobs:
 
       - name: Install Supabase CLI
         run: |
-          curl -fsSL https://get.pnpm.io/install.sh | sh -
-          pnpm add -g supabase
+          curl -fsSL https://cli.supabase.com/install.sh | bash
+          export PATH="/home/runner/.local/bin:$PATH"
+        shell: bash
 
       - name: Deploy Supabase Functions
         run: |
@@ -26,4 +27,5 @@ jobs:
         env:
           # Use a Supabase access token from https://supabase.com/dashboard/account/tokens
           # This is different from the service_role key and is specifically for CLI operations
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }} 
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        shell: bash 
