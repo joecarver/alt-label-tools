@@ -30,6 +30,14 @@ jobs:
           supabase --version
         shell: bash
 
+      - name: Initialize Supabase Project
+        run: |
+          supabase init
+          supabase link --project-ref "qxvnzkcsfygovclpdxzp"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        shell: bash
+
       - name: Deploy Supabase Functions
         run: |
           supabase functions deploy monitor-sync-health --project-ref "qxvnzkcsfygovclpdxzp"
