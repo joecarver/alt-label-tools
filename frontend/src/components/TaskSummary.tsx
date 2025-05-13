@@ -22,27 +22,27 @@ interface Props {
 export function TaskSummary({ releaseId, initialTasks }: Props) {
     const [taskSummary, setTaskSummary] = useState<TaskSummaryData>(getTaskSummary(initialTasks));
 
-    // useEffect(() => {
-    //     const handleTaskCompletion = async (event: Event) => {
-    //         const customEvent = event as CustomEvent<{ releaseId?: string }>;
-    //         if (customEvent.detail?.releaseId === releaseId) {
-    //             try {
-    //                 const response = await fetch(
-    //                     `/api/task-summary?releaseId=${releaseId}&taskIds=${initialTasks.map((task) => task.id).join(";")}&clientName=${clientName}&catalogNumber=${catalogNumber}`
-    //                 );
-    //                 const data = await response.json();
-    //                 setTaskSummary(data);
-    //             } catch (error) {
-    //                 console.error("Error fetching task summary:", error);
-    //             }
-    //         }
-    //     };
+    useEffect(() => {
+        const handleTaskCompletion = async (event: Event) => {
+            const customEvent = event as CustomEvent<{ releaseId?: string }>;
+            if (customEvent.detail?.releaseId === releaseId) {
+                try {
+                    const response = await fetch(
+                        `/api/task-summary?releaseId=${releaseId}`
+                    );
+                    const data = await response.json();
+                    setTaskSummary(data);
+                } catch (error) {
+                    console.error("Error fetching task summary:", error);
+                }
+            }
+        };
 
-    //     document.body.addEventListener("taskCompletionUpdated", handleTaskCompletion);
-    //     return () => {
-    //         document.body.removeEventListener("taskCompletionUpdated", handleTaskCompletion);
-    //     };
-    // }, [releaseId, clientName, catalogNumber]);
+        document.body.addEventListener("taskCompletionUpdated", handleTaskCompletion);
+        return () => {
+            document.body.removeEventListener("taskCompletionUpdated", handleTaskCompletion);
+        };
+    }, [releaseId]);
 
     return (
         <div id={`task-summary-${releaseId}`} data-release-id={releaseId}>

@@ -3,6 +3,7 @@ import { Badge } from "@radix-ui/themes";
 import { CheckIcon } from "@radix-ui/react-icons";
 import { formatSingleDate } from "../utils/date";
 import { TaskCompletionButton } from "./TaskCompletionButton";
+import { CompletionStatus } from "src/types/CompletionStatus";
 
 const { task, isDetectable, taskStatus, releaseId } = Astro.props;
 ---
@@ -19,8 +20,9 @@ const { task, isDetectable, taskStatus, releaseId } = Astro.props;
         <TaskCompletionButton
             client:load
             taskId={task.id}
+            taskNotionId={task.notionId}
             releaseId={releaseId}
-            completedAt={task.completedAt}
+            completedAt={taskStatus?.completionStatus === CompletionStatus.DONE_MANUALLY ? taskStatus.updatedAt : undefined}
         />
     )
 }

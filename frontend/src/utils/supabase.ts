@@ -88,4 +88,65 @@ export async function getTaskStatus(taskId: string): Promise<TaskStatus> {
     }
 
     return keysToCamelCase<TaskStatus>(data);
+}
+
+// Update Notion task completion
+async function updateNotionTaskCompletion(taskNotionId: string, completedAt: string | null): Promise<void> {
+    const notionApiKey = getSecret('NOTION_API_KEY');
+    if (!notionApiKey) {
+        throw new Error('Missing Notion API key');
+    }
+
+    const response = await fetch(`https://api.notion.com/v1/pages/${taskNotionId}`, {
+        method: 'PATCH',
+        headers: {
+            'Authorization': `Bearer ${notionApiKey}`,
+            'Notion-Version': '2022-06-28',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            properties: {
+                completedAt: {
+                    date: completedAt ? { start: completedAt } : null
+                }
+            }
+        })
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        console.error('Error updating Notion task:', error);
+        throw new Error('Failed to update Notion task');
+    }
+}
+
+// Update task completion status
+export async function updateTaskCompletion(taskId: string, taskNotionId: string, completedAt: string): Promise<void> {
+    // First update the task's completed_at
+    const { error: taskError } = await supabase
+        .from('tasks')
+        .update({ completed_at: completedAt || null })
+        .eq('id', taskId);
+
+    if (taskError) {
+        console.error('Error updating task completion:', taskError);
+        throw taskError;
+    }
+
+    // Then update the task status
+    const { error: statusError } = await supabase
+        .from('task_statuses')
+        .update({
+            completion_status: completedAt ? CompletionStatus.DONE_MANUALLY : CompletionStatus.TODO,
+            updated_at: new Date().toISOString()
+        })
+        .eq('task_id', taskId);
+
+    if (statusError) {
+        console.error('Error updating task status:', statusError);
+        throw statusError;
+    }
+
+    // Finally update Notion
+    await updateNotionTaskCompletion(taskNotionId, completedAt || null);
 } 

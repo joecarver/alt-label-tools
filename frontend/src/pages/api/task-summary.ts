@@ -1,15 +1,14 @@
 import type { APIRoute } from 'astro';
-import { getTaskSummary } from 'frontend/src/utils/getTaskSummary';
-import { ReleaseTaskName } from 'frontend/src/types/ReleaseTask';
-import { getTasks } from 'frontend/src/utils/NotionApi/tasks';
+import { getTaskSummary } from '../../utils/getTaskSummary';
+import { ReleaseTaskName } from '../../types/ReleaseTask';
+import { getTasks } from '../../utils/supabase';
+import type { ReleaseTask } from '../../types/ReleaseTask';
 
 export const GET: APIRoute = async ({ url }) => {
     const releaseId = url.searchParams.get('releaseId');
-    const clientName = url.searchParams.get('clientName');
-    const catalogNumber = url.searchParams.get('catalogNumber');
 
-    if (!releaseId || !clientName || !catalogNumber) {
-        return new Response(JSON.stringify({ error: 'Missing required parameters' }), {
+    if (!releaseId) {
+        return new Response(JSON.stringify({ error: 'Missing required releaseId' }), {
             status: 400,
             headers: {
                 'Content-Type': 'application/json'
@@ -18,10 +17,9 @@ export const GET: APIRoute = async ({ url }) => {
     }
 
     try {
-        const taskIds = url.searchParams.get('taskIds')?.split(';') || [];
-        const tasks = await getTasks(releaseId, taskIds, clientName, catalogNumber);
+        const tasks = await getTasks(releaseId);
         const taskSummary = getTaskSummary(tasks);
-        const releaseDate = tasks.find((task) => task.name === ReleaseTaskName.ReleaseDate)?.startDate || "";
+        const releaseDate = tasks.find((task: ReleaseTask) => task.name === ReleaseTaskName.ReleaseDate)?.startDate || "";
 
         return new Response(JSON.stringify({
             completedTasks: taskSummary.completedTasks,

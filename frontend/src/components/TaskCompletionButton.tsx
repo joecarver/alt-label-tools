@@ -5,11 +5,12 @@ import { useState } from "react";
 
 interface Props {
     taskId: string;
+    taskNotionId: string;
     completedAt?: string;
     releaseId: string;
 }
 
-export function TaskCompletionButton({ taskId, completedAt, releaseId }: Props) {
+export function TaskCompletionButton({ taskId, taskNotionId, completedAt, releaseId }: Props) {
     const [isLoading, setIsLoading] = useState(false);
     const [isCompleted, setIsCompleted] = useState(!!completedAt);
     const [completionDate, setCompletionDate] = useState(completedAt);
@@ -19,6 +20,7 @@ export function TaskCompletionButton({ taskId, completedAt, releaseId }: Props) 
         setIsLoading(true);
         const formData = new FormData();
         formData.append('taskId', taskId);
+        formData.append('taskNotionId', taskNotionId);
         formData.append('completedAt', isCompleted ? '' : new Date().toISOString());
         formData.append('redirectTo', window.location.pathname);
 

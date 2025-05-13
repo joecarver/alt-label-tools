@@ -1,10 +1,11 @@
 import type { APIRoute } from 'astro';
-import { updateTaskCompletion } from 'frontend/src/utils/NotionApi/api';
+import { updateTaskCompletion } from '../../utils/supabase';
 
 export const POST: APIRoute = async ({ request }) => {
     try {
         const formData = await request.formData();
         const taskId = formData.get('taskId');
+        const taskNotionId = formData.get('taskNotionId');
         const completedAt = formData.get('completedAt');
 
         if (!taskId) {
@@ -19,7 +20,19 @@ export const POST: APIRoute = async ({ request }) => {
             );
         }
 
-        await updateTaskCompletion(taskId.toString(), (completedAt || "").toString());
+        if (!taskNotionId) {
+            return new Response(
+                JSON.stringify({ error: 'Missing required taskNotionId' }),
+                {
+                    status: 400,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+        }
+
+        await updateTaskCompletion(taskId.toString(), taskNotionId.toString(), (completedAt || "").toString());
 
         return new Response(
             JSON.stringify({ success: true }),
