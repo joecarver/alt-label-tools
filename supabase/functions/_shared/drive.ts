@@ -1,4 +1,3 @@
-
 import type { FileInfo } from '../../types/FileInfo.ts';
 
 // Cache for storing folder paths to their IDs
@@ -7,6 +6,10 @@ const folderIdCache: Record<string, string> = {};
 // Service account credentials
 const serviceAccountEmail = Deno.env.get('GOOGLE_SERVICE_ACCOUNT_EMAIL');
 const serviceAccountKey = Deno.env.get('GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY');
+
+console.log('Drive credentials check:')
+console.log('GOOGLE_SERVICE_ACCOUNT_EMAIL exists:', !!serviceAccountEmail)
+console.log('GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY exists:', !!serviceAccountKey)
 
 // Format the private key by replacing literal \n with actual newlines
 const formatPrivateKey = (key: string) => {
@@ -194,23 +197,31 @@ interface DriveFolder {
 }
 
 export async function getFolderId(folderName: string): Promise<string | null> {
+    console.log('Getting folder ID for:', folderName)
+    
     // Check cache first
     if (folderIdCache[folderName]) {
+        console.log('Found folder ID in cache:', folderIdCache[folderName])
         return folderIdCache[folderName];
     }
 
     // If the folderName contains slashes, it's a path
     const pathParts = folderName.split('/').filter(part => part.trim() !== '');
     if (pathParts.length === 0) {
+        console.log('No valid path parts found')
         return null;
     }
 
     try {
+        console.log('Generating service account token...')
         const token = await generateServiceAccountToken();
+        console.log('Token generated successfully')
+        
         let currentFolderId: string | null = null;
         let currentPath = '';
 
         // First, find the root folder that was shared with the service account
+        console.log('Searching for root folder:', pathParts[0])
         const rootResponse = await fetch(
             `https://www.googleapis.com/drive/v3/files?q=name+=+'${pathParts[0]}'+and+mimeType+=+'application/vnd.google-apps.folder'+and+trashed+=+false+and+sharedWithMe+=+true&fields=files(id)`,
             {
@@ -221,6 +232,7 @@ export async function getFolderId(folderName: string): Promise<string | null> {
         );
 
         if (!rootResponse.ok) {
+            console.error('Root folder search failed:', rootResponse.status, rootResponse.statusText)
             if (rootResponse.status === 429) { // Rate limit error
                 console.warn('Rate limit hit, retrying after delay...');
                 await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
@@ -230,17 +242,22 @@ export async function getFolderId(folderName: string): Promise<string | null> {
         }
 
         const rootData = await rootResponse.json();
+        console.log('Root folder search response:', rootData)
+        
         if (!rootData.files?.length) {
+            console.log('No root folder found')
             return null;
         }
 
         currentFolderId = rootData.files[0].id;
         if (!currentFolderId) {
+            console.log('No valid root folder ID found')
             return null;
         }
 
         currentPath = pathParts[0];
         folderIdCache[currentPath] = currentFolderId;
+        console.log('Root folder found:', currentFolderId)
 
         // If there's only one part in the path, we're done
         if (pathParts.length === 1) {
@@ -250,6 +267,7 @@ export async function getFolderId(folderName: string): Promise<string | null> {
         // For the remaining parts, build a query that searches for all remaining folders at once
         const remainingParts = pathParts.slice(1);
         const folderNames = remainingParts.map(name => `name+=+'${name}'`).join('+or+');
+        console.log('Searching for subfolders:', remainingParts)
 
         const response = await fetch(
             `https://www.googleapis.com/drive/v3/files?q=(${folderNames})+and+mimeType+=+'application/vnd.google-apps.folder'+and+trashed+=+false&fields=files(id,name,parents)`,
@@ -261,6 +279,7 @@ export async function getFolderId(folderName: string): Promise<string | null> {
         );
 
         if (!response.ok) {
+            console.error('Subfolder search failed:', response.status, response.statusText)
             if (response.status === 429) { // Rate limit error
                 console.warn('Rate limit hit, retrying after delay...');
                 await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
@@ -270,7 +289,10 @@ export async function getFolderId(folderName: string): Promise<string | null> {
         }
 
         const data = await response.json();
+        console.log('Subfolder search response:', data)
+        
         if (!data.files?.length) {
+            console.log('No subfolders found')
             return null;
         }
 
@@ -283,19 +305,22 @@ export async function getFolderId(folderName: string): Promise<string | null> {
         for (let i = 1; i < pathParts.length; i++) {
             const folderPart = pathParts[i];
             currentPath += '/' + folderPart;
+            console.log('Looking for subfolder:', folderPart, 'in path:', currentPath)
 
             const folderInfo = folderMap.get(folderPart);
             if (!folderInfo || !folderInfo.parents.includes(currentFolderId)) {
+                console.log('Subfolder not found or not in correct parent')
                 return null;
             }
 
             currentFolderId = folderInfo.id;
             folderIdCache[currentPath] = currentFolderId;
+            console.log('Found subfolder:', currentFolderId)
         }
 
         return currentFolderId;
     } catch (error) {
-        console.error('Error searching for folders:', error);
+        console.error('Error searching for folders:', error)
         throw error;
     }
 } 

@@ -1,6 +1,5 @@
 import type { BlockObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import { getFolderId } from "./drive.ts";
-import { notion } from "./utils.ts";
 
 export interface Release {
     id: string;
@@ -13,12 +12,30 @@ export interface Release {
 }
 
 export async function getReleasesFromNotion(clientId: string, clientName: string): Promise<Release[]> {
-    const response = await notion.blocks.children.list({
-        block_id: clientId,
-        page_size: 100,
-    });
+    const notionApiKey = Deno.env.get('NOTION_API_KEY')
+    if (!notionApiKey) {
+        throw new Error('NOTION_API_KEY environment variable is not set')
+    }
 
-    const results = response.results as BlockObjectResponse[];
+    const response = await fetch(
+        `https://api.notion.com/v1/blocks/${clientId}/children?page_size=100`,
+        {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${notionApiKey}`,
+                'Notion-Version': '2022-06-28',
+                'Content-Type': 'application/json'
+            }
+        }
+    );
+
+    if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Notion API error: ${response.status} ${errorText}`)
+    }
+
+    const data = await response.json()
+    const results = data.results as BlockObjectResponse[];
     const releaseDatabases = results.filter((result) => result.type === "child_database");
 
     const releases: Release[] = [];

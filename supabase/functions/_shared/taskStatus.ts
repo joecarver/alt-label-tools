@@ -1,4 +1,3 @@
-
 import type { FileInfo } from "../../types/FileInfo.ts";
 import { CompletionStatus } from "../../types/CompletionStatus.ts";
 import { BadgeColor } from "../../types/BadgeColor.ts";

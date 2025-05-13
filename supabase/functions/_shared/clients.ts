@@ -1,6 +1,5 @@
 import type { BlockObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import { getFolderId } from "./drive.ts";
-import { notion } from "./utils.ts";
 
 export interface LabelClient {
     id: string;
@@ -10,25 +9,51 @@ export interface LabelClient {
 
 export async function getClientsFromNotion(): Promise<LabelClient[]> {
     const clientsBlockId = "1bcaab79f528805bb18cf74fb628292b";
-    const response = await notion.blocks.children.list({
-        block_id: clientsBlockId,
-        page_size: 100,
-    });
+    
+    const notionApiKey = Deno.env.get('NOTION_API_KEY')
+    if (!notionApiKey) {
+        throw new Error('NOTION_API_KEY environment variable is not set')
+    }
+    
+    try {
+        const response = await fetch(
+            `https://api.notion.com/v1/blocks/${clientsBlockId}/children?page_size=100`,
+            {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${notionApiKey}`,
+                    'Notion-Version': '2022-06-28',
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
 
-    const results = response.results as BlockObjectResponse[];
+        if (!response.ok) {
+            const errorText = await response.text()
+            throw new Error(`Notion API error: ${response.status} ${errorText}`)
+        }
 
-    const clients = await Promise.all(
-        results
-            .filter((result) => result.type === "child_page")
-            .map(async (result) => {
-                const folderId = await getFolderId(`Clients/${result.child_page.title}`);
-                return {
-                    id: result.id,
-                    name: result.child_page.title,
-                    folderId: folderId ?? "",
-                };
-            })
-    );
+        const data = await response.json()
+        const results = data.results as BlockObjectResponse[];
 
-    return clients;
+        const clients = await Promise.all(
+            results
+                .filter((result) => result.type === "child_page")
+                .map(async (result) => {
+                    const folderId = await getFolderId(`Clients/${result.child_page.title}`);
+                    return {
+                        id: result.id,
+                        name: result.child_page.title,
+                        folderId: folderId ?? "",
+                    };
+                })
+        );
+
+        return clients;
+    } catch (error) {
+        if (error instanceof Error) {
+            throw error;
+        }
+        throw new Error('Unknown error occurred');
+    }
 }
