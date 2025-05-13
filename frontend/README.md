@@ -1,21 +1,43 @@
-# Schedule & Workflow Dashboard
+# Alt Label Tools Frontend
 
-A modern dashboard built with Astro that displays schedule data from Notion and workflow data from n8n.
+A modern dashboard built with Astro that displays and manages music release tasks and metadata, integrating with Supabase and Notion.
+
+## System Architecture
+
+### Frontend Components
+
+1. **Astro Application**
+   - Built with Astro for optimal performance
+   - Server-side rendered pages for fast initial load
+   - Client-side interactivity where needed
+   - Dark mode support with Radix UI components
+
+2. **API Routes**
+   - `/api/update-task-completion`: Handles manual task completion changes
+   - `/api/task-summary`: Fetches the latest task summary from Supabase
+   - Maintains data consistency between Supabase and Notion
+
+3. **Data Integration**
+   - Supabase for real-time data access
+   - Notion API for updating task management
+   - Links to Google drive resources
 
 ## Features
 
-- 📅 Schedule data integration with Notion
-- 🔄 Workflow status from n8n
+- 📅 Release schedule visualization
+- ✅ Task management and completion tracking
+- 🔄 Real-time updates from Supabase
 - 🎨 Modern UI with Radix UI components
 - 🌙 Dark mode support
 - ⚡ Fast and responsive
 
 ## Prerequisites
 
-- Node.js 18 or later
-- npm or yarn
+- Node.js 22.14 or later
+- yarn
+- Supabase project setup
 - Notion API key and database ID
-- n8n API key and webhook URL
+- Google Drive service account credentials
 
 ## Setup
 
@@ -23,102 +45,64 @@ A modern dashboard built with Astro that displays schedule data from Notion and 
 
 ```bash
 git clone <repository-url>
-cd <repository-name>
+cd frontend
 ```
 
 2. Install dependencies:
 
 ```bash
-npm install
+yarn
 ```
 
-3. Create a `.env` file in the root directory with the following variables:
+3. Update `../.env` with the following variables
 
 ```env
-NOTION_API_KEY=your_notion_api_key_here
-NOTION_DATABASE_ID=your_notion_database_id_here
-N8N_API_KEY=your_n8n_api_key_here
-N8N_WEBHOOK_URL=your_n8n_webhook_url_here
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
+NOTION_API_KEY=your_notion_api_key
+GOOGLE_SERVICE_ACCOUNT_EMAIL=your_service_account_email
+GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY=your_private_key
+GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_ID=your_private_key_id
 ```
 
 4. Start the development server:
 
 ```bash
-npm run dev
+yarn dev
 ```
 
 5. Open your browser and navigate to `http://localhost:4321`
 
-## Notion Setup
-
-1. Create a new integration in the [Notion Developers](https://www.notion.so/my-integrations) page
-2. Create a new database in Notion with the following properties:
-   - Name (title)
-   - Date (date)
-   - Description (text)
-3. Share the database with your integration
-4. Copy the database ID from the URL
-
-## n8n Setup
-
-1. Create a new workflow in n8n
-2. Set up a webhook node to expose your workflow data
-3. Configure authentication using an API key
-4. Copy the webhook URL and API key
-
 ## Development
 
-- `npm run dev` - Start the development server
-- `npm run build` - Build the project
-- `npm run preview` - Preview the production build
+- `yarn dev` - Start the development server
+- `yarn build` - Build the project
+- `yarn preview` - Preview the production build
+- `yarn astro ...` - Run CLI commands like `astro add`, `astro check`
 
-## License
-
-MIT
-
-```sh
-npm create astro@latest -- --template basics
-```
-
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
-
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
+## Project Structure
 
 ```text
-/
+frontend/
 ├── public/
 │   └── favicon.svg
 ├── src/
+│   ├── components/
+│   │   └── [UI components]
 │   ├── layouts/
 │   │   └── Layout.astro
-│   └── pages/
-│       └── index.astro
+│   ├── pages/
+│   │   ├── index.astro
+│   │   └── api/
+│   │       └── [API routes]
+│   └── utils/
+│       └── [Utility functions]
 └── package.json
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+## Security
 
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+- Environment variables for sensitive data
+- API key management
+- Secure API endpoints with proper validation
+- CORS configuration for API routes
