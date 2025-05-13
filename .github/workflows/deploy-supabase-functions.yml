@@ -16,7 +16,7 @@ jobs:
 
       - name: Install Supabase CLI
         run: |
-        # Remove any existing files
+          # Remove any existing files
           rm -f supabase_linux_amd64.tar.gz
           rm -rf supabase
           
