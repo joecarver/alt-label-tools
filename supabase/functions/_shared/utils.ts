@@ -2,7 +2,6 @@ import "https://deno.land/std@0.204.0/dotenv/load.ts";
 import { createClient } from '@supabase/supabase-js'
 import { Client } from '@notionhq/client'
 
-
 export const supabase = createClient(
     Deno.env.get('SUPABASE_URL') ?? '',
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''

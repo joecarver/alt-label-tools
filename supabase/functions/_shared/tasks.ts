@@ -1,8 +1,7 @@
 
 import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
-import { notion } from "./notion.ts";
 import { ReleaseTaskName } from "../../types/ReleaseTask.ts";
-
+import { notion } from "./utils.ts";
 
 export interface ReleaseTask {
     id: string;

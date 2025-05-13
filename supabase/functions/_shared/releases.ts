@@ -1,6 +1,6 @@
 import type { BlockObjectResponse } from "@notionhq/client/build/src/api-endpoints";
-import { notion } from "./notion.ts";
 import { getFolderId } from "./drive.ts";
+import { notion } from "./utils.ts";
 
 export interface Release {
     id: string;

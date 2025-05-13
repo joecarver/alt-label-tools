@@ -1,6 +1,6 @@
 import type { BlockObjectResponse } from "@notionhq/client/build/src/api-endpoints";
-import { notion, cacheManager } from "./notion.ts";
 import { getFolderId } from "./drive.ts";
+import { notion } from "./utils.ts";
 
 export interface LabelClient {
     id: string;

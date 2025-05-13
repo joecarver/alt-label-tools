@@ -1,13 +1,11 @@
 
 import type { FileInfo } from "../../types/FileInfo.ts";
-import { notion, cacheManager } from "./notion.ts";
 import { CompletionStatus } from "../../types/CompletionStatus.ts";
 import { BadgeColor } from "../../types/BadgeColor.ts";
 import { DueDateStatus } from "../../types/DueDateStatus.ts";
 import { parseISO } from "date-fns";
 import { ReleaseTaskName } from "../../types/ReleaseTask.ts";
 import { getFileInfo } from "./drive.ts";
-
 
 interface TaskCompletionParams {
     taskName: ReleaseTaskName;
@@ -164,31 +162,3 @@ export async function getTaskStatus(
     }
     return status;
 }
-
-export async function updateTaskCompletion(
-    taskId: string,
-    completedAt: string | null
-): Promise<void> {
-    if (!completedAt) {
-        await notion.pages.update({
-            page_id: taskId,
-            properties: {
-                completedAt: null,
-            },
-        });
-    } else {
-        await notion.pages.update({
-            page_id: taskId,
-            properties: {
-                completedAt: {
-                    date: {
-                        start: completedAt,
-                    },
-                },
-            },
-        });
-    }
-
-    // Invalidate task cache
-    await cacheManager.set(`notion_task_${taskId}`, null);
-} 
