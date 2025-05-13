@@ -1,0 +1,29 @@
+name: Deploy Supabase Functions
+
+on:
+  push:
+    paths:
+      - 'supabase/**'
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Supabase CLI
+        run: |
+          curl -fsSL https://get.pnpm.io/install.sh | sh -
+          pnpm add -g supabase
+
+      - name: Deploy Supabase Functions
+        run: |
+          chmod +x deploy-supabase-functions.sh
+          ./deploy-supabase-functions.sh
+        env:
+          # Use a Supabase access token from https://supabase.com/dashboard/account/tokens
+          # This is different from the service_role key and is specifically for CLI operations
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }} 
