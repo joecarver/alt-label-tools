@@ -16,8 +16,10 @@ jobs:
 
       - name: Install Supabase CLI
         run: |
-          curl -fsSL https://cli.supabase.com/install.sh | bash
-          export PATH="/home/runner/.local/bin:$PATH"
+          wget -q https://github.com/supabase/cli/releases/download/v1.142.0/supabase_linux_amd64.tar.gz
+          tar xzf supabase_linux_amd64.tar.gz
+          sudo mv supabase /usr/local/bin/
+          rm supabase_linux_amd64.tar.gz
         shell: bash
 
       - name: Deploy Supabase Functions
