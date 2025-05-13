@@ -5,11 +5,8 @@ interface ImportMetaEnv {
     readonly PRODUCTION_URL: string;
     readonly GOOGLE_CLIENT_ID: string;
     readonly GOOGLE_CLIENT_SECRET: string;
-    readonly NOTION_API_KEY: string;
-    readonly NOTION_DATABASE_ID: string;
-    readonly N8N_WEBHOOK_URL: string;
-    readonly N8N_API_KEY: string;
-    readonly GOOGLE_SERVICE_ACCOUNT_EMAIL: string;
+    readonly SUPABASE_URL: string;
+    readonly SUPABASE_ANON_KEY: string;
 }
 
 interface ImportMeta {
@@ -27,6 +24,8 @@ declare global {
     const N8N_WEBHOOK_URL: string;
     const N8N_API_KEY: string;
     const GOOGLE_SERVICE_ACCOUNT_EMAIL: string;
+    const SUPABASE_URL: string;
+    const SUPABASE_ANON_KEY: string;
     const ALT_LABEL_TOOLS_METADATA: KVNamespace;
 }
 

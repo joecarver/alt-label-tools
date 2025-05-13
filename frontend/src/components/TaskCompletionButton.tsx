@@ -1,6 +1,6 @@
 import { Button } from "@radix-ui/themes";
 import { CheckIcon, Cross2Icon } from "@radix-ui/react-icons";
-import { formatSingleDate } from "frontend/src/utils/date";
+import { formatSingleDate } from "../utils/date";
 import { useState } from "react";
 
 interface Props {

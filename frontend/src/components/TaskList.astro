@@ -1,18 +1,16 @@
 ---
-import { Box, Flex } from "@radix-ui/themes";
-import TaskItem from "./TaskItem.astro";
+import { Flex, Box } from "@radix-ui/themes";
+import { getTasks } from "../utils/supabase";
 import { TaskSummary } from "./TaskSummary";
-import { getTasksForRelease } from "frontend/src/utils/NotionApi/tasks";
+import TaskItem from "./TaskItem.astro";
 
 interface Props {
     releaseId: string;
-    clientName: string;
-    catalogNumber: string;
 }
 
-const { releaseId, clientName, catalogNumber } = Astro.props;
+const { releaseId } = Astro.props;
 
-const tasks = await getTasksForRelease(releaseId, clientName, catalogNumber);
+const tasks = await getTasks(releaseId);
 ---
 
 <details>
@@ -20,8 +18,6 @@ const tasks = await getTasksForRelease(releaseId, clientName, catalogNumber);
         <TaskSummary
             client:load
             releaseId={releaseId}
-            clientName={clientName}
-            catalogNumber={catalogNumber}
             initialTasks={tasks}
         />
     </summary>
@@ -40,15 +36,12 @@ const tasks = await getTasksForRelease(releaseId, clientName, catalogNumber);
                     )
                     .map((task) => (
                         <TaskItem
-                            clientName={clientName}
                             task={task}
                             releaseId={releaseId}
                         />
-                    ))
-            }
-        </Flex>
-    </Box>
-</details>
+        ))
+    }
+</Flex>
 
 <style>
     summary {

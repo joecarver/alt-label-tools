@@ -1,22 +1,24 @@
 ---
-import { getReleases } from "frontend/src/utils/NotionApi/api";
-import { Flex } from "@radix-ui/themes";
+import { Grid, Box } from "@radix-ui/themes";
 import ReleaseCard from "./ReleaseCard.astro";
-import { getAuthTokenFromCookies } from "frontend/src/utils/auth";
+import type { Release } from "../types/Release";
 
-const clientName = Astro.props.clientName;
-const clientId = Astro.props.clientId;
-const authToken = getAuthTokenFromCookies(Astro.cookies);
-if (!authToken) {
-    throw new Error("No auth token found");
+interface Props {
+    clientId: string;
+    clientName: string;
+    releases: Release[];
 }
-const releases = await getReleases(clientId, clientName);
+
+const { clientId, clientName, releases } = Astro.props;
 ---
 
-<Flex direction="column" gap="4">
+<Grid columns="1" gap="4">
     {
-        releases.map((release) => (
-            <ReleaseCard clientName={clientName} release={release} />
+        releases.map((release: Release) => (
+            <ReleaseCard
+                release={release}
+                clientName={clientName}
+            />
         ))
     }
-</Flex>
+</Grid>

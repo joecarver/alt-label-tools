@@ -1,6 +1,6 @@
-import { BadgeColor } from "frontend/src/types/BadgeColor";
-import { CompletionStatus } from "frontend/src/types/CompletionStatus";
-import { ReleaseTaskName, type ReleaseTask } from "frontend/src/types/ReleaseTask";
+import { BadgeColor } from "../types/BadgeColor";
+import { CompletionStatus } from "../types/CompletionStatus";
+import { ReleaseTaskName, type ReleaseTask } from "../types/ReleaseTask";
 
 export const getTaskSummary = (tasks: ReleaseTask[]) => {
     const totalTasks = tasks.length;

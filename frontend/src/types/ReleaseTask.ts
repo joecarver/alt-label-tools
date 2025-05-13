@@ -23,7 +23,6 @@ export type DetectableReleaseTask = Extract<ReleaseTaskName, ReleaseTaskName.Con
 export interface ReleaseTask {
     id: string;
     name: ReleaseTaskName;
-
     releaseId: string | null;
     startDate: string;
     endDate: string;

@@ -1,10 +1,8 @@
 ---
 import { Grid, Container, Box } from "@radix-ui/themes";
 import ClientCard from "./ClientCard.astro";
-
-import { getClients } from "frontend/src/utils/NotionApi/api";
-import type { LabelClient } from "frontend/src/types/LabelClient";
-import LoadingSpinner from "./LoadingSpinner.astro";
+import { getClients } from "../utils/supabase";
+import type { LabelClient } from "src/types/LabelClient";
 
 const clients = await getClients();
 ---

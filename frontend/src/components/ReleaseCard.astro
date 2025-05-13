@@ -1,7 +1,7 @@
 ---
 import { Card, Text, Flex, Badge, Spinner } from "@radix-ui/themes";
 import TaskList from "./TaskList.astro";
-import type { Release } from "frontend/src/types/Release";
+import type { Release } from "../types/Release";
 
 import LinkButton from "./LinkButton.astro";
 
@@ -28,8 +28,6 @@ const folderUrl = `https://drive.google.com/drive/folders/${release.folderId}`;
             </Flex>
         </Flex>
         <TaskList
-            clientName={clientName}
-            catalogNumber={release.catalogNumber}
             releaseId={release.id}
             server:defer
         >

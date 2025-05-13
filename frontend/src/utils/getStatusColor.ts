@@ -1,6 +1,6 @@
-import { BadgeColor } from "frontend/src/types/BadgeColor";
-import { CompletionStatus } from "frontend/src/types/CompletionStatus";
-import { DueDateStatus } from "frontend/src/types/DueDateStatus";
+import { BadgeColor } from "../types/BadgeColor";
+import { CompletionStatus } from "../types/CompletionStatus";
+import { DueDateStatus } from "../types/DueDateStatus";
 
 export const getCompletionStatusColor = (status: CompletionStatus): BadgeColor => {
     switch (status) {

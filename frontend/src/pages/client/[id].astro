@@ -1,9 +1,8 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import { getAuthTokenFromCookies } from "frontend/src/utils/auth";
-import { verifyToken } from "frontend/src/utils/auth";
-import { getClients } from "frontend/src/utils/NotionApi/api";
-import { getReleases } from "frontend/src/utils/NotionApi/releases";
+import { getAuthTokenFromCookies } from "../../utils/auth";
+import { verifyToken } from "../../utils/auth";
+import { getClients, getReleases } from "../../utils/supabase";
 import {
     Card,
     Flex,
@@ -14,10 +13,11 @@ import {
     Button,
     Link,
 } from "@radix-ui/themes";
-import LinkButton from "@/components/LinkButton.astro";
-import ReleaseList from "@/components/ReleaseList.astro";
-import LoadingSpinner from "@/components/LoadingSpinner.astro";
+import LinkButton from "../../components/LinkButton.astro";
+import ReleaseList from "../../components/ReleaseList.astro";
+import LoadingSpinner from "../../components/LoadingSpinner.astro";
 import { BiArrowBack } from "react-icons/bi";
+import type { LabelClient } from "../../types/LabelClient";
 
 // Check if user is authenticated
 const token = getAuthTokenFromCookies(Astro.cookies);
@@ -37,11 +37,13 @@ try {
 
 const { id } = Astro.params;
 const clients = await getClients();
-const client = clients.find((c) => c.id === id);
+const client = clients.find((c: LabelClient) => c.id === id);
 
 if (!client) {
     return Astro.redirect("/");
 }
+
+const releases = await getReleases(client.id);
 ---
 
 <Layout title={`${client.name} - ALT Label Tools`}>
@@ -64,6 +66,7 @@ if (!client) {
                             <ReleaseList
                                 clientId={client.id}
                                 clientName={client.name}
+                                releases={releases}
                                 server:defer
                             >
                                 <LoadingSpinner
