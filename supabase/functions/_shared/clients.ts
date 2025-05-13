@@ -7,6 +7,8 @@ export interface LabelClient {
     folderId: string;
 }
 
+console.log("test change");
+
 export async function getClientsFromNotion(): Promise<LabelClient[]> {
     const clientsBlockId = "1bcaab79f528805bb18cf74fb628292b";
     
