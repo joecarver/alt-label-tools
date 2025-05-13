@@ -1,0 +1,29 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { getAuthTokenFromCookies } from "frontend/src/utils/auth";
+import { verifyToken } from "frontend/src/utils/auth";
+import ClientList from "@/components/ClientList.astro";
+import LoadingSpinner from "@/components/LoadingSpinner.astro";
+
+// Check if user is authenticated
+const token = getAuthTokenFromCookies(Astro.cookies);
+if (!token) {
+	return Astro.redirect("/login");
+}
+
+try {
+	const payload = await verifyToken(token);
+	if (!payload) {
+		return Astro.redirect("/login");
+	}
+} catch (error) {
+	console.error("Token verification failed:", error);
+	return Astro.redirect("/login");
+}
+---
+
+<Layout title="ALT Label Tools">
+	<ClientList server:defer>
+		<LoadingSpinner text="Loading clients..." slot="fallback" />
+	</ClientList>
+</Layout>

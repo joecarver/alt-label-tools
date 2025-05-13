@@ -4,16 +4,16 @@
     "baseUrl": ".",
     "paths": {
       "@/*": [
-        "src/*"
+        "frontend/src/*"
       ]
     }
   },
   "include": [
-    ".astro/types.d.ts",
+    "frontend/.astro/types.d.ts",
     "**/*"
   ],
   "exclude": [
-    "dist"
+    "frontend/dist"
   ],
   "lib": [
     "deno.window",

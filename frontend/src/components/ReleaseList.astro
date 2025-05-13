@@ -1,0 +1,22 @@
+---
+import { getReleases } from "frontend/src/utils/NotionApi/api";
+import { Flex } from "@radix-ui/themes";
+import ReleaseCard from "./ReleaseCard.astro";
+import { getAuthTokenFromCookies } from "frontend/src/utils/auth";
+
+const clientName = Astro.props.clientName;
+const clientId = Astro.props.clientId;
+const authToken = getAuthTokenFromCookies(Astro.cookies);
+if (!authToken) {
+    throw new Error("No auth token found");
+}
+const releases = await getReleases(clientId, clientName);
+---
+
+<Flex direction="column" gap="4">
+    {
+        releases.map((release) => (
+            <ReleaseCard clientName={clientName} release={release} />
+        ))
+    }
+</Flex>

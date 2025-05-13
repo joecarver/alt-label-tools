@@ -1,0 +1,48 @@
+---
+import { Card, Text, Flex, Badge, Spinner } from "@radix-ui/themes";
+import TaskList from "./TaskList.astro";
+import type { Release } from "frontend/src/types/Release";
+
+import LinkButton from "./LinkButton.astro";
+
+interface Props {
+    release: Release;
+    clientName: string;
+}
+
+const { release, clientName } = Astro.props;
+
+const folderUrl = `https://drive.google.com/drive/folders/${release.folderId}`;
+---
+
+<Card size="2">
+    <Flex direction="column" gap="3">
+        <Flex justify="between" align="center">
+            <Flex direction="column" gap="1">
+                <Flex align="center" gap="2" wrap="wrap">
+                    <Text size="4" weight="bold">
+                        {release.name}
+                    </Text>
+                    {release.folderId && <LinkButton url={folderUrl} />}
+                </Flex>
+            </Flex>
+        </Flex>
+        <TaskList
+            clientName={clientName}
+            catalogNumber={release.catalogNumber}
+            releaseId={release.id}
+            server:defer
+        >
+            <Badge
+                color="gray"
+                variant="soft"
+                size="2"
+                style={{ width: "fit-content" }}
+                slot="fallback"
+            >
+                <Spinner size="1" />
+                Loading tasks...
+            </Badge>
+        </TaskList>
+    </Flex>
+</Card>
