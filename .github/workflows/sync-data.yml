@@ -3,7 +3,7 @@ name: Sync Data
 
 on:
   schedule:
-    - cron: '*/1 * * * *'  # Every minute
+    - cron: '*/5 * * * *'  # Every 5 minutes
   workflow_dispatch:  # Allow manual triggers
 
 jobs:
