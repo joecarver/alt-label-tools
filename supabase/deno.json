@@ -9,7 +9,8 @@
     "imports": {
         "@notionhq/client": "https://esm.sh/@notionhq/client@2.2.14",
         "@notionhq/client/build/src/api-endpoints": "https://esm.sh/@notionhq/client@2.2.14/build/src/api-endpoints",
-        "@supabase/supabase-js": "npm:@supabase/supabase-js@^2.49.4"
+        "@supabase/supabase-js": "npm:@supabase/supabase-js@^2.49.4",
+        "date-fns": "npm:date-fns@^4.1.0"
     },
     "nodeModulesDir": "auto",
     "tasks": {

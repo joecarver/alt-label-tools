@@ -3,7 +3,7 @@ import type { FileInfo } from "../../types/FileInfo.ts";
 import { notion, cacheManager } from "./notion.ts";
 import { CompletionStatus } from "../../types/CompletionStatus.ts";
 import { BadgeColor } from "../../types/BadgeColor.ts";
-import { DueDateStatus } from "../../types/DueDateStatus";
+import { DueDateStatus } from "../../types/DueDateStatus.ts";
 import { parseISO } from "date-fns";
 import { ReleaseTaskName } from "../../types/ReleaseTask.ts";
 import { getFileInfo } from "./drive.ts";
