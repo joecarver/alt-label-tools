@@ -22,7 +22,7 @@ const { task, isDetectable, taskStatus, releaseId } = Astro.props;
             taskId={task.id}
             taskNotionId={task.notionId}
             releaseId={releaseId}
-            completedAt={taskStatus?.completionStatus === CompletionStatus.DONE_MANUALLY ? taskStatus.updatedAt : undefined}
+            completedAt={taskStatus?.completionStatus === CompletionStatus.DONE_MANUALLY ? task.completedAt : undefined}
         />
     )
 }
