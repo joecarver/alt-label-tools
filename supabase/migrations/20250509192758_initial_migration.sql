@@ -94,6 +94,7 @@ alter table releases enable row level security;
 alter table tasks enable row level security;
 alter table task_statuses enable row level security;
 
+
 -- Create policies for authenticated users
 create policy "Allow authenticated users to read clients"
   on clients for select
@@ -139,7 +140,6 @@ create policy "Allow service role to manage task statuses"
   to service_role
   using (true)
   with check (true);
-
 
 -- Create a table for monitoring instead of a view
 create table sync_health_monitor (
@@ -249,3 +249,32 @@ create table sync_executions (
 -- Create index for querying recent executions
 create index idx_sync_executions_function_name_created_at 
 on sync_executions(function_name, created_at desc);
+
+
+-- Enable RLS for monitoring tables
+alter table sync_executions enable row level security;
+alter table sync_health_monitor enable row level security;
+
+-- Create policies for authenticated users to read monitoring data
+create policy "Allow authenticated users to read sync executions"
+  on sync_executions for select
+  to authenticated
+  using (true);
+
+create policy "Allow authenticated users to read sync health monitor"
+  on sync_health_monitor for select
+  to authenticated
+  using (true);
+
+-- Create policies for service role to manage monitoring data
+create policy "Allow service role to manage sync executions"
+  on sync_executions for all
+  to service_role
+  using (true)
+  with check (true);
+
+create policy "Allow service role to manage sync health monitor"
+  on sync_health_monitor for all
+  to service_role
+  using (true)
+  with check (true);
