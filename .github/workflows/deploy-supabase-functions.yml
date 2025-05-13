@@ -32,7 +32,6 @@ jobs:
 
       - name: Deploy Supabase Functions
         run: |
-          cd supabase
           supabase functions deploy monitor-sync-health --project-ref "qxvnzkcsfygovclpdxzp"
           supabase functions deploy sync-clients --project-ref "qxvnzkcsfygovclpdxzp"
           supabase functions deploy sync-releases --project-ref "qxvnzkcsfygovclpdxzp"
