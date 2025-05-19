@@ -24,6 +24,10 @@ export async function serve(req: Request) {
         console.log('Retrieved existing clients:', existingClients?.length ?? 0)
 
         const existingIds = new Set(existingClients?.map(c => c.notion_id) ?? [])
+        const currentNotionIds = new Set<string>()
+
+        // Track all current Notion IDs
+        clients.forEach(client => currentNotionIds.add(client.id))
 
         console.log('Upserting clients to Supabase...')
         const { error } = await supabase
@@ -42,17 +46,34 @@ export async function serve(req: Request) {
             throw error
         }
 
+        // Find and delete clients that no longer exist in Notion
+        const recordsToDelete = Array.from(existingIds).filter(id => !currentNotionIds.has(id))
+        let recordsDeleted = 0
+        if (recordsToDelete.length > 0) {
+            const { error: deleteError } = await supabase
+                .from('clients')
+                .delete()
+                .in('notion_id', recordsToDelete)
+
+            if (deleteError) {
+                console.error('Error deleting clients:', deleteError)
+                throw deleteError
+            }
+            recordsDeleted = recordsToDelete.length
+        }
+
         const result = {
             recordsProcessed: clients.length,
             recordsCreated: clients.filter(c => !existingIds.has(c.id)).length,
-            recordsUpdated: clients.filter(c => existingIds.has(c.id)).length
+            recordsUpdated: clients.filter(c => existingIds.has(c.id)).length,
+            recordsDeleted
         }
 
         console.log('Sync results:', result)
 
         await trackSyncExecution('sync-clients', 'success', result, null, startTime)
 
-        console.log(`Successfully synced ${result.recordsProcessed} clients`)
+        console.log(`Successfully synced ${result.recordsProcessed} clients (${result.recordsCreated} created, ${result.recordsUpdated} updated, ${result.recordsDeleted} deleted)`)
         return successResponse(result)
     } catch (error) {
         console.error('Detailed error in sync-clients:', error)
@@ -60,7 +81,8 @@ export async function serve(req: Request) {
         await trackSyncExecution('sync-clients', 'failure', {
             recordsProcessed: 0,
             recordsCreated: 0,
-            recordsUpdated: 0
+            recordsUpdated: 0,
+            recordsDeleted: 0
         }, errorMessage, startTime)
         return handleError(error)
     }

@@ -36,6 +36,7 @@ export interface SyncExecutionResult {
     recordsProcessed: number;
     recordsCreated: number;
     recordsUpdated: number;
+    recordsDeleted?: number;
 }
 
 export async function trackSyncExecution(
@@ -54,6 +55,7 @@ export async function trackSyncExecution(
             records_processed: result.recordsProcessed,
             records_created: result.recordsCreated,
             records_updated: result.recordsUpdated,
+            records_deleted: result.recordsDeleted,
             error_message: errorMessage,
             execution_time_ms: Date.now() - startTime
         })

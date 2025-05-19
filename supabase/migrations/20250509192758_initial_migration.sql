@@ -141,96 +141,6 @@ create policy "Allow service role to manage task statuses"
   using (true)
   with check (true);
 
--- Create a table for monitoring instead of a view
-create table sync_health_monitor (
-    id uuid primary key default uuid_generate_v4(),
-    table_name text not null,
-    last_sync timestamp with time zone,
-    record_count bigint,
-    is_healthy boolean,
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-
--- Create a function to update the monitoring data
-create or replace function update_sync_health()
-returns void language plpgsql as $$
-begin
-    -- Clear existing monitoring data
-    delete from sync_health_monitor;
-    
-    -- Insert new monitoring data
-    insert into sync_health_monitor (table_name, last_sync, record_count, is_healthy)
-    select 
-        'clients' as table_name,
-        max(updated_at) as last_sync,
-        count(*) as record_count,
-        max(updated_at) > now() - interval '5 minutes' as is_healthy
-    from clients
-    union all
-    select 
-        'releases' as table_name,
-        max(updated_at) as last_sync,
-        count(*) as record_count,
-        max(updated_at) > now() - interval '5 minutes' as is_healthy
-    from releases
-    union all
-    select 
-        'tasks' as table_name,
-        max(updated_at) as last_sync,
-        count(*) as record_count,
-        max(updated_at) > now() - interval '5 minutes' as is_healthy
-    from tasks
-    union all
-    select 
-        'task_statuses' as table_name,
-        max(updated_at) as last_sync,
-        count(*) as record_count,
-        max(updated_at) > now() - interval '5 minutes' as is_healthy
-    from task_statuses;
-end;
-$$;
-
--- Create a function to check for unhealthy syncs
-create or replace function check_sync_health()
-returns table (
-    table_name text,
-    last_sync timestamp with time zone,
-    record_count bigint,
-    is_healthy boolean,
-    time_since_last_sync interval
-) language plpgsql as $$
-begin
-    return query
-    select 
-        m.table_name,
-        m.last_sync,
-        m.record_count,
-        m.is_healthy,
-        now() - m.last_sync as time_since_last_sync
-    from sync_health_monitor m
-    where not m.is_healthy
-    order by m.last_sync asc;
-end;
-$$;
-
--- Create a function to alert on sync failures
-create or replace function alert_on_sync_failure()
-returns void language plpgsql as $$
-declare
-    unhealthy_syncs record;
-begin
-    for unhealthy_syncs in 
-        select * from check_sync_health()
-    loop
-        -- Here you would implement your alerting logic
-        -- For example, sending an email or webhook
-        raise notice 'Sync health check failed for %: Last sync was % ago',
-            unhealthy_syncs.table_name,
-            unhealthy_syncs.time_since_last_sync;
-    end loop;
-end;
-$$;
-
 -- Create sync_executions table
 create table sync_executions (
     id uuid primary key default uuid_generate_v4(),
@@ -241,6 +151,7 @@ create table sync_executions (
     records_processed integer,
     records_created integer,
     records_updated integer,
+    records_deleted integer,
     error_message text,
     execution_time_ms integer,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null
@@ -251,30 +162,18 @@ create index idx_sync_executions_function_name_created_at
 on sync_executions(function_name, created_at desc);
 
 
--- Enable RLS for monitoring tables
+-- Enable RLS for sync_executions table
 alter table sync_executions enable row level security;
-alter table sync_health_monitor enable row level security;
 
--- Create policies for authenticated users to read monitoring data
+-- Create policies for authenticated users to read sync executions
 create policy "Allow authenticated users to read sync executions"
   on sync_executions for select
   to authenticated
   using (true);
 
-create policy "Allow authenticated users to read sync health monitor"
-  on sync_health_monitor for select
-  to authenticated
-  using (true);
-
--- Create policies for service role to manage monitoring data
+-- Create policies for service role to manage sync executions
 create policy "Allow service role to manage sync executions"
   on sync_executions for all
-  to service_role
-  using (true)
-  with check (true);
-
-create policy "Allow service role to manage sync health monitor"
-  on sync_health_monitor for all
   to service_role
   using (true)
   with check (true);
