@@ -1,8 +1,5 @@
 import type { FileInfo } from '../../types/FileInfo.ts';
 
-// Cache for storing folder paths to their IDs
-const folderIdCache: Record<string, string> = {};
-
 // Service account credentials
 const serviceAccountEmail = Deno.env.get('GOOGLE_SERVICE_ACCOUNT_EMAIL');
 const serviceAccountKey = Deno.env.get('GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY');
@@ -198,12 +195,6 @@ interface DriveFolder {
 
 export async function getFolderId(folderName: string): Promise<string | null> {
     console.log('Getting folder ID for:', folderName)
-    
-    // Check cache first
-    if (folderIdCache[folderName]) {
-        console.log('Found folder ID in cache:', folderIdCache[folderName])
-        return folderIdCache[folderName];
-    }
 
     // If the folderName contains slashes, it's a path
     const pathParts = folderName.split('/').filter(part => part.trim() !== '');
@@ -256,7 +247,6 @@ export async function getFolderId(folderName: string): Promise<string | null> {
         }
 
         currentPath = pathParts[0];
-        folderIdCache[currentPath] = currentFolderId;
         console.log('Root folder found:', currentFolderId)
 
         // If there's only one part in the path, we're done
@@ -314,7 +304,6 @@ export async function getFolderId(folderName: string): Promise<string | null> {
             }
 
             currentFolderId = folderInfo.id;
-            folderIdCache[currentPath] = currentFolderId;
             console.log('Found subfolder:', currentFolderId)
         }
 

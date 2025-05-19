@@ -7,8 +7,8 @@
         "strict": true
     },
     "imports": {
-        "@supabase/supabase-js": "npm:@supabase/supabase-js@^2.49.4",
-        "date-fns": "npm:date-fns@^4.1.0",
+        "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.49.4",
+        "date-fns": "https://esm.sh/date-fns@4.1.0",
         "@notionhq/client/build/src/api-endpoints": "https://esm.sh/@notionhq/client@2.2.14/build/src/api-endpoints"
     },
     "nodeModulesDir": "auto",
