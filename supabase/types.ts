@@ -137,6 +137,7 @@ export type Database = {
       }
       releases: {
         Row: {
+          campaign_length_weeks: number
           catalog_number: string
           client_id: string | null
           created_at: string
@@ -150,9 +151,19 @@ export type Database = {
           license_allow_politics: boolean | null
           mastering_engineer: number | null
           name: string
+          release_date: string | null
+          services_required_dj_promo: boolean | null
+          services_required_marketing_driver: boolean | null
+          services_required_mastering: boolean | null
+          services_required_mixing: boolean | null
+          services_required_playlist_pitching: boolean | null
+          services_required_press: boolean | null
+          services_required_press_release: boolean | null
+          services_required_sync: boolean | null
           updated_at: string
         }
         Insert: {
+          campaign_length_weeks?: number
           catalog_number: string
           client_id?: string | null
           created_at?: string
@@ -166,9 +177,19 @@ export type Database = {
           license_allow_politics?: boolean | null
           mastering_engineer?: number | null
           name: string
+          release_date?: string | null
+          services_required_dj_promo?: boolean | null
+          services_required_marketing_driver?: boolean | null
+          services_required_mastering?: boolean | null
+          services_required_mixing?: boolean | null
+          services_required_playlist_pitching?: boolean | null
+          services_required_press?: boolean | null
+          services_required_press_release?: boolean | null
+          services_required_sync?: boolean | null
           updated_at?: string
         }
         Update: {
+          campaign_length_weeks?: number
           catalog_number?: string
           client_id?: string | null
           created_at?: string
@@ -182,6 +203,15 @@ export type Database = {
           license_allow_politics?: boolean | null
           mastering_engineer?: number | null
           name?: string
+          release_date?: string | null
+          services_required_dj_promo?: boolean | null
+          services_required_marketing_driver?: boolean | null
+          services_required_mastering?: boolean | null
+          services_required_mixing?: boolean | null
+          services_required_playlist_pitching?: boolean | null
+          services_required_press?: boolean | null
+          services_required_press_release?: boolean | null
+          services_required_sync?: boolean | null
           updated_at?: string
         }
         Relationships: [
@@ -207,51 +237,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      sync_executions: {
-        Row: {
-          completed_at: string | null
-          created_at: string
-          error_message: string | null
-          execution_time_ms: number | null
-          function_name: string
-          id: string
-          records_created: number | null
-          records_deleted: number | null
-          records_processed: number | null
-          records_updated: number | null
-          started_at: string
-          status: string
-        }
-        Insert: {
-          completed_at?: string | null
-          created_at?: string
-          error_message?: string | null
-          execution_time_ms?: number | null
-          function_name: string
-          id?: string
-          records_created?: number | null
-          records_deleted?: number | null
-          records_processed?: number | null
-          records_updated?: number | null
-          started_at?: string
-          status: string
-        }
-        Update: {
-          completed_at?: string | null
-          created_at?: string
-          error_message?: string | null
-          execution_time_ms?: number | null
-          function_name?: string
-          id?: string
-          records_created?: number | null
-          records_deleted?: number | null
-          records_processed?: number | null
-          records_updated?: number | null
-          started_at?: string
-          status?: string
-        }
-        Relationships: []
       }
       task_statuses: {
         Row: {

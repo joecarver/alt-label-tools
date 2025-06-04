@@ -58,8 +58,17 @@ if (!client) {
                   <input type="date" id="release_date" name="release_date" required 
                     style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #ccc' }} />
 
-                  <input type="number" id="campaign_length" name="campaign_length" placeholder="Campaign Length (Weeks)" required 
-                    style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #ccc' }} />
+                  <div>
+                    <Text size="2">Campaign Length</Text>
+                    <label style={{ display: 'inline-flex', alignItems: 'center', marginRight: '1rem' }}>
+                      <input type="radio" id="campaign_length_8" name="campaign_length" value="8" required />
+                      <Text size="2" style={{ marginLeft: '0.5rem' }}>8 Weeks</Text>
+                    </label>
+                    <label style={{ display: 'inline-flex', alignItems: 'center' }}>
+                      <input type="radio" id="campaign_length_12" name="campaign_length" value="12" required />
+                      <Text size="2" style={{ marginLeft: '0.5rem' }}>12 Weeks</Text>
+                    </label>
+                  </div>
                 </Flex>
               </Card>
 
@@ -179,7 +188,7 @@ if (!client) {
     catalog_number: 'ALT001',
     name: 'Test Release',
     release_date: new Date().toISOString().split('T')[0],
-    campaign_length: '4',
+    campaign_length: '8',
     mastering_engineer_email: 'mastering@example.com',
     designer_email: 'designer@example.com',
     license_allow_politics: true,
@@ -193,6 +202,11 @@ if (!client) {
   fillTestDataButton.addEventListener('click', () => {
     // Fill text inputs
     Object.entries(testData).forEach(([key, value]) => {
+      if (key === 'campaign_length') {
+        const radio = form.querySelector(`input[name="campaign_length"][value="${value}"]`) as HTMLInputElement;
+        if (radio) radio.checked = true;
+        return;
+      }
       const element = form.elements.namedItem(key) as HTMLInputElement;
       if (element) {
         if (element.type === 'checkbox') {
