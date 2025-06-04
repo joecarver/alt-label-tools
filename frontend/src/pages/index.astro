@@ -1,7 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { getAuthTokenFromCookies } from "../utils/auth";
-import { verifyToken } from "../utils/auth";
+import { getUserFromToken } from "../utils/auth";
+import { isAdmin } from "../utils/authorization";
+import { getClients, getClientsForUser } from "../utils/supabase";
 import ClientList from "../components/ClientList.astro";
 import LoadingSpinner from "../components/LoadingSpinner.astro";
 
@@ -11,19 +13,27 @@ if (!token) {
 	return Astro.redirect("/login");
 }
 
+let user;
 try {
-	const payload = await verifyToken(token);
-	if (!payload) {
+	user = await getUserFromToken(token);
+	if (!user) {
 		return Astro.redirect("/login");
 	}
 } catch (error) {
 	console.error("Token verification failed:", error);
 	return Astro.redirect("/login");
 }
+
+let clients = [];
+if (user.email && isAdmin(user.email)) {
+	clients = await getClients();
+} else {
+	clients = await getClients(user.id);
+}
 ---
 
 <Layout title="ALT Label Tools">
-	<ClientList server:defer>
+	<ClientList clients={clients} server:defer>
 		<LoadingSpinner text="Loading clients..." slot="fallback" />
 	</ClientList>
 </Layout>

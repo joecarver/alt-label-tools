@@ -1,118 +1,49 @@
-import { getSecret } from 'astro:env/server';
+import { createClient, type User } from "@supabase/supabase-js";
+import { getSecret } from "astro:env/server";
 
-// List of allowed email addresses
-const ALLOWED_EMAILS = [
-    'joe.crvr1@gmail.com',
-    'altlabeltools@gmail.com'
-];
+const SUPABASE_URL = getSecret("SUPABASE_URL");
+const SUPABASE_ANON_KEY = getSecret("SUPABASE_ANON_KEY");
 
-// Get the base URL for the current environment
-const getBaseUrl = () => {
-    if (getSecret('NODE_ENV') === 'production') {
-        const url = getSecret('PRODUCTION_URL');
-        if (!url) {
-            throw new Error('PRODUCTION_URL environment variable is not set');
-        }
-        return url;
-    }
-    return 'http://localhost:4321';
-};
-
-// Scopes required for user authentication
-const USER_SCOPES = [
-    'https://www.googleapis.com/auth/userinfo.email',
-    'https://www.googleapis.com/auth/userinfo.profile'
-];
-
-export function generateAuthUrl(): string {
-    const baseUrl = getBaseUrl();
-    const redirectUri = `${baseUrl}/api/auth`;
-    const clientId = getSecret('GOOGLE_CLIENT_ID');
-
-    if (!clientId) {
-        throw new Error('GOOGLE_CLIENT_ID environment variable is not set');
-    }
-
-    const params = new URLSearchParams({
-        client_id: clientId,
-        redirect_uri: redirectUri,
-        response_type: 'code',
-        scope: USER_SCOPES.join(' '),
-        access_type: 'offline',
-        prompt: 'consent'
-    });
-
-    return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  throw new Error("Supabase environment variables are not set");
 }
 
-export async function getTokens(code: string) {
-    const baseUrl = getBaseUrl();
-    const redirectUri = `${baseUrl}/api/auth`;
-    const clientId = getSecret('GOOGLE_CLIENT_ID');
-    const clientSecret = getSecret('GOOGLE_CLIENT_SECRET');
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    if (!clientId || !clientSecret) {
-        throw new Error('GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET environment variables are not set');
-    }
-
-    const params = new URLSearchParams({
-        code,
-        client_id: clientId,
-        client_secret: clientSecret,
-        redirect_uri: redirectUri,
-        grant_type: 'authorization_code'
-    });
-
-    const response = await fetch('https://oauth2.googleapis.com/token', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: params.toString()
-    });
-
-    if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Token request failed:', {
-            status: response.status,
-            statusText: response.statusText,
-            error: errorText
-        });
-        throw new Error(`Failed to get tokens: ${errorText}`);
-    }
-
-    return response.json();
+// Sign up a new user
+export async function signUpWithEmail(email: string, password: string) {
+  const { data, error } = await supabase.auth.signUp({ email, password });
+  if (error) throw error;
+  return data;
 }
 
-// Helper function to get auth token from cookies (for user session only)
+// Sign in an existing user
+export async function signInWithEmail(email: string, password: string) {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+  if (error) throw error;
+  return data;
+}
+
+// Sign out the current user
+export async function signOut() {
+  const { error } = await supabase.auth.signOut();
+  if (error) throw error;
+}
+
+// Get the user from a session token (access_token)
+export async function getUserFromToken(token: string): Promise<User | null> {
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error) {
+    console.error("Error getting user from token", error);
+    return null;
+  }
+  return data.user;
+}
+
+// Helper to get auth token from cookies
 export function getAuthTokenFromCookies(cookies: any): string | null {
-    return cookies.get('auth_token')?.value || null;
+  return cookies.get("auth_token")?.value || null;
 }
-
-// Verify user session token and check if email is allowed
-export async function verifyToken(token: string) {
-    try {
-        const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch user info');
-        }
-
-        const userInfo = await response.json();
-
-        // Check if the user's email is in the allowed list
-        if (!userInfo.email || !ALLOWED_EMAILS.includes(userInfo.email)) {
-            console.error('Unauthorized email attempt:', userInfo.email);
-            return null;
-        }
-
-        return userInfo;
-    } catch (error) {
-        console.error('Token verification failed:', error);
-        return null;
-    }
-} 

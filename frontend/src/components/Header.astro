@@ -1,20 +1,29 @@
 ---
-import { Heading, Text } from "@radix-ui/themes";
+import type { User } from "@supabase/supabase-js";
+import { Badge, Flex, Heading, Text } from "@radix-ui/themes";
 import { getAuthTokenFromCookies } from "../utils/auth";
-import { verifyToken } from "../utils/auth";
+import { getUserFromToken } from "../utils/auth";
 import Avatar from "./Avatar.astro";
+import { isAdmin } from "../utils/authorization";
+import { MdAdminPanelSettings } from "react-icons/md";
 
 // Get user info
 const token = getAuthTokenFromCookies(Astro.cookies);
-let userInfo = null;
+let userInfo: User | null = null;
 if (token) {
-    userInfo = await verifyToken(token);
+    userInfo = await getUserFromToken(token);
 }
+const isUserAdmin = userInfo?.email && isAdmin(userInfo.email);
+
+console.log({ isUserAdmin });
 ---
 
 <header>
     <Heading as="h1" className="header-title">ALT ~ Automated Label Tools</Heading>
-    {userInfo && <Avatar userInfo={userInfo} />}
+    <Flex align="center" gap="2">
+        {isUserAdmin && <Badge size="3" color="gray" variant="soft"><MdAdminPanelSettings /></Badge>}
+        {userInfo && <Avatar userInfo={userInfo} />}
+    </Flex>
 </header>
 
 <style>

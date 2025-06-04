@@ -1,10 +1,28 @@
 ---
 import { Grid, Container, Box, Button, Flex } from "@radix-ui/themes";
 import ClientCard from "./ClientCard.astro";
+import { getAuthTokenFromCookies, getUserFromToken } from "../utils/auth";
+import { isAdmin } from "../utils/authorization";
 import { getClients } from "../utils/supabase";
-import type { LabelClient } from "src/types/LabelClient";
+import type { LabelClient } from "../types/LabelClient";
 
-const clients = await getClients();
+const token = getAuthTokenFromCookies(Astro.cookies);
+if (!token) {
+	return Astro.redirect("/login");
+}
+
+let user;
+try {
+	user = await getUserFromToken(token);
+	if (!user) {
+		return Astro.redirect("/login");
+	}
+} catch (error) {
+	console.error("Token verification failed:", error);
+	return Astro.redirect("/login");
+}
+
+const clients = await getClients(user.email && isAdmin(user.email) ? undefined : user.id);
 ---
 
 <Container size="3">

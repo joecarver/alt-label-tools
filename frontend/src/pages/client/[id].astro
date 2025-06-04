@@ -1,8 +1,9 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import { getAuthTokenFromCookies } from "../../utils/auth";
-import { verifyToken } from "../../utils/auth";
-import { getClients, getReleases } from "../../utils/supabase";
+import { getUserFromToken } from "../../utils/auth";
+import { getClients, getReleases, getUsersForClient } from "../../utils/supabase";
+import { isAdmin } from "../../utils/authorization";
 import {
     Card,
     Flex,
@@ -19,15 +20,26 @@ import LoadingSpinner from "../../components/LoadingSpinner.astro";
 import { BiArrowBack } from "react-icons/bi";
 import type { LabelClient } from "../../types/LabelClient";
 
+// Helper to get all users (for admin select)
+async function getAllUsers(): Promise<{id: string, email: string}[]> {
+    const { supabase } = await import("../../utils/supabase");
+    const { data, error } = await supabase.auth.admin.listUsers();  
+    if (error) return [];
+    return data.users
+        .filter(user => typeof user.email === 'string')
+        .map(user => ({ id: user.id, email: user.email as string }));
+}
+
 // Check if user is authenticated
 const token = getAuthTokenFromCookies(Astro.cookies);
 if (!token) {
     return Astro.redirect("/login");
 }
 
+let user;
 try {
-    const payload = await verifyToken(token);
-    if (!payload) {
+    user = await getUserFromToken(token);
+    if (!user) {
         return Astro.redirect("/login");
     }
 } catch (error) {
@@ -36,7 +48,7 @@ try {
 }
 
 const { id } = Astro.params;
-const clients = await getClients();
+const clients = await getClients(user.email && isAdmin(user.email) ? undefined : user.id);
 const client = clients.find((c: LabelClient) => c.id === id);
 
 if (!client) {
@@ -44,6 +56,12 @@ if (!client) {
 }
 
 const releases = await getReleases(client.id);
+const usersWithAccess = await getUsersForClient(client.id);
+const admin = user.email && isAdmin(user.email);
+let allUsers: {id: string, email: string}[] = [];
+if (admin) {
+    allUsers = await getAllUsers();
+}
 ---
 
 <Layout title={`${client.name} - ALT Label Tools`}>
@@ -91,5 +109,13 @@ const releases = await getReleases(client.id);
     .back-button {
         /* position: absolute; */
         transform: translateY(-100%);
+    }
+    .users-access-box {
+        margin-top: 2rem;
+    }
+    .user-access-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
     }
 </style>

@@ -18,15 +18,21 @@ if (!supabaseUrl || !supabaseKey) {
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Fetch all clients
-export async function getClients(): Promise<LabelClient[]> {
-  const { data, error } = await supabase.from("clients").select("*");
+export async function getClients(userId?: string): Promise<LabelClient[]> {
+  // If no userId provided, return all clients (for admin)
+  if (!userId) {
+    const { data, error } = await supabase.from("clients").select("*");
 
-  if (error) {
-    console.error("Error fetching clients:", error);
-    throw error;
+    if (error) {
+      console.error("Error fetching clients:", error);
+      throw error;
+    }
+
+    return keysToCamelCase<LabelClient[]>(data);
   }
 
-  return keysToCamelCase<LabelClient[]>(data);
+  // For non-admin users, get only their assigned clients
+  return getClientsForUser(userId);
 }
 
 // Fetch releases for a specific client
@@ -117,4 +123,90 @@ export async function updateTaskCompletion(
     console.error("Error updating task status:", statusError);
     throw statusError;
   }
+}
+
+// Fetch all clients a user has access to
+export async function getClientsForUser(
+  userId: string
+): Promise<LabelClient[]> {
+  const { data, error } = await supabase
+    .from("client_users")
+    .select("client:clients(*)")
+    .eq("user_id", userId);
+
+  if (error) {
+    console.error("Error fetching user clients:", error);
+    throw error;
+  }
+
+  // Flatten the result to just the client objects
+  const clients = (data || []).map((row: any) => row.client).filter(Boolean);
+  return clients;
+}
+
+// Assign a user to a client (admin only)
+export async function assignUserToClient(
+  userId: string,
+  clientId: string
+): Promise<boolean> {
+  const { error } = await supabase
+    .from("client_users")
+    .insert([{ user_id: userId, client_id: clientId }]);
+  if (error) {
+    console.error("Error assigning user to client:", error);
+    return false;
+  }
+  return true;
+}
+
+// Get all users with access to a client
+export async function getUsersForClient(
+  clientId: string
+): Promise<{ user_id: string; email: string }[]> {
+  const { data, error } = await supabase
+    .from("client_users")
+    .select("user_id")
+    .eq("client_id", clientId);
+
+  if (error) {
+    console.error("Error fetching users for client:", error);
+    return [];
+  }
+
+  const users = await Promise.all(
+    data.map(async (u) => {
+      const { data: user, error: userError } =
+        await supabase.auth.admin.getUserById(u.user_id);
+      if (userError) {
+        console.error("Error fetching user:", userError);
+        return null;
+      }
+      return {
+        user_id: user.user.id,
+        email: user.user.email,
+      };
+    })
+  );
+
+  return users.filter((u) => u !== null) as {
+    user_id: string;
+    email: string;
+  }[];
+}
+
+// Remove a user from a client
+export async function removeUserFromClient(
+  userId: string,
+  clientId: string
+): Promise<boolean> {
+  const { error } = await supabase
+    .from("client_users")
+    .delete()
+    .eq("user_id", userId)
+    .eq("client_id", clientId);
+  if (error) {
+    console.error("Error removing user from client:", error);
+    return false;
+  }
+  return true;
 }

@@ -1,35 +1,20 @@
 ---
 import { getAuthTokenFromCookies } from "../utils/auth";
-import { verifyToken } from "../utils/auth";
 import {
     Box,
     Button,
     Flex,
     Heading,
-    Link,
     Text,
     Theme,
 } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
-import { BsGoogle } from "react-icons/bs";
-import { FaGoogle } from "react-icons/fa";
 
 // Check if user is already authenticated
 const token = getAuthTokenFromCookies(Astro.cookies);
 if (token) {
-    try {
-        const payload = await verifyToken(token);
-        if (payload) {
-            return Astro.redirect("/");
-        }
-    } catch (error) {
-        console.error("Token verification failed:", error);
-    }
+  return Astro.redirect("/");
 }
-
-// Get the auth URL server-side
-const response = await fetch(`${Astro.url.origin}/api/auth`);
-const { authUrl } = await response.json();
 ---
 
 <!doctype html>
@@ -46,22 +31,44 @@ const { authUrl } = await response.json();
                     <Heading as="h1" size="9"> ALT </Heading>
                     <Heading as="h2" size="4"> Automated Label Tools </Heading>
 
-                    <Link href={authUrl}>
-                        <Button
-                            type="button"
-                            color="blue"
-                            variant="surface"
-                            size="4"
-                            style={{
-                                cursor: "pointer",
-                            }}
-                        >
-                            <FaGoogle /> Sign in with Google
-                        </Button>
-                    </Link>
+                    <form id="loginForm" style="width: 100%;">
+                        <Flex direction="column" gap="3">
+                            <input type="email" id="email" name="email" placeholder="Email" required style="width: 100%; padding: 0.75rem; border-radius: 0.25rem; border: 1px solid #ccc; font-size: 1rem;" />
+                            <input type="password" id="password" name="password" placeholder="Password" required style="width: 100%; padding: 0.75rem; border-radius: 0.25rem; border: 1px solid #ccc; font-size: 1rem;" />
+                            <Button type="submit" color="blue" size="4" className="login-button">Sign in</Button>
+                            <Text id="loginError" color="red" className="login-error"> </Text>
+                        </Flex>
+                    </form>
                 </Flex>
             </Box>
         </Theme>
+        <script type="module">
+            const form = document.getElementById('loginForm');
+            const errorText = document.getElementById('loginError');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                errorText.style.display = 'none';
+                const email = form.email.value;
+                const password = form.password.value;
+                try {
+                    const response = await fetch('/api/auth', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password, type: 'login' })
+                    });
+                    if (!response.ok) {
+                        const result = await response.json();
+                        errorText.textContent = result.error || 'Login failed.';
+                        errorText.style.display = 'block';
+                        return;
+                    }
+                    window.location.href = '/';
+                } catch (err) {
+                    errorText.textContent = 'An error occurred. Please try again.';
+                    errorText.style.display = 'block';
+                }
+            });
+        </script>
     </body>
 
     <style>
@@ -96,6 +103,9 @@ const { authUrl } = await response.json();
 
         .login-button {
             width: 100%;
+        }
+        .login-error {
+            display: none;
         }
     </style>
 </html>

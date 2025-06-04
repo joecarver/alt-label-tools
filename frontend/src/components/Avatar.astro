@@ -1,4 +1,6 @@
 ---
+import { Badge } from '@radix-ui/themes';
+
 interface Props {
     userInfo: {
         name?: string | null;
@@ -13,14 +15,9 @@ const { userInfo } = Astro.props;
 <div class="avatar-container">
     <details class="dropdown">
         <summary class="avatar">
-            <img
-                src={userInfo.picture}
-                alt={userInfo.name || userInfo.email || "User"}
-                onerror="this.onerror=null; this.src=''; this.classList.add('fallback')"
-            />
-            <div class="fallback">
+            <Badge size="3" color="gray" variant="soft">
                 {userInfo.name?.charAt(0) || userInfo.email?.charAt(0) || "U"}
-            </div>
+            </Badge>
         </summary>
         <div class="dropdown-content">
             <div class="user-info">
@@ -56,48 +53,32 @@ const { userInfo } = Astro.props;
     .avatar {
         width: 40px;
         height: 40px;
-        border-radius: 50%;
         overflow: hidden;
-        background: var(--blue-9);
-        color: white;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: 500;
+        font-weight: 600;
         position: relative;
         transition: transform 0.2s ease;
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+        text-transform: uppercase;
     }
 
     .dropdown[open] .avatar {
         transform: scale(1.05);
     }
 
-    .avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .avatar .fallback {
-        display: none;
-        font-size: 1.2rem;
-    }
-
-    .avatar img.fallback + .fallback {
-        display: flex;
-    }
-
     .dropdown-content {
         position: absolute;
         right: 0;
         top: calc(100% + 8px);
-        background: white;
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         min-width: 240px;
         padding: 12px;
         z-index: 100;
         text-align: right;
+        background: var(--gray-1, #fff);
     }
 
     .user-info {
@@ -106,18 +87,18 @@ const { userInfo } = Astro.props;
 
     .name {
         font-weight: 600;
-        color: var(--gray-12);
+        color: var(--gray-12, #18181b);
         margin-bottom: 4px;
     }
 
     .email {
         font-size: 0.875rem;
-        color: var(--gray-11);
+        color: var(--gray-11, #52525b);
     }
 
     .divider {
         height: 1px;
-        background: var(--gray-5);
+        background: var(--gray-5, #e4e4e7);
         margin: 8px 0;
     }
 
@@ -126,7 +107,7 @@ const { userInfo } = Astro.props;
         padding: 8px 12px;
         border: none;
         background: none;
-        color: var(--red-11);
+        color: var(--red-11, #be123c);
         font-size: 0.875rem;
         text-align: right;
         cursor: pointer;
@@ -135,6 +116,6 @@ const { userInfo } = Astro.props;
     }
 
     .logout-button:hover {
-        background: var(--red-3);
+        background: var(--red-3, #fee2e2);
     }
 </style>
