@@ -19,9 +19,6 @@ import "@radix-ui/themes/styles.css";
                   
                   <input type="text" id="name" name="name" placeholder="Client Name" required 
                     style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #ccc' }} />
-
-                  <input type="text" id="folder_id" name="folder_id" placeholder="Google Drive Folder ID" required 
-                    style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #ccc' }} />
                 </Flex>
               </Card>
 
@@ -45,7 +42,6 @@ import "@radix-ui/themes/styles.css";
     const formData = new FormData(form);
     const data = {
       name: formData.get('name'),
-      folder_id: formData.get('folder_id'),
     };
 
     try {

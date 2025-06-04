@@ -1,5 +1,5 @@
 ---
-import { Text } from "@radix-ui/themes";
+import { Heading, Text } from "@radix-ui/themes";
 import { getAuthTokenFromCookies } from "../utils/auth";
 import { verifyToken } from "../utils/auth";
 import Avatar from "./Avatar.astro";
@@ -13,7 +13,7 @@ if (token) {
 ---
 
 <header>
-    <Text as="div" className="header-title">ALT ~ Automated Label Tools</Text>
+    <Heading as="h1" className="header-title">ALT ~ Automated Label Tools</Heading>
     {userInfo && <Avatar userInfo={userInfo} />}
 </header>
 

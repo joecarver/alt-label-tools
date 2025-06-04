@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "../../../../supabase/types";
+import { createDriveFolder } from "../../utils/drive";
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -10,7 +11,10 @@ export const POST: APIRoute = async ({ request }) => {
     );
 
     const data = await request.json();
-    const { name, folder_id } = data;
+    const { name } = data;
+
+    // Create a Google Drive folder for the client
+    const folder_id = await createDriveFolder(name);
 
     // Create the client
     const { data: client, error: clientError } = await supabase
