@@ -2,12 +2,13 @@ import type { APIRoute } from "astro";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "../../../../supabase/types";
 import { createDriveFolder } from "../../utils/drive";
+import { getSecret } from "astro:env/server";
 
 export const POST: APIRoute = async ({ request }) => {
   try {
     const supabase = createClient<Database>(
-      import.meta.env.SUPABASE_URL,
-      import.meta.env.SUPABASE_SERVICE_ROLE_KEY
+      getSecret("SUPABASE_URL") || "",
+      getSecret("SUPABASE_SERVICE_ROLE_KEY") || ""
     );
 
     const data = await request.json();
