@@ -53,13 +53,18 @@ const releases = await getReleases(client.id);
                 <Card size="2">
                     <Flex direction="column" gap="3">
                         <Flex justify="between" align="center">
-                            <Flex direction="row" gap="2">
+                            <Flex direction="row" gap="2" align="center" justify="between" width="100%">
                                 <Text size="4" weight="bold">
                                     {client.name}
                                 </Text>
                                 <LinkButton
                                     url={`https://drive.google.com/drive/folders/${client.folderId}`}
                                 />
+                                <Link href={`/client/new-release?clientId=${client.id}`}>
+                                    <Button size="2" variant="soft">
+                                        New Release
+                                    </Button>
+                                </Link>
                             </Flex>
                         </Flex>
                         <Box>

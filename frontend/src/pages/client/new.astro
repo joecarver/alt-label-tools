@@ -1,0 +1,72 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { Card, Text, Flex, Button, Container, Theme } from "@radix-ui/themes";
+import "@radix-ui/themes/styles.css";
+---
+
+<Layout title="New Client">
+  <Theme>
+    <Container size="2">
+      <Card size="2">
+        <Flex direction="column" gap="4">
+          <Text size="6" weight="bold">New Client</Text>
+          
+          <form id="clientForm">
+            <Flex direction="column" gap="4">
+              <Card size="2">
+                <Flex direction="column" gap="3">
+                  <Text size="4" weight="bold">Client Information</Text>
+                  
+                  <input type="text" id="name" name="name" placeholder="Client Name" required 
+                    style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #ccc' }} />
+
+                  <input type="text" id="folder_id" name="folder_id" placeholder="Google Drive Folder ID" required 
+                    style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #ccc' }} />
+                </Flex>
+              </Card>
+
+              <Button type="submit" size="3" style={{ width: '100%' }}>
+                Create Client
+              </Button>
+            </Flex>
+          </form>
+        </Flex>
+      </Card>
+    </Container>
+  </Theme>
+</Layout>
+
+<script>
+  const form = document.getElementById('clientForm') as HTMLFormElement;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+    const data = {
+      name: formData.get('name'),
+      folder_id: formData.get('folder_id'),
+    };
+
+    try {
+      const response = await fetch('/api/create-client', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create client');
+      }
+
+      const result = await response.json();
+      alert('Client created successfully!');
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Error creating client:', error);
+      alert('Failed to create client. Please try again.');
+    }
+  });
+</script> 
