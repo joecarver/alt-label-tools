@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "../../../../supabase/types";
+import { createDriveFolder } from "../../utils/drive";
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -28,7 +29,14 @@ export const POST: APIRoute = async ({ request }) => {
       campaign_length,
       services_required,
       client_id,
+      client_folder_id,
     } = data;
+
+    // Create a Google Drive folder for the release under the client's folder if provided
+    const releaseFolderId = await createDriveFolder(
+      name,
+      client_folder_id || undefined
+    );
 
     // First, create or get the artist
     const { data: artist, error: artistError } = await supabase
@@ -82,6 +90,7 @@ export const POST: APIRoute = async ({ request }) => {
         mastering_engineer: masteringEngineer.id,
         designer: designer.id,
         client_id,
+        folder_id: releaseFolderId,
       })
       .select()
       .single();
