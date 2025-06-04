@@ -1,6 +1,6 @@
 # Alt Label Tools Frontend
 
-A modern dashboard built with Astro that displays and manages music release tasks and metadata, integrating with Supabase and Notion.
+A modern dashboard built with Astro that displays and manages music release tasks and metadata, integrating with Supabase and Google Drive.
 
 ## System Architecture
 
@@ -15,11 +15,10 @@ A modern dashboard built with Astro that displays and manages music release task
 2. **API Routes**
    - `/api/update-task-completion`: Handles manual task completion changes
    - `/api/task-summary`: Fetches the latest task summary from Supabase
-   - Maintains data consistency between Supabase and Notion
+   - Maintains data consistency between Supabase
 
 3. **Data Integration**
-   - Supabase for real-time data access
-   - Notion API for updating task management
+   - Supabase for data access
    - Links to Google drive resources
 
 ## Features
@@ -36,7 +35,6 @@ A modern dashboard built with Astro that displays and manages music release task
 - Node.js 22.14 or later
 - yarn
 - Supabase project setup
-- Notion API key and database ID
 - Google Drive service account credentials
 
 ## Setup
@@ -59,7 +57,6 @@ yarn
 ```env
 SUPABASE_URL=your_supabase_url
 SUPABASE_ANON_KEY=your_supabase_anon_key
-NOTION_API_KEY=your_notion_api_key
 GOOGLE_SERVICE_ACCOUNT_EMAIL=your_service_account_email
 GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY=your_private_key
 GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_ID=your_private_key_id

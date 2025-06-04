@@ -81,7 +81,6 @@ export const POST: APIRoute = async ({ request }) => {
         license_allow_fastfashion,
         mastering_engineer: masteringEngineer.id,
         designer: designer.id,
-        notion_id: catalog_number, // Using catalog number as notion_id for now
         client_id,
       })
       .select()

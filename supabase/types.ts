@@ -42,7 +42,6 @@ export type Database = {
           folder_id: string | null
           id: string
           name: string
-          notion_id: string
           updated_at: string
         }
         Insert: {
@@ -50,7 +49,6 @@ export type Database = {
           folder_id?: string | null
           id?: string
           name: string
-          notion_id: string
           updated_at?: string
         }
         Update: {
@@ -58,7 +56,6 @@ export type Database = {
           folder_id?: string | null
           id?: string
           name?: string
-          notion_id?: string
           updated_at?: string
         }
         Relationships: []
@@ -153,8 +150,6 @@ export type Database = {
           license_allow_politics: boolean | null
           mastering_engineer: number | null
           name: string
-          notion_id: string
-          notion_url: string | null
           updated_at: string
         }
         Insert: {
@@ -171,8 +166,6 @@ export type Database = {
           license_allow_politics?: boolean | null
           mastering_engineer?: number | null
           name: string
-          notion_id: string
-          notion_url?: string | null
           updated_at?: string
         }
         Update: {
@@ -189,8 +182,6 @@ export type Database = {
           license_allow_politics?: boolean | null
           mastering_engineer?: number | null
           name?: string
-          notion_id?: string
-          notion_url?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -311,7 +302,6 @@ export type Database = {
           id: string
           is_detectable: boolean | null
           name: string
-          notion_id: string
           release_id: string | null
           start_date: string | null
           updated_at: string
@@ -323,7 +313,6 @@ export type Database = {
           id?: string
           is_detectable?: boolean | null
           name: string
-          notion_id: string
           release_id?: string | null
           start_date?: string | null
           updated_at?: string
@@ -335,7 +324,6 @@ export type Database = {
           id?: string
           is_detectable?: boolean | null
           name?: string
-          notion_id?: string
           release_id?: string | null
           start_date?: string | null
           updated_at?: string

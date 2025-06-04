@@ -20,7 +20,6 @@ const { task, isDetectable, taskStatus, releaseId } = Astro.props;
         <TaskCompletionButton
             client:load
             taskId={task.id}
-            taskNotionId={task.notionId}
             releaseId={releaseId}
             completedAt={taskStatus?.completionStatus === CompletionStatus.DONE_MANUALLY ? task.completedAt : undefined}
         />

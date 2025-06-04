@@ -18,7 +18,6 @@ export const POST: APIRoute = async ({ request }) => {
       .insert({
         name,
         folder_id,
-        notion_id: name, // Using name as notion_id for now
       })
       .select()
       .single();

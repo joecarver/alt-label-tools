@@ -7,17 +7,11 @@ The backend system built with Supabase Edge Functions and Cloudflare Workers for
 ### Edge Functions
 
 1. **Sync Functions**
-   - `sync-clients`: Synchronizes label client data from Notion
-   - `sync-releases`: Syncs release information for each client
-   - `sync-tasks`: Updates task data for all releases
    - `sync-task-statuses`: Manages task completion states
-   - `monitor-sync-health`: Ensures synchronization processes are running correctly
 
 2. **Shared Utilities**
    - `_shared/utils.ts`: Common utilities and Supabase client setup
-   - `_shared/clients.ts`: Notion client data handling
-   - `_shared/releases.ts`: Release data management
-   - `_shared/tasks.ts`: Task synchronization logic
+   - `_shared/taskStatus.ts`: Task status logic
    - `_shared/drive.ts`: Google Drive integration
 
 ### Database Schema
@@ -97,7 +91,6 @@ supabase functions deploy <function-name>
 ## Environment Variables
 
 Required environment variables:
-- `NOTION_API_KEY`: For Notion API access
 - `SUPABASE_URL`: Supabase project URL
 - `SUPABASE_SERVICE_ROLE_KEY`: For database operations
 - `GOOGLE_SERVICE_ACCOUNT_EMAIL`: For Drive integration
