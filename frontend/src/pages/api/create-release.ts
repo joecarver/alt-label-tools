@@ -83,6 +83,7 @@ export const POST: APIRoute = async ({ request }) => {
       .insert({
         catalog_number,
         name,
+        release_date,
         license_allow_politics,
         license_allow_alcohol,
         license_allow_pharmaceuticals,

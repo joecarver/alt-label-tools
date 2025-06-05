@@ -1,63 +1,76 @@
 ---
-import Layout from '../../layouts/Layout.astro';
+import Layout from "../../layouts/Layout.astro";
 import { Card, Text, Flex, Button, Container, Theme } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
 ---
 
 <Layout title="New Client">
-  <Theme>
-    <Container size="2">
-      <Card size="2">
-        <Flex direction="column" gap="4">
-          <Text size="6" weight="bold">New Client</Text>
-          <Text size="3">Adding a new client will also create a new folder in Google Drive, using the client name as the folder name.</Text>
-          
-          <form id="clientForm">
-            <Flex direction="column" gap="4">
-              <input type="text" id="name" name="name" placeholder="Client Name" required 
-                style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #ccc' }} />
+  <Container size="2">
+    <Card size="2">
+      <Flex direction="column" gap="4">
+        <Text size="6" weight="bold">New Client</Text>
+        <Text size="3"
+          >Adding a new client will also create a new folder in Google Drive,
+          using the client name as the folder name.</Text
+        >
 
-              <Button type="submit" size="3" style={{ width: '100%' }}>
-                Create
-              </Button>
-            </Flex>
-          </form>
-        </Flex>
-      </Card>
-    </Container>
-  </Theme>
+        <form id="clientForm">
+          <Flex direction="column" gap="4">
+            <input
+              type="text"
+              id="name"
+              name="name"
+              placeholder="Client Name"
+              required
+              style={{
+                width: "100%",
+                padding: "0.5rem",
+                borderRadius: "0.25rem",
+                border: "1px solid #ccc",
+              }}
+            />
+
+            <Button type="submit" size="3" style={{ width: "100%" }}>
+              Create
+            </Button>
+          </Flex>
+        </form>
+      </Flex>
+    </Card>
+  </Container>
 </Layout>
 
 <script>
-  const form = document.getElementById('clientForm') as HTMLFormElement;
+  const form = document.getElementById("clientForm") as HTMLFormElement;
 
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const formData = new FormData(form);
     const data = {
-      name: formData.get('name'),
+      name: formData.get("name"),
     };
 
     try {
-      const response = await fetch('/api/create-client', {
-        method: 'POST',
+      const response = await fetch("/api/create-client", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create client');
+        throw new Error("Failed to create client");
       }
 
       const result = await response.json();
-      alert('Client created successfully!');
-      window.location.href = '/';
+      alert("Client created successfully!");
+      window.location.href = "/";
     } catch (error) {
-      console.error('Error creating client:', error);
-      alert('Failed to create client. Please try again.');
+      console.error("Error creating client:", error);
+      alert("Failed to create client. Please try again.");
     }
   });
-</script> 
+</script>
+

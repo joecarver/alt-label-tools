@@ -21,14 +21,20 @@ export const supabase = createClient(supabaseUrl, supabaseKey);
 export async function getClients(userId?: string): Promise<LabelClient[]> {
   // If no userId provided, return all clients (for admin)
   if (!userId) {
-    const { data, error } = await supabase.from("clients").select("*");
+    const { data, error } = await supabase
+      .from("clients")
+      .select("*, releases(*)");
 
+    console.log(data);
     if (error) {
       console.error("Error fetching clients:", error);
       throw error;
     }
 
-    return keysToCamelCase<LabelClient[]>(data);
+    return keysToCamelCase<LabelClient[]>(data).map((client) => ({
+      ...client,
+      releaseCount: client.releases.length,
+    }));
   }
 
   // For non-admin users, get only their assigned clients

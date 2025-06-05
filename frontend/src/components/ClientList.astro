@@ -1,5 +1,14 @@
 ---
-import { Grid, Container, Box, Button, Flex, Link, Text, Heading } from "@radix-ui/themes";
+import {
+  Grid,
+  Container,
+  Box,
+  Button,
+  Flex,
+  Link,
+  Text,
+  Heading,
+} from "@radix-ui/themes";
 import ClientCard from "./ClientCard.astro";
 import { getAuthTokenFromCookies, getUserFromToken } from "../utils/auth";
 import { isAdmin } from "../utils/authorization";
@@ -9,40 +18,40 @@ import { BiPlus } from "react-icons/bi";
 
 const token = getAuthTokenFromCookies(Astro.cookies);
 if (!token) {
-	return Astro.redirect("/login");
+  return Astro.redirect("/login");
 }
 
 let user;
 try {
-	user = await getUserFromToken(token);
-	if (!user) {
-		return Astro.redirect("/login");
-	}
+  user = await getUserFromToken(token);
+  if (!user) {
+    return Astro.redirect("/login");
+  }
 } catch (error) {
-	console.error("Token verification failed:", error);
-	return Astro.redirect("/login");
+  console.error("Token verification failed:", error);
+  return Astro.redirect("/login");
 }
 
-const clients = await getClients(user.email && isAdmin(user.email) ? undefined : user.id);
+const clients = await getClients(
+  user.email && isAdmin(user.email) ? undefined : user.id
+);
 ---
 
 <Container size="3">
-    <Grid columns="1" gap="6">
-        <Box>
-            <Heading as="h1" size="5">Clients</Text>
-            <Grid columns="1" gap="4">
-                {
-                    clients.map((client: LabelClient) => (
-                        <ClientCard client={client} />
-                    ))
-                }
-                <Link href="/client/new">
-                    <Button size="2" variant="soft" style={{cursor: "pointer"}}>
-                        <BiPlus />
-                        New Client
-                    </Button>
-                </Link>
-            </Grid>
-        </Box>
-    </Grid>
+  <Grid columns="1" gap="6">
+    <Box>
+      <Heading as="h1" size="5" mb="4" style={{ opacity: "0.8" }}>
+        Clients
+      </Heading>
+      <Grid columns="1" gap="4">
+        {clients.map((client: LabelClient) => <ClientCard client={client} />)}
+        <Link href="/client/new">
+          <Button size="2" variant="soft" style={{ cursor: "pointer" }}>
+            <BiPlus />
+            New Client
+          </Button>
+        </Link>
+      </Grid>
+    </Box>
+  </Grid>
 </Container>

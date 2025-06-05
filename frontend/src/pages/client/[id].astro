@@ -2,17 +2,21 @@
 import Layout from "../../layouts/Layout.astro";
 import { getAuthTokenFromCookies } from "../../utils/auth";
 import { getUserFromToken } from "../../utils/auth";
-import { getClients, getReleases, getUsersForClient } from "../../utils/supabase";
+import {
+  getClients,
+  getReleases,
+  getUsersForClient,
+} from "../../utils/supabase";
 import { isAdmin } from "../../utils/authorization";
 import {
-    Card,
-    Flex,
-    Text,
-    Box,
-    Grid,
-    Container,
-    Button,
-    Link,
+  Card,
+  Flex,
+  Text,
+  Box,
+  Grid,
+  Container,
+  Button,
+  Link,
 } from "@radix-ui/themes";
 import LinkButton from "../../components/LinkButton.astro";
 import ReleaseList from "../../components/ReleaseList.astro";
@@ -21,102 +25,100 @@ import { BiArrowBack, BiPlus } from "react-icons/bi";
 import type { LabelClient } from "../../types/LabelClient";
 
 // Helper to get all users (for admin select)
-async function getAllUsers(): Promise<{id: string, email: string}[]> {
-    const { supabase } = await import("../../utils/supabase");
-    const { data, error } = await supabase.auth.admin.listUsers();  
-    if (error) return [];
-    return data.users
-        .filter(user => typeof user.email === 'string')
-        .map(user => ({ id: user.id, email: user.email as string }));
+async function getAllUsers(): Promise<{ id: string; email: string }[]> {
+  const { supabase } = await import("../../utils/supabase");
+  const { data, error } = await supabase.auth.admin.listUsers();
+  if (error) return [];
+  return data.users
+    .filter((user) => typeof user.email === "string")
+    .map((user) => ({ id: user.id, email: user.email as string }));
 }
 
 // Check if user is authenticated
 const token = getAuthTokenFromCookies(Astro.cookies);
 if (!token) {
-    return Astro.redirect("/login");
+  return Astro.redirect("/login");
 }
 
 let user;
 try {
-    user = await getUserFromToken(token);
-    if (!user) {
-        return Astro.redirect("/login");
-    }
-} catch (error) {
-    console.error("Token verification failed:", error);
+  user = await getUserFromToken(token);
+  if (!user) {
     return Astro.redirect("/login");
+  }
+} catch (error) {
+  console.error("Token verification failed:", error);
+  return Astro.redirect("/login");
 }
 
 const { id } = Astro.params;
-const clients = await getClients(user.email && isAdmin(user.email) ? undefined : user.id);
+const clients = await getClients(
+  user.email && isAdmin(user.email) ? undefined : user.id
+);
 const client = clients.find((c: LabelClient) => c.id === id);
 
 if (!client) {
-    return Astro.redirect("/");
+  return Astro.redirect("/");
 }
 
 const releases = await getReleases(client.id);
 const usersWithAccess = await getUsersForClient(client.id);
 const admin = user.email && isAdmin(user.email);
-let allUsers: {id: string, email: string}[] = [];
+let allUsers: { id: string; email: string }[] = [];
 if (admin) {
-    allUsers = await getAllUsers();
+  allUsers = await getAllUsers();
 }
 ---
 
 <Layout title={`${client.name} - ALT Label Tools`}>
-    <Container size="3">
-        <Grid columns="1" gap="6">
-            <Box>
-                <Card size="2">
-                    <Flex direction="column" gap="3">
-                        <Flex justify="between" align="center">
-                            <Flex direction="row" gap="2" align="center" justify="between" width="100%">
-                                <Text size="4" weight="bold">
-                                    {client.name}
-                                </Text>
-                                <LinkButton
-                                    url={`https://drive.google.com/drive/folders/${client.folderId}`}
-                                />
-                                <Link href={`/client/new-release?clientId=${client.id}`}>
-                                    <Button size="2" variant="soft" style={{cursor: "pointer"}}>
-                                        <BiPlus />
-                                        New Release
-                                    </Button>
-                                </Link>
-                            </Flex>
-                        </Flex>
-                        <Box>
-                            <ReleaseList
-                                clientId={client.id}
-                                clientName={client.name}
-                                releases={releases}
-                                server:defer
-                            >
-                                <LoadingSpinner
-                                    text="Loading releases..."
-                                    slot="fallback"
-                                />
-                            </ReleaseList>
-                        </Box>
-                    </Flex>
-                </Card>
-            </Box>
-        </Grid>
-    </Container>
+  <Container size="3">
+    <Grid columns="1" gap="6">
+      <Box>
+        <Flex direction="column" gap="3">
+          <Flex justify="between" align="center">
+            <Flex direction="row" gap="2" align="center" width="100%">
+              <Text size="4" weight="bold">
+                {client.name}
+              </Text>
+              <LinkButton
+                url={`https://drive.google.com/drive/folders/${client.folderId}`}
+              />
+            </Flex>
+          </Flex>
+          <Flex direction="column" gap="4">
+            <ReleaseList
+              clientId={client.id}
+              clientName={client.name}
+              releases={releases}
+              server:defer
+            >
+              <LoadingSpinner text="Loading releases..." slot="fallback" />
+            </ReleaseList>
+
+            <Link href={`/client/new-release?clientId=${client.id}`}>
+              <Button size="2" variant="soft" style={{ cursor: "pointer" }}>
+                <BiPlus />
+                New Release
+              </Button>
+            </Link>
+          </Flex>
+        </Flex>
+      </Box>
+    </Grid>
+  </Container>
 </Layout>
 
 <style>
-    .back-button {
-        /* position: absolute; */
-        transform: translateY(-100%);
-    }
-    .users-access-box {
-        margin-top: 2rem;
-    }
-    .user-access-list {
-        margin: 0;
-        padding: 0;
-        list-style: none;
-    }
+  .back-button {
+    /* position: absolute; */
+    transform: translateY(-100%);
+  }
+  .users-access-box {
+    margin-top: 2rem;
+  }
+  .user-access-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
 </style>

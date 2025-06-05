@@ -4,16 +4,27 @@ import { Button, IconButton, Link } from "@radix-ui/themes";
 import { PiFolder, PiFolderFill } from "react-icons/pi";
 
 interface Props {
-    url: string;
-    fileName?: string;
+  url: string;
+  fileName?: string;
 }
 
 const { url, fileName } = Astro.props;
 ---
 
 <Link href={url} target="_blank">
-    <Button size="1" variant="outline" style={{ cursor: "pointer" }}>
-        {fileName ? <FileIcon /> : <PiFolder size="14" />}
-        {fileName || "Open in Drive"}
-    </Button>
+  <Button
+    size="1"
+    variant="outline"
+    style={{ cursor: "pointer" }}
+    className="link-button"
+  >
+    {fileName ? <FileIcon /> : <PiFolder size="14" />}
+    {fileName || "Open in Drive"}
+  </Button>
 </Link>
+
+<style>
+  .link-button:hover {
+    background-color: var(--color-accent-12);
+  }
+</style>

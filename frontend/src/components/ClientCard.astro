@@ -1,29 +1,52 @@
 ---
-import { Card, Flex, Text } from "@radix-ui/themes";
+import { Badge, Card, Flex, Text } from "@radix-ui/themes";
 import LinkButton from "./LinkButton.astro";
 import type { LabelClient } from "../types/LabelClient";
+import { isAfter, isBefore } from "date-fns";
 
 interface Props {
-    client: LabelClient;
+  client: LabelClient;
 }
 
 const { client } = Astro.props;
+console.log(client.releases);
+const completedReleases = client.releases.filter((release) =>
+  isBefore(new Date(release.releaseDate), new Date())
+);
+
+const upcomingReleases = client.releases.filter((release) =>
+  isAfter(new Date(release.releaseDate), new Date())
+);
 ---
 
 <Card key={client.id} size="2">
-    <Flex justify="between" align="center">
-        <Flex direction="row" align="center" justify="between" gap="2" width="100%">
-            <a
-                href={`/client/${client.id}`}
-                style="text-decoration: none; color: inherit;"
-            >
-                <Text size="4" weight="bold">
-                    {client.name}
-                </Text>
-            </a>
-            <LinkButton
-                url={`https://drive.google.com/drive/folders/${client.folderId}`}
-            />
-        </Flex>
+  <Flex direction="column" justify="between">
+    <Flex align="center" justify="between" gap="2" width="100%">
+      <a
+        href={`/client/${client.id}`}
+        style="text-decoration: none; color: inherit;"
+      >
+        <Text size="4" weight="bold">
+          {client.name}
+        </Text>
+      </a>
+      <LinkButton
+        url={`https://drive.google.com/drive/folders/${client.folderId}`}
+      />
     </Flex>
+    <Flex align="center" gap="2">
+      <Badge size="1" variant="outline" style={{ opacity: "0.8" }}>
+        {completedReleases.length} release{
+          completedReleases.length === 1 ? "" : "s"
+        }
+        completed
+      </Badge>
+      <Badge size="1" variant="outline" style={{ opacity: "0.8" }}>
+        {upcomingReleases.length} release{
+          upcomingReleases.length === 1 ? "" : "s"
+        }
+        upcoming
+      </Badge>
+    </Flex>
+  </Flex>
 </Card>
