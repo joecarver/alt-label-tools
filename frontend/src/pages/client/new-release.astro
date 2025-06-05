@@ -33,7 +33,7 @@ if (!client) {
 ---
 
 <Layout title="New Release">
-  <Theme>
+
     <Container size="2">
       <Card size="2">
         <Flex direction="column" gap="4">
@@ -102,38 +102,7 @@ if (!client) {
                 </Flex>
               </Card>
 
-              <Card size="2">
-                <Flex direction="column" gap="3">
-                  <Text size="4" weight="bold">License Information</Text>
-                  
-                  <Flex direction="column" gap="2">
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <input type="checkbox" id="license_allow_politics" name="license_allow_politics" />
-                      <Text size="2">Allow Politics</Text>
-                    </label>
-
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <input type="checkbox" id="license_allow_alcohol" name="license_allow_alcohol" />
-                      <Text size="2">Allow Alcohol</Text>
-                    </label>
-
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <input type="checkbox" id="license_allow_pharmaceuticals" name="license_allow_pharmaceuticals" />
-                      <Text size="2">Allow Pharmaceuticals</Text>
-                    </label>
-
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <input type="checkbox" id="license_allow_fastfood" name="license_allow_fastfood" />
-                      <Text size="2">Allow Fast Food</Text>
-                    </label>
-
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <input type="checkbox" id="license_allow_fastfashion" name="license_allow_fastfashion" />
-                      <Text size="2">Allow Fast Fashion</Text>
-                    </label>
-                  </Flex>
-                </Flex>
-              </Card>
+              
 
               <Card size="2">
                 <Flex direction="column" gap="3">
@@ -183,6 +152,39 @@ if (!client) {
                 </Flex>
               </Card>
 
+              <Card size="2">
+                <Flex direction="column" gap="3">
+                  <Text size="4" weight="bold">License Information</Text>
+                  
+                  <Flex direction="column" gap="2">
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <input type="checkbox" id="license_allow_politics" name="license_allow_politics" />
+                      <Text size="2">Allow Politics</Text>
+                    </label>
+
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <input type="checkbox" id="license_allow_alcohol" name="license_allow_alcohol" />
+                      <Text size="2">Allow Alcohol</Text>
+                    </label>
+
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <input type="checkbox" id="license_allow_pharmaceuticals" name="license_allow_pharmaceuticals" />
+                      <Text size="2">Allow Pharmaceuticals</Text>
+                    </label>
+
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <input type="checkbox" id="license_allow_fastfood" name="license_allow_fastfood" />
+                      <Text size="2">Allow Fast Food</Text>
+                    </label>
+
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <input type="checkbox" id="license_allow_fastfashion" name="license_allow_fastfashion" />
+                      <Text size="2">Allow Fast Fashion</Text>
+                    </label>
+                  </Flex>
+                </Flex>
+              </Card>
+
               <Button type="submit" size="3" style={{ width: '100%' }}>
                 Submit Release
               </Button>
@@ -191,7 +193,6 @@ if (!client) {
         </Flex>
       </Card>
     </Container>
-  </Theme>
 </Layout>
 
 <script>

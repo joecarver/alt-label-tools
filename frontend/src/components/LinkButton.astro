@@ -14,6 +14,6 @@ const { url, fileName } = Astro.props;
 <Link href={url} target="_blank">
     <Button size="1" variant="outline" style={{ cursor: "pointer" }}>
         {fileName ? <FileIcon /> : <PiFolder size="14" />}
-        {fileName}
+        {fileName || "Open in Drive"}
     </Button>
 </Link>

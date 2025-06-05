@@ -12,7 +12,7 @@ const { client } = Astro.props;
 
 <Card key={client.id} size="2">
     <Flex justify="between" align="center">
-        <Flex direction="row" gap="2">
+        <Flex direction="row" align="center" justify="between" gap="2" width="100%">
             <a
                 href={`/client/${client.id}`}
                 style="text-decoration: none; color: inherit;"

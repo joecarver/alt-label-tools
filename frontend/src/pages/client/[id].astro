@@ -17,7 +17,7 @@ import {
 import LinkButton from "../../components/LinkButton.astro";
 import ReleaseList from "../../components/ReleaseList.astro";
 import LoadingSpinner from "../../components/LoadingSpinner.astro";
-import { BiArrowBack } from "react-icons/bi";
+import { BiArrowBack, BiPlus } from "react-icons/bi";
 import type { LabelClient } from "../../types/LabelClient";
 
 // Helper to get all users (for admin select)
@@ -79,7 +79,8 @@ if (admin) {
                                     url={`https://drive.google.com/drive/folders/${client.folderId}`}
                                 />
                                 <Link href={`/client/new-release?clientId=${client.id}`}>
-                                    <Button size="2" variant="soft">
+                                    <Button size="2" variant="soft" style={{cursor: "pointer"}}>
+                                        <BiPlus />
                                         New Release
                                     </Button>
                                 </Link>

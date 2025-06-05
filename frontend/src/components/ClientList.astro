@@ -1,10 +1,11 @@
 ---
-import { Grid, Container, Box, Button, Flex } from "@radix-ui/themes";
+import { Grid, Container, Box, Button, Flex, Link, Text, Heading } from "@radix-ui/themes";
 import ClientCard from "./ClientCard.astro";
 import { getAuthTokenFromCookies, getUserFromToken } from "../utils/auth";
 import { isAdmin } from "../utils/authorization";
 import { getClients } from "../utils/supabase";
 import type { LabelClient } from "../types/LabelClient";
+import { BiPlus } from "react-icons/bi";
 
 const token = getAuthTokenFromCookies(Astro.cookies);
 if (!token) {
@@ -28,17 +29,19 @@ const clients = await getClients(user.email && isAdmin(user.email) ? undefined :
 <Container size="3">
     <Grid columns="1" gap="6">
         <Box>
-            <Flex justify="end" mb="4">
-                <Button asChild size="2">
-                    <a href="/client/new">New Client</a>
-                </Button>
-            </Flex>
+            <Heading as="h1" size="5">Clients</Text>
             <Grid columns="1" gap="4">
                 {
                     clients.map((client: LabelClient) => (
                         <ClientCard client={client} />
                     ))
                 }
+                <Link href="/client/new">
+                    <Button size="2" variant="soft" style={{cursor: "pointer"}}>
+                        <BiPlus />
+                        New Client
+                    </Button>
+                </Link>
             </Grid>
         </Box>
     </Grid>
