@@ -45,7 +45,7 @@ export async function getClients(userId?: string): Promise<LabelClient[]> {
 export async function getReleases(clientId: string): Promise<Release[]> {
   const { data, error } = await supabase
     .from("releases")
-    .select("*")
+    .select("*, artists(*)")
     .eq("client_id", clientId);
 
   if (error) {

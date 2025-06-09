@@ -7,3 +7,6 @@ crons = ["* * * * *"]
 
 [observability.logs]
 enabled = true
+
+[vars]
+SUPABASE_PROJECT_REF = "qxvnzkcsfygovclpdxzp"

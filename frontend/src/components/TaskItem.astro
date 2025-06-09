@@ -1,7 +1,8 @@
 ---
-import { Text, Flex, Badge, Box } from "@radix-ui/themes";
+import { Text, Flex, Badge, Box, Card } from "@radix-ui/themes";
 import { type ReleaseTask } from "../types/ReleaseTask";
 import { CompletionStatus } from "../types/CompletionStatus";
+import { DueDateStatus } from "../types/DueDateStatus";
 import { formatDateRange } from "../utils/date";
 import { ClockIcon } from "@radix-ui/react-icons";
 import TaskItemCompletionStatus from "./TaskItemCompletionStatus.astro";
@@ -9,46 +10,70 @@ import { getDueDateStatusColor } from "../utils/getStatusColor";
 import LinkButton from "./LinkButton.astro";
 
 interface Props {
-    task: ReleaseTask;
-    releaseId: string;
+  task: ReleaseTask;
+  releaseId: string;
 }
 
 const { task, releaseId } = Astro.props;
+
+const isCompleted =
+  task.taskStatus.completionStatus === CompletionStatus.DONE_DETECTED ||
+  task.taskStatus.completionStatus === CompletionStatus.DONE_MANUALLY;
+
+const isOverdue =
+  task.taskStatus.dueDateStatus === DueDateStatus.OVERDUE && !isCompleted;
+
+const taskClass = isCompleted
+  ? "task-item-completed"
+  : isOverdue
+    ? "task-item-overdue"
+    : "task-item-not-completed";
 ---
 
-<Box>
-    <Flex direction="column" gap="1">
-        <Flex gap="2" align="center" justify="between">
-            <Text weight="medium">{task.name}</Text>
-        </Flex>
-        <Flex gap="1" wrap="wrap">
-            <Badge
-                size="2"
-                color={getDueDateStatusColor(
-                    task.taskStatus.dueDateStatus || undefined,
-                )}
-                variant="soft"
-            >
-                <ClockIcon />Due: {
-                    formatDateRange(task.startDate, task.endDate)
-                }
-            </Badge>
-            <TaskItemCompletionStatus
-                task={task}
-                isDetectable={task.isDetectable}
-                taskStatus={task.taskStatus}
-                releaseId={releaseId}
-            />
-            {
-                task.taskStatus?.completionStatus ===
-                    CompletionStatus.DONE_DETECTED &&
-                    task.taskStatus?.fileInfo?.webViewLink && (
-                        <LinkButton
-                            url={task.taskStatus.fileInfo.webViewLink}
-                            fileName={task.taskStatus.fileInfo.name}
-                        />
-                    )
-            }
-        </Flex>
+<Card className={taskClass}>
+  <Flex direction="column" gap="1">
+    <Flex gap="2" align="center" justify="between">
+      <Text weight="medium">{task.name}</Text>
     </Flex>
-</Box>
+    <Flex gap="1" wrap="wrap">
+      <Badge
+        size="2"
+        color={getDueDateStatusColor(
+          task.taskStatus.dueDateStatus || undefined
+        )}
+        variant="soft"
+      >
+        <ClockIcon />Due: {formatDateRange(task.startDate, task.endDate)}
+      </Badge>
+      <TaskItemCompletionStatus
+        task={task}
+        isDetectable={task.isDetectable}
+        taskStatus={task.taskStatus}
+        releaseId={releaseId}
+      />
+      {
+        task.taskStatus?.completionStatus === CompletionStatus.DONE_DETECTED &&
+          task.taskStatus?.fileInfo?.webViewLink && (
+            <LinkButton
+              url={task.taskStatus.fileInfo.webViewLink}
+              fileName={task.taskStatus.fileInfo.name}
+            />
+          )
+      }
+    </Flex>
+  </Flex>
+</Card>
+
+<style>
+  .task-item-completed {
+    background-color: var(--green-4);
+  }
+
+  .task-item-overdue {
+    background-color: var(--red-4);
+  }
+
+  .task-item-not-completed {
+    background-color: var(--orange-4);
+  }
+</style>

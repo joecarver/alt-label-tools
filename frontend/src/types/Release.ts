@@ -1,11 +1,11 @@
-import type { LabelClient } from "./LabelClient";
+import type { Database } from "../../../supabase/types";
+import type { Artist } from "./Artist";
+import type { KeysToCamelCase } from "./utils";
 
-export interface Release {
-  id: string;
-  name: string;
-  catalogNumber: string;
-  releaseDate: string;
-  artist: string;
-  labelId: LabelClient["id"];
-  folderId: string | null;
-}
+export type Release = KeysToCamelCase<
+  Database["public"]["Tables"]["releases"]["Row"]
+> & {
+  artists: Artist[];
+};
+
+export type ReleaseWithArtists = Release;

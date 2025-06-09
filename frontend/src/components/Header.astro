@@ -11,39 +11,43 @@ import { MdAdminPanelSettings } from "react-icons/md";
 const token = getAuthTokenFromCookies(Astro.cookies);
 let userInfo: User | null = null;
 if (token) {
-    userInfo = await getUserFromToken(token);
+  userInfo = await getUserFromToken(token);
 }
 const isUserAdmin = userInfo?.email && isAdmin(userInfo.email);
-
-console.log({ isUserAdmin });
 ---
 
 <header>
-    <Heading as="h1" className="header-title">ALT ~ Automated Label Tools</Heading>
-    <Flex align="center" gap="2">
-        {isUserAdmin && <Badge size="3" color="gray" variant="soft"><MdAdminPanelSettings /></Badge>}
-        {userInfo && <Avatar userInfo={userInfo} />}
-    </Flex>
+  <Heading as="h1" className="header-title">ALT ~ Automated Label Tools</Heading
+  >
+  <Flex align="center" gap="2">
+    {
+      isUserAdmin && (
+        <Badge size="3" color="gray" variant="soft">
+          <MdAdminPanelSettings />
+        </Badge>
+      )
+    }
+    {userInfo && <Avatar userInfo={userInfo} />}
+  </Flex>
 </header>
 
 <style>
-    header {
-        height: var(--header-height);
-        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
-        padding: 0.5rem 1rem;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-    }
+  header {
+    height: var(--header-height);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+    padding: 0.5rem 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
 
-
-    .header-title {
-        font-size: clamp(1rem, 2.5vw, 1.5rem);
-        font-weight: 600;
-        margin: 0;
-    }
+  .header-title {
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    font-weight: 600;
+    margin: 0;
+  }
 </style>

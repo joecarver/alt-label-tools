@@ -9,7 +9,7 @@ interface Props {
 }
 
 const { client } = Astro.props;
-console.log(client.releases);
+
 const completedReleases = client.releases.filter((release) =>
   isBefore(new Date(release.releaseDate), new Date())
 );

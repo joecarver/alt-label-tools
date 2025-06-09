@@ -1,46 +1,55 @@
 ---
-import { Card, Text, Flex, Badge, Spinner } from "@radix-ui/themes";
+import { Card, Text, Flex, Badge, Spinner, Box } from "@radix-ui/themes";
 import TaskList from "./TaskList.astro";
 import type { Release } from "../types/Release";
 
 import LinkButton from "./LinkButton.astro";
+import { formatSingleDate } from "../utils/date";
 
 interface Props {
-    release: Release;
-    clientName: string;
+  release: Release;
+  clientName: string;
 }
 
-const { release, clientName } = Astro.props;
+const { release } = Astro.props;
 
 const folderUrl = `https://drive.google.com/drive/folders/${release.folderId}`;
 ---
 
 <Card size="2">
-    <Flex direction="column" gap="3">
-        <Flex justify="between" align="center">
-            <Flex direction="column" gap="1">
-                <Flex align="center" gap="2" wrap="wrap">
-                    <Text size="4" weight="bold">
-                        {release.name}
-                    </Text>
-                    {release.folderId && <LinkButton url={folderUrl} />}
-                </Flex>
-            </Flex>
+  <Flex direction="column" gap="3">
+    <Flex justify="between" align="center">
+      <Flex direction="column" gap="1">
+        <Flex align="baseline" gap="2" wrap="wrap">
+          <Text size="4" weight="bold">
+            {release.name}
+          </Text>
+          <Text size="2" color="gray">{release.catalogNumber}</Text>
+          {release.folderId && <LinkButton url={folderUrl} />}
         </Flex>
-        <TaskList
-            releaseId={release.id}
-            server:defer
-        >
-            <Badge
-                color="gray"
-                variant="soft"
-                size="2"
-                style={{ width: "fit-content" }}
-                slot="fallback"
-            >
-                <Spinner size="1" />
-                Loading tasks...
-            </Badge>
-        </TaskList>
+        <Text size="3">
+          {release.artists.map((artist) => artist.artistName).join(", ")}
+        </Text>
+      </Flex>
     </Flex>
+    <Box>
+      <Badge size="2" color="blue" variant="soft">
+        Release Date: {
+          release.releaseDate ? formatSingleDate(release.releaseDate) : "TBD"
+        }
+      </Badge>
+    </Box>
+    <TaskList releaseId={release.id} server:defer>
+      <Badge
+        color="gray"
+        variant="soft"
+        size="2"
+        style={{ width: "fit-content" }}
+        slot="fallback"
+      >
+        <Spinner size="1" />
+        Loading tasks...
+      </Badge>
+    </TaskList>
+  </Flex>
 </Card>

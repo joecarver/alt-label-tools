@@ -5,7 +5,7 @@ import { TaskSummary } from "./TaskSummary";
 import TaskItem from "./TaskItem.astro";
 
 interface Props {
-    releaseId: string;
+  releaseId: string;
 }
 
 const { releaseId } = Astro.props;
@@ -14,37 +14,26 @@ const tasks = await getTasks(releaseId);
 ---
 
 <details>
-    <summary>
-        <TaskSummary
-            client:load
-            releaseId={releaseId}
-            initialTasks={tasks}
-        />
-    </summary>
+  <summary>
+    <TaskSummary client:load releaseId={releaseId} initialTasks={tasks} />
+  </summary>
 
-    <Box
-        style={{ padding: "0.5rem 1rem", backgroundColor: "var(--gray-2)" }}
-        className="task-list"
-    >
-        <Flex direction="column" gap="4">
-            {
-                tasks
-                    .sort(
-                        (a, b) =>
-                            new Date(a.startDate).getTime() -
-                            new Date(b.startDate).getTime(),
-                    )
-                    .map((task) => (
-                        <TaskItem
-                            task={task}
-                            releaseId={releaseId}
-                        />
-        ))
-    }
-</Flex>
+  <Box style={{ backgroundColor: "var(--gray-2)" }} className="task-list">
+    <Flex direction="column" gap="4">
+      {
+        tasks
+          .sort(
+            (a, b) =>
+              new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+          )
+          .map((task) => <TaskItem task={task} releaseId={releaseId} />)
+      }
+    </Flex>
 
-<style>
-    summary {
+    <style>
+      summary {
         list-style: none;
-    }
-</style>
+      }
+    </style>
+  </Box>
+</details>
