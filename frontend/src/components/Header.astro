@@ -1,6 +1,6 @@
 ---
 import type { User } from "@supabase/supabase-js";
-import { Badge, Flex, Heading, Text } from "@radix-ui/themes";
+import { Badge, Flex, Heading, Link } from "@radix-ui/themes";
 import { getAuthTokenFromCookies } from "../utils/auth";
 import { getUserFromToken } from "../utils/auth";
 import Avatar from "./Avatar.astro";
@@ -17,8 +17,11 @@ const isUserAdmin = userInfo?.email && isAdmin(userInfo.email);
 ---
 
 <header>
-  <Heading as="h1" className="header-title">ALT ~ Automated Label Tools</Heading
-  >
+  <a href="/">
+    <Heading as="h1" className="header-title">
+      ALT ~ Automated Label Tools
+    </Heading>
+  </a>
   <Flex align="center" gap="2">
     {
       isUserAdmin && (
@@ -43,8 +46,18 @@ const isUserAdmin = userInfo?.email && isAdmin(userInfo.email);
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid;
   }
 
+  a {
+    text-decoration: none;
+    color: inherit;
+
+    &:hover {
+      text-decoration: underline;
+      text-underline-offset: 0.4rem;
+    }
+  }
   .header-title {
     font-size: clamp(1rem, 2.5vw, 1.5rem);
     font-weight: 600;
