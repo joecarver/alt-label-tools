@@ -21,50 +21,15 @@ import {
 import LinkButton from "../../components/LinkButton.astro";
 import ReleaseList from "../../components/ReleaseList.astro";
 import LoadingSpinner from "../../components/LoadingSpinner.astro";
-import { BiArrowBack, BiPlus } from "react-icons/bi";
+import { BiPlus } from "react-icons/bi";
 import type { LabelClient } from "../../types/LabelClient";
 
-// Helper to get all users (for admin select)
-async function getAllUsers(): Promise<{ id: string; email: string }[]> {
-  const { supabase } = await import("../../utils/supabase");
-  const { data, error } = await supabase.auth.admin.listUsers();
-  if (error) return [];
-  return data.users
-    .filter((user) => typeof user.email === "string")
-    .map((user) => ({ id: user.id, email: user.email as string }));
-}
-
-// Check if user is authenticated
-const token = getAuthTokenFromCookies(Astro.cookies);
-if (!token) {
-  return Astro.redirect("/login");
-}
-
-let user;
-try {
-  user = await getUserFromToken(token);
-  if (!user) {
-    return Astro.redirect("/login");
-  }
-} catch (error) {
-  console.error("Token verification failed:", error);
-  return Astro.redirect("/login");
-}
-
 const { id } = Astro.params;
-const clients = await getClients(
-  user.email && isAdmin(user.email) ? undefined : user.id
-);
+const { clients } = Astro.locals;
 const client = clients.find((c: LabelClient) => c.id === id);
-
+console.log(client);
 if (!client) {
   return Astro.redirect("/");
-}
-
-const admin = user.email && isAdmin(user.email);
-let allUsers: { id: string; email: string }[] = [];
-if (admin) {
-  allUsers = await getAllUsers();
 }
 ---
 

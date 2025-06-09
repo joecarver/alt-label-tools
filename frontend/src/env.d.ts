@@ -1,5 +1,8 @@
 /// <reference types="astro/client" />
 
+import type { User } from "./types/User";
+import type { LabelClient } from "./types/LabelClient";
+
 interface ImportMetaEnv {
   readonly NODE_ENV: string;
   readonly PRODUCTION_URL: string;
@@ -46,5 +49,7 @@ declare namespace App {
         ALT_LABEL_TOOLS_METADATA?: KVNamespace;
       };
     };
+    user: User;
+    clients: LabelClient[];
   }
 }

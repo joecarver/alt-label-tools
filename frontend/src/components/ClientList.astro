@@ -10,31 +10,11 @@ import {
   Heading,
 } from "@radix-ui/themes";
 import ClientCard from "./ClientCard.astro";
-import { getAuthTokenFromCookies, getUserFromToken } from "../utils/auth";
 import { isAdmin } from "../utils/authorization";
-import { getClients } from "../utils/supabase";
 import type { LabelClient } from "../types/LabelClient";
 import { BiPlus } from "react-icons/bi";
 
-const token = getAuthTokenFromCookies(Astro.cookies);
-if (!token) {
-  return Astro.redirect("/login");
-}
-
-let user;
-try {
-  user = await getUserFromToken(token);
-  if (!user) {
-    return Astro.redirect("/login");
-  }
-} catch (error) {
-  console.error("Token verification failed:", error);
-  return Astro.redirect("/login");
-}
-
-const clients = await getClients(
-  user.email && isAdmin(user.email) ? undefined : user.id
-);
+const { user, clients } = Astro.locals;
 ---
 
 <Container size="3">
@@ -45,12 +25,16 @@ const clients = await getClients(
       </Heading>
       <Grid columns="1" gap="4">
         {clients.map((client: LabelClient) => <ClientCard client={client} />)}
-        <Link href="/client/new">
-          <Button size="2" variant="soft" style={{ cursor: "pointer" }}>
-            <BiPlus />
-            New Client
-          </Button>
-        </Link>
+        {
+          user.email && isAdmin(user.email) && (
+            <Link href="/client/new">
+              <Button size="2" variant="soft" style={{ cursor: "pointer" }}>
+                <BiPlus />
+                New Client
+              </Button>
+            </Link>
+          )
+        }
       </Grid>
     </Box>
   </Grid>
