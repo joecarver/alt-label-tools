@@ -1,13 +1,5 @@
 ---
-import Layout from "../../layouts/Layout.astro";
-import { getAuthTokenFromCookies } from "../../utils/auth";
-import { getUserFromToken } from "../../utils/auth";
-import {
-  getClients,
-  getReleases,
-  getUsersForClient,
-} from "../../utils/supabase";
-import { isAdmin } from "../../utils/authorization";
+import Layout from "../../../layouts/Layout.astro";
 import {
   Card,
   Flex,
@@ -18,16 +10,16 @@ import {
   Button,
   Link,
 } from "@radix-ui/themes";
-import LinkButton from "../../components/LinkButton.astro";
-import ReleaseList from "../../components/ReleaseList.astro";
-import LoadingSpinner from "../../components/LoadingSpinner.astro";
+import LinkButton from "../../../components/LinkButton.astro";
+import ReleaseList from "../../../components/ReleaseList.astro";
+import LoadingSpinner from "../../../components/LoadingSpinner.astro";
 import { BiPlus } from "react-icons/bi";
-import type { LabelClient } from "../../types/LabelClient";
+import type { LabelClient } from "../../../types/LabelClient";
 
 const { id } = Astro.params;
 const { clients } = Astro.locals;
 const client = clients.find((c: LabelClient) => c.id === id);
-console.log(client);
+
 if (!client) {
   return Astro.redirect("/");
 }
@@ -58,7 +50,7 @@ if (!client) {
               <LoadingSpinner text="Loading releases..." slot="fallback" />
             </ReleaseList>
 
-            <Link href={`/client/new-release?clientId=${client.id}`}>
+            <Link href={`/client/${id}/new-release`}>
               <Button size="2" variant="soft" style={{ cursor: "pointer" }}>
                 <BiPlus />
                 New Release
