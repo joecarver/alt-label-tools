@@ -1,55 +1,48 @@
 ---
 import { Button, Flex, Link, Text } from "@radix-ui/themes";
 import { BiArrowBack } from "react-icons/bi";
+import { isAdmin } from "../utils/authorization";
 
-const location = Astro.url.pathname;
-const breadcrumbs = location.split("/").filter((crumb) => crumb !== "");
+const { user } = Astro.locals;
 
-if (breadcrumbs.length === 0) {
-    return;
+if (!user.email || !isAdmin(user.email)) {
+  return;
 }
-const breadcrumbLinks = breadcrumbs.map((crumb, index) => {
-    const path = `/${breadcrumbs.slice(0, index + 1).join("/")}`;
-    return {
-        label: crumb,
-        href: path,
-    };
-});
 ---
 
 <Flex className="breadcrumbs" gap="2">
-    <Link
-        href="/"
-        style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "0.3rem",
-        }}
-    >
-        <Button variant="surface" color="blue" size="1" className="back-button">
-            <BiArrowBack />Clients
-        </Button>
-    </Link>
+  <Link
+    href="/"
+    style={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "0.3rem",
+    }}
+  >
+    <Button variant="surface" color="blue" size="1" className="back-button">
+      <BiArrowBack />Clients
+    </Button>
+  </Link>
 </Flex>
 
 <style>
-    .breadcrumbs {
-        position: sticky;
-        top: calc(var(--header-height) + 1.3rem);
-        height: 0;
-        background-color: var(--background);
-        z-index: 100;
-        padding-left: 1rem;
-        border-bottom: 1px solid var(--gray-200);
-    }
+  .breadcrumbs {
+    position: sticky;
+    top: calc(var(--header-height) + 1.3rem);
+    height: 0;
+    background-color: var(--background);
+    z-index: 100;
+    padding-left: 1rem;
+    border-bottom: 1px solid var(--gray-200);
+  }
 
-    .back-button {
-        border-radius: 0;
-        cursor: pointer;
+  .back-button {
+    border-radius: 0;
+    cursor: pointer;
 
-        &:hover {
-            background-color: rgb(var(--primary-light));
-        }
+    &:hover {
+      background-color: rgb(var(--primary-light));
     }
+  }
 </style>
