@@ -37,6 +37,12 @@ if (!client) {
             name="client_id"
             value={client.id}
           />
+          <input
+            type="hidden"
+            id="client_folder_id"
+            name="client_folder_id"
+            value={client.folderId}
+          />
           <Flex direction="column" gap="4">
             <Card size="2">
               <Flex direction="column" gap="3">
@@ -581,6 +587,7 @@ if (!client) {
         ";"
       ),
       client_id: formData.get("client_id"),
+      client_folder_id: formData.get("client_folder_id"),
     };
 
     try {
