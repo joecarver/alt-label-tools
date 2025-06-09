@@ -6,6 +6,7 @@ export type Release = KeysToCamelCase<
   Database["public"]["Tables"]["releases"]["Row"]
 > & {
   artists: Artist[];
+  releaseDate: string;
 };
 
 export type ReleaseWithArtists = Release;

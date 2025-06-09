@@ -42,11 +42,11 @@ export async function getClients(userId?: string): Promise<LabelClient[]> {
 }
 
 // Fetch releases for a specific client
-export async function getReleases(clientId: string): Promise<Release[]> {
+export async function getReleases(clientIds: string[]): Promise<Release[]> {
   const { data, error } = await supabase
     .from("releases")
     .select("*, artists(*)")
-    .eq("client_id", clientId);
+    .in("client_id", clientIds);
 
   if (error) {
     console.error("Error fetching releases:", error);
@@ -145,9 +145,20 @@ export async function getClientsForUser(
     throw error;
   }
 
-  // Flatten the result to just the client objects
-  const clients = (data || []).map((row: any) => row.client).filter(Boolean);
-  return clients;
+  if (!data || data.length === 0) {
+    return [];
+  }
+
+  const releases = await getReleases(data.map((row: any) => row.client.id));
+
+  const clients = data
+    .map((row: any) => ({
+      ...row.client,
+      releases,
+    }))
+    .filter(Boolean);
+
+  return keysToCamelCase<LabelClient[]>(clients);
 }
 
 // Assign a user to a client (admin only)
