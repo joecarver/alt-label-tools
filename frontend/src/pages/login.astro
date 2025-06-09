@@ -49,79 +49,93 @@ if (token) {
                 type="submit"
                 color="blue"
                 size="4"
-                className="login-button">Sign in</Button
+                className="login-button"
+                id="loginButton"
               >
-              <Text id="loginError" color="red" className="login-error" />
+                Sign in
+                <Text id="loginError" color="red" className="login-error" />
+              </Button>
             </Flex>
           </form>
         </Flex>
       </Box>
-    </Theme>
-    <script type="module">
-      const form = document.getElementById("loginForm");
-      const errorText = document.getElementById("loginError");
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        errorText.style.display = "none";
-        const email = form.email.value;
-        const password = form.password.value;
-        try {
-          const response = await fetch("/api/auth", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password, type: "login" }),
-          });
-          if (!response.ok) {
-            const result = await response.json();
-            errorText.textContent = result.error || "Login failed.";
+      <script type="module">
+        const form = document.getElementById("loginForm");
+        const errorText = document.getElementById("loginError");
+        const submitButton = document.getElementById("loginButton");
+
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          errorText.style.display = "none";
+          const email = form.email.value;
+          const password = form.password.value;
+          submitButton.classList.add("disabled");
+          try {
+            const response = await fetch("/api/auth", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email, password, type: "login" }),
+            });
+            if (!response.ok) {
+              const result = await response.json();
+              errorText.textContent = result.error || "Login failed.";
+              errorText.style.display = "block";
+              return;
+            }
+            window.location.href = "/";
+          } catch (err) {
+            errorText.textContent = "An error occurred. Please try again.";
             errorText.style.display = "block";
-            return;
+          } finally {
+            submitButton.classList.remove("disabled");
           }
-          window.location.href = "/";
-        } catch (err) {
-          errorText.textContent = "An error occurred. Please try again.";
-          errorText.style.display = "block";
+        });
+      </script>
+    </Theme>
+
+    <style>
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        background-color: #f9fafb;
+      }
+
+      .login-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .login-card {
+        max-width: 28rem;
+        width: 100%;
+        padding: 2rem;
+        background-color: var(--gray-5);
+        border-radius: 0.5rem;
+      }
+
+      input {
+        width: 100%;
+        padding: 0.5rem;
+        box-sizing: border-box;
+        font-size: 1rem;
+      }
+
+      .login-button {
+        width: 100%;
+        font-size: 1rem;
+
+        &.disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
         }
-      });
-    </script>
+      }
+
+      .login-error {
+        display: none;
+      }
+    </style>
   </body>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, sans-serif;
-      background-color: #f9fafb;
-    }
-
-    .login-container {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .login-card {
-      max-width: 28rem;
-      width: 100%;
-      padding: 2rem;
-      background-color: var(--gray-5);
-      border-radius: 0.5rem;
-    }
-
-    input {
-      width: 100%;
-      padding: 0.5rem;
-      box-sizing: border-box;
-      font-size: 1rem;
-    }
-
-    .login-button {
-      width: 100%;
-      font-size: 1rem;
-    }
-    .login-error {
-      display: none;
-    }
-  </style>
 </html>
