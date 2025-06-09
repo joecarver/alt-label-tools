@@ -1,13 +1,6 @@
 ---
 import { getAuthTokenFromCookies } from "../utils/auth";
-import {
-    Box,
-    Button,
-    Flex,
-    Heading,
-    Text,
-    Theme,
-} from "@radix-ui/themes";
+import { Box, Button, Flex, Heading, Text, Theme } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
 
 // Check if user is already authenticated
@@ -19,93 +12,116 @@ if (token) {
 
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Login - Alt Label Tools</title>
-    </head>
-    <body>
-        <Theme>
-            <Box className="login-container">
-                <Flex direction="column" gap="4" className="login-card">
-                    <Heading as="h1" size="9"> ALT </Heading>
-                    <Heading as="h2" size="4"> Automated Label Tools </Heading>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Alt Label Tools</title>
+  </head>
+  <body>
+    <Theme
+      appearance="dark"
+      accentColor="yellow"
+      grayColor="slate"
+      scaling="100%"
+    >
+      <Box className="login-container">
+        <Flex direction="column" gap="4" className="login-card">
+          <Heading as="h1" size="9"> ALT </Heading>
+          <Heading as="h2" size="4"> Automated Label Tools </Heading>
 
-                    <form id="loginForm" style="width: 100%;">
-                        <Flex direction="column" gap="3">
-                            <input type="email" id="email" name="email" placeholder="Email" required style="width: 100%; padding: 0.75rem; border-radius: 0.25rem; border: 1px solid #ccc; font-size: 1rem;" />
-                            <input type="password" id="password" name="password" placeholder="Password" required style="width: 100%; padding: 0.75rem; border-radius: 0.25rem; border: 1px solid #ccc; font-size: 1rem;" />
-                            <Button type="submit" color="blue" size="4" className="login-button">Sign in</Button>
-                            <Text id="loginError" color="red" className="login-error"> </Text>
-                        </Flex>
-                    </form>
-                </Flex>
-            </Box>
-        </Theme>
-        <script type="module">
-            const form = document.getElementById('loginForm');
-            const errorText = document.getElementById('loginError');
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                errorText.style.display = 'none';
-                const email = form.email.value;
-                const password = form.password.value;
-                try {
-                    const response = await fetch('/api/auth', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email, password, type: 'login' })
-                    });
-                    if (!response.ok) {
-                        const result = await response.json();
-                        errorText.textContent = result.error || 'Login failed.';
-                        errorText.style.display = 'block';
-                        return;
-                    }
-                    window.location.href = '/';
-                } catch (err) {
-                    errorText.textContent = 'An error occurred. Please try again.';
-                    errorText.style.display = 'block';
-                }
-            });
-        </script>
-    </body>
+          <form id="loginForm" style="width: 100%;">
+            <Flex direction="column" gap="3">
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="Email"
+                required
+              />
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Password"
+                required
+              />
+              <Button
+                type="submit"
+                color="blue"
+                size="4"
+                className="login-button">Sign in</Button
+              >
+              <Text id="loginError" color="red" className="login-error" />
+            </Flex>
+          </form>
+        </Flex>
+      </Box>
+    </Theme>
+    <script type="module">
+      const form = document.getElementById("loginForm");
+      const errorText = document.getElementById("loginError");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        errorText.style.display = "none";
+        const email = form.email.value;
+        const password = form.password.value;
+        try {
+          const response = await fetch("/api/auth", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password, type: "login" }),
+          });
+          if (!response.ok) {
+            const result = await response.json();
+            errorText.textContent = result.error || "Login failed.";
+            errorText.style.display = "block";
+            return;
+          }
+          window.location.href = "/";
+        } catch (err) {
+          errorText.textContent = "An error occurred. Please try again.";
+          errorText.style.display = "block";
+        }
+      });
+    </script>
+  </body>
 
-    <style>
-        body {
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-                Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: #f9fafb;
-        }
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, sans-serif;
+      background-color: #f9fafb;
+    }
 
-        .login-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-        .login-card {
-            max-width: 28rem;
-            width: 100%;
-            padding: 2rem;
-            background-color: rgb(248, 248, 248);
-            border-radius: 0.5rem;
-            box-shadow:
-                0 4px 6px -1px rgb(0 0 0 / 0.1),
-                0 2px 4px -2px rgb(0 0 0 / 0.1);
-        }
+    .login-card {
+      max-width: 28rem;
+      width: 100%;
+      padding: 2rem;
+      background-color: var(--gray-5);
+      border-radius: 0.5rem;
+    }
 
-        .login-header {
-            text-align: center;
-        }
+    input {
+      width: 100%;
+      padding: 0.5rem;
+      box-sizing: border-box;
+      font-size: 1rem;
+    }
 
-        .login-button {
-            width: 100%;
-        }
-        .login-error {
-            display: none;
-        }
-    </style>
+    .login-button {
+      width: 100%;
+      font-size: 1rem;
+    }
+    .login-error {
+      display: none;
+    }
+  </style>
 </html>
