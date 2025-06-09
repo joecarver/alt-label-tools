@@ -4,9 +4,10 @@ import { Card, Text, Flex, Button, Container, Theme } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
 
 import type { LabelClient } from "../../../types/LabelClient";
+import { isAdmin } from "src/utils/authorization";
 
 const { id } = Astro.params;
-const { clients } = Astro.locals;
+const { clients, user } = Astro.locals;
 const client = clients.find((c: LabelClient) => c.id === id);
 
 if (!client) {
@@ -20,9 +21,13 @@ if (!client) {
       <Flex direction="column" gap="4">
         <Flex justify="between" align="center">
           <Text size="6" weight="bold">New Release for {client.name}</Text>
-          <Button id="fillTestData" variant="soft" size="2"
-            >Fill Test Data</Button
-          >
+          {
+            user.email && isAdmin(user.email) && (
+              <Button id="fillTestData" variant="soft" size="2">
+                Fill Test Data
+              </Button>
+            )
+          }
         </Flex>
 
         <form id="releaseForm">
@@ -144,7 +149,7 @@ if (!client) {
                   type="text"
                   id="catalog_number"
                   name="catalog_number"
-                  placeholder="Release Number"
+                  placeholder="Catalog Number"
                   required
                   style={{
                     width: "100%",
