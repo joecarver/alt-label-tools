@@ -6,6 +6,7 @@ import type { ReleaseTask } from "../types/ReleaseTask";
 import type { TaskStatus } from "../types/TaskCompletionStatus";
 import { CompletionStatus } from "../types/CompletionStatus";
 import { keysToCamelCase } from "./case";
+import type { Artist } from "src/types/Artist";
 
 // Initialize Supabase client
 const supabaseUrl = getSecret("SUPABASE_URL");
@@ -25,16 +26,22 @@ export async function getClients(userId?: string): Promise<LabelClient[]> {
       .from("clients")
       .select("*, releases(*)");
 
-    console.log(data);
     if (error) {
       console.error("Error fetching clients:", error);
       throw error;
     }
 
-    return keysToCamelCase<LabelClient[]>(data).map((client) => ({
-      ...client,
-      releaseCount: client.releases.length,
-    }));
+    return await Promise.all(
+      keysToCamelCase<LabelClient[]>(data).map(async (client) => ({
+        ...client,
+        releases: await Promise.all(
+          client.releases.map(async (release) => ({
+            ...release,
+            artists: await getArtists(release.id),
+          }))
+        ),
+      }))
+    );
   }
 
   // For non-admin users, get only their assigned clients
@@ -54,6 +61,22 @@ export async function getReleases(clientIds: string[]): Promise<Release[]> {
   }
 
   return keysToCamelCase<Release[]>(data);
+}
+
+async function getArtists(releaseId: string): Promise<Artist[]> {
+  const { data, error } = await supabase
+    .from("release_artists")
+    .select("artist:artists(*)")
+    .eq("release_id", releaseId);
+
+  if (error) {
+    console.error("Error fetching artists:", error);
+    throw error;
+  }
+
+  console.log(data);
+
+  return keysToCamelCase<Artist[]>(data.map((row) => row.artist));
 }
 
 // Fetch tasks for a specific release

@@ -20,6 +20,8 @@ const { id } = Astro.params;
 const { clients } = Astro.locals;
 const client = clients.find((c: LabelClient) => c.id === id);
 
+console.log(clients);
+
 if (!client) {
   return Astro.redirect("/");
 }
