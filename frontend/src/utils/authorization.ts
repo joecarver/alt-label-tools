@@ -5,6 +5,7 @@ const ADMIN_EMAILS = [
   "joe.crvr1@gmail.com",
   "joecarver@live.co.uk",
   "altlabeltools@gmail.com",
+  "djpitchdj@gmail.com",
 ];
 
 export function isAdmin(email: string): boolean {
