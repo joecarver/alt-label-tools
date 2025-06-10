@@ -2,7 +2,7 @@
 import { Flex, Box } from "@radix-ui/themes";
 import { getTasks } from "../utils/supabase";
 import { TaskSummary } from "./TaskSummary";
-import TaskItem from "./TaskItem.astro";
+import { TaskItem } from "./TaskItem";
 
 interface Props {
   releaseId: string;
@@ -26,7 +26,9 @@ const tasks = await getTasks(releaseId);
             (a, b) =>
               new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
           )
-          .map((task) => <TaskItem task={task} releaseId={releaseId} />)
+          .map((task) => (
+            <TaskItem client:load task={task} releaseId={releaseId} />
+          ))
       }
     </Flex>
 

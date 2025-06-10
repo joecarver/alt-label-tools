@@ -1,0 +1,15 @@
+.taskItem {
+  width: 100%;
+}
+
+.taskItemCompleted {
+  background-color: var(--green-4);
+}
+
+.taskItemOverdue {
+  background-color: var(--red-4);
+}
+
+.taskItemNotCompleted {
+  background-color: var(--orange-4);
+} 

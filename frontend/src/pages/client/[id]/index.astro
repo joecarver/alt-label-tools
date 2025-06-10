@@ -10,7 +10,7 @@ import {
   Button,
   Link,
 } from "@radix-ui/themes";
-import LinkButton from "../../../components/LinkButton.astro";
+import { DriveLinkButton } from "../../../components/DriveLinkButton";
 import ReleaseList from "../../../components/ReleaseList.astro";
 import LoadingSpinner from "../../../components/LoadingSpinner.astro";
 import { BiPlus } from "react-icons/bi";
@@ -37,7 +37,7 @@ if (!client) {
               <Text size="4" weight="bold">
                 {client.name}
               </Text>
-              <LinkButton
+              <DriveLinkButton
                 url={`https://drive.google.com/drive/folders/${client.folderId}`}
               />
             </Flex>

@@ -4,58 +4,19 @@ import { formatSingleDate } from "../utils/date";
 import { useState } from "react";
 
 interface Props {
-  taskId: string;
   completedAt?: string;
-  releaseId: string;
+  isCompleted: boolean;
+  isLoading: boolean;
+  onToggle: () => void;
 }
 
 export function TaskCompletionButton({
-  taskId,
   completedAt,
-  releaseId,
+  isCompleted,
+  isLoading,
+  onToggle,
 }: Props) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(!!completedAt);
-  const [completionDate, setCompletionDate] = useState(completedAt);
   const [isHovering, setIsHovering] = useState(false);
-
-  const handleToggle = async () => {
-    setIsLoading(true);
-    const formData = new FormData();
-    formData.append("taskId", taskId);
-    formData.append("completedAt", isCompleted ? "" : new Date().toISOString());
-    formData.append("redirectTo", window.location.pathname);
-
-    try {
-      const response = await fetch("/api/update-task-completion", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update task completion");
-      }
-
-      setIsCompleted(!isCompleted);
-      setCompletionDate(isCompleted ? undefined : new Date().toISOString());
-
-      // Trigger update event
-      const event = new CustomEvent("taskCompletionUpdated", {
-        bubbles: true,
-        composed: true,
-        detail: {
-          taskId,
-          releaseId,
-        },
-      });
-      document.body.dispatchEvent(event);
-    } catch (error) {
-      console.error("Failed to update task completion:", error);
-      alert("Failed to update task completion. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   if (isCompleted) {
     return (
@@ -66,13 +27,13 @@ export function TaskCompletionButton({
         variant="soft"
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
-        onClick={handleToggle}
+        onClick={onToggle}
         style={{ cursor: isLoading ? "not-allowed" : "pointer" }}
         disabled={isLoading}
         loading={isLoading}
       >
         {isHovering ? <Cross2Icon /> : <CheckIcon />}
-        {`Completed: ${formatSingleDate(completionDate!)} (manually)`}
+        {`Completed: ${formatSingleDate(completedAt!)} (manually)`}
       </Button>
     );
   }
@@ -83,7 +44,7 @@ export function TaskCompletionButton({
       size="1"
       variant="outline"
       color="green"
-      onClick={handleToggle}
+      onClick={onToggle}
       disabled={isLoading}
       loading={isLoading}
       style={{

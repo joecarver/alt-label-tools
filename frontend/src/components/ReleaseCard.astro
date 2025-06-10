@@ -3,8 +3,8 @@ import { Card, Text, Flex, Badge, Spinner, Box } from "@radix-ui/themes";
 import TaskList from "./TaskList.astro";
 import type { Release } from "../types/Release";
 
-import LinkButton from "./LinkButton.astro";
 import { formatSingleDate } from "../utils/date";
+import { DriveLinkButton } from "./DriveLinkButton";
 
 interface Props {
   release: Release;
@@ -25,7 +25,7 @@ const folderUrl = `https://drive.google.com/drive/folders/${release.folderId}`;
             {release.name}
           </Text>
           <Text size="2" color="gray">{release.catalogNumber}</Text>
-          {release.folderId && <LinkButton url={folderUrl} />}
+          {release.folderId && <DriveLinkButton url={folderUrl} />}
         </Flex>
         <Text size="3">
           {release.artists.map((artist) => artist.artistName).join(", ")}
