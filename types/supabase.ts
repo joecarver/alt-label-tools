@@ -172,11 +172,13 @@ export type Database = {
       }
       releases: {
         Row: {
+          artwork_folder_id: string | null
           campaign_length_weeks: number
           catalog_number: string
           client_id: string | null
           created_at: string
           designer: number | null
+          documentation_folder_id: string | null
           folder_id: string | null
           id: string
           license_allow_alcohol: boolean | null
@@ -185,7 +187,9 @@ export type Database = {
           license_allow_pharmaceuticals: boolean | null
           license_allow_politics: boolean | null
           mastering_engineer: number | null
+          masters_folder_id: string | null
           name: string
+          premasters_folder_id: string | null
           release_date: string | null
           services_required_dj_promo: boolean | null
           services_required_marketing_driver: boolean | null
@@ -198,11 +202,13 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          artwork_folder_id?: string | null
           campaign_length_weeks?: number
           catalog_number: string
           client_id?: string | null
           created_at?: string
           designer?: number | null
+          documentation_folder_id?: string | null
           folder_id?: string | null
           id?: string
           license_allow_alcohol?: boolean | null
@@ -211,7 +217,9 @@ export type Database = {
           license_allow_pharmaceuticals?: boolean | null
           license_allow_politics?: boolean | null
           mastering_engineer?: number | null
+          masters_folder_id?: string | null
           name: string
+          premasters_folder_id?: string | null
           release_date?: string | null
           services_required_dj_promo?: boolean | null
           services_required_marketing_driver?: boolean | null
@@ -224,11 +232,13 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          artwork_folder_id?: string | null
           campaign_length_weeks?: number
           catalog_number?: string
           client_id?: string | null
           created_at?: string
           designer?: number | null
+          documentation_folder_id?: string | null
           folder_id?: string | null
           id?: string
           license_allow_alcohol?: boolean | null
@@ -237,7 +247,9 @@ export type Database = {
           license_allow_pharmaceuticals?: boolean | null
           license_allow_politics?: boolean | null
           mastering_engineer?: number | null
+          masters_folder_id?: string | null
           name?: string
+          premasters_folder_id?: string | null
           release_date?: string | null
           services_required_dj_promo?: boolean | null
           services_required_marketing_driver?: boolean | null
@@ -313,13 +325,6 @@ export type Database = {
             columns: ["task_id"]
             isOneToOne: false
             referencedRelation: "tasks"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "task_status_file_task_status_id_fkey"
-            columns: ["task_id"]
-            isOneToOne: false
-            referencedRelation: "task_statuses"
             referencedColumns: ["id"]
           },
         ]

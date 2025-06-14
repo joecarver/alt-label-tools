@@ -17,7 +17,7 @@ export const DriveLinkButton = ({ url, fileName }: DriveLinkButtonProps) => {
         className="link-button"
       >
         {fileName ? <FileIcon /> : <PiFolder size={14} />}
-        {fileName || "Open in Drive"}
+        {fileName || "Open folder in Drive"}
       </Button>
     </a>
   );

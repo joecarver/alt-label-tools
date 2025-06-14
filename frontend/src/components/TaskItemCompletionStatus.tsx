@@ -3,29 +3,27 @@ import { CheckIcon } from "@radix-ui/react-icons";
 import { formatSingleDate } from "../utils/date";
 import { TaskCompletionButton } from "./TaskCompletionButton";
 import { CompletionStatus } from "@/types/CompletionStatus";
-import { type ReleaseTask } from "@/types/ReleaseTask";
-import { type TaskStatus } from "@/types/TaskStatus";
 
 interface TaskItemCompletionStatusProps {
-  task: ReleaseTask;
   isDetectable: boolean;
-  taskStatus?: TaskStatus;
+  completionStatus: CompletionStatus;
+  completedAt: string | null;
   onToggle: () => void;
   isLoading: boolean;
 }
 
 export const TaskItemCompletionStatus = ({
-  task,
   isDetectable,
-  taskStatus,
+  completionStatus,
+  completedAt,
   onToggle,
   isLoading,
 }: TaskItemCompletionStatusProps) => {
   if (isDetectable) {
-    return taskStatus?.fileInfo?.createdTime ? (
+    return completionStatus === CompletionStatus.DONE_DETECTED ? (
       <Badge size="2" color="green" variant="soft">
         <CheckIcon />
-        Completed: {formatSingleDate(taskStatus.fileInfo.createdTime)}
+        Completed: {formatSingleDate(completedAt || "")}
       </Badge>
     ) : null;
   }
@@ -33,14 +31,8 @@ export const TaskItemCompletionStatus = ({
   return (
     <div>
       <TaskCompletionButton
-        isCompleted={
-          taskStatus?.completionStatus === CompletionStatus.DONE_MANUALLY
-        }
-        completedAt={
-          taskStatus?.completionStatus === CompletionStatus.DONE_MANUALLY
-            ? task.completedAt || undefined
-            : undefined
-        }
+        isCompleted={completionStatus === CompletionStatus.DONE_MANUALLY}
+        completedAt={completedAt || undefined}
         onToggle={onToggle}
         isLoading={isLoading}
       />

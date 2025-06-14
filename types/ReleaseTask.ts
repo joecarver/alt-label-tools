@@ -1,6 +1,6 @@
-import type { TaskStatus } from "./TaskStatus";
 import type { Database } from "./supabase";
 import type { KeysToCamelCase } from "./utils";
+import type { TaskFile } from "./TaskFile";
 
 export enum ReleaseTaskName {
   ReleaseDate = "Release Date",
@@ -28,5 +28,5 @@ export type DetectableReleaseTask = Extract<
 export type ReleaseTask = KeysToCamelCase<
   Database["public"]["Tables"]["tasks"]["Row"]
 > & {
-  taskStatus: TaskStatus | null;
+  taskFiles: TaskFile[];
 };

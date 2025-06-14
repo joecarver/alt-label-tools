@@ -81,29 +81,15 @@ async function getArtists(releaseId: string): Promise<Artist[]> {
 export async function getTasks(releaseId: string): Promise<ReleaseTask[]> {
   const { data, error } = await supabase
     .from("tasks")
-    .select("*")
+    .select("*, task_files(*)")
     .eq("release_id", releaseId);
-
-  const taskStatuses = await supabase
-    .from("task_statuses")
-    .select("*")
-    .in(
-      "task_id",
-      (data || []).map((task) => task.id)
-    );
 
   if (error) {
     console.error("Error fetching tasks:", error);
     throw error;
   }
 
-  const tasks = data.map((task) => ({
-    ...task,
-    taskStatus:
-      taskStatuses.data?.find((status) => status.task_id === task.id) || null,
-  }));
-
-  return keysToCamelCase<ReleaseTask[]>(tasks);
+  return keysToCamelCase<ReleaseTask[]>(data);
 }
 
 export async function getTaskStatus(taskId: string): Promise<TaskStatus> {
@@ -128,27 +114,17 @@ export async function updateTaskCompletion(
 ): Promise<void> {
   const { error: taskError } = await supabase
     .from("tasks")
-    .update({ completed_at: completedAt || null })
+    .update({
+      completed_at: completedAt || null,
+      completion_status: completedAt
+        ? CompletionStatus.DONE_MANUALLY
+        : CompletionStatus.TODO,
+    })
     .eq("id", taskId);
 
   if (taskError) {
     console.error("Error updating task completion:", taskError);
     throw taskError;
-  }
-
-  const { error: statusError } = await supabase
-    .from("task_statuses")
-    .update({
-      completion_status: completedAt
-        ? CompletionStatus.DONE_MANUALLY
-        : CompletionStatus.TODO,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("task_id", taskId);
-
-  if (statusError) {
-    console.error("Error updating task status:", statusError);
-    throw statusError;
   }
 }
 

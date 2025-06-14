@@ -5,6 +5,7 @@ import type { Release } from "@/types/Release";
 
 import { formatSingleDate } from "../utils/date";
 import { DriveLinkButton } from "./DriveLinkButton";
+import { ReleaseTaskName } from "@/types/ReleaseTask";
 
 interface Props {
   release: Release;
@@ -14,17 +15,26 @@ interface Props {
 const { release } = Astro.props;
 
 const folderUrl = `https://drive.google.com/drive/folders/${release.folderId}`;
+
+const taskFolderUrls = {
+  [ReleaseTaskName.PreMastersSubmitted]: `https://drive.google.com/drive/folders/${release.premastersFolderId}`,
+  [ReleaseTaskName.MastersSubmitted]: `https://drive.google.com/drive/folders/${release.mastersFolderId}`,
+  [ReleaseTaskName.ArtworkCreation]: `https://drive.google.com/drive/folders/${release.artworkFolderId}`,
+  [ReleaseTaskName.ContractCreated]: `https://drive.google.com/drive/folders/${release.documentationFolderId}`,
+};
 ---
 
 <Card size="2">
   <Flex direction="column" gap="3">
     <Flex justify="between" align="center">
-      <Flex direction="column" gap="1">
-        <Flex align="baseline" gap="2" wrap="wrap">
-          <Text size="4" weight="bold">
-            {release.name}
-          </Text>
-          <Text size="2" color="gray">{release.catalogNumber}</Text>
+      <Flex direction="column" gap="1" width="100%">
+        <Flex justify="between" width="100%">
+          <Flex align="baseline" gap="2">
+            <Text size="4" weight="bold">
+              {release.name}
+            </Text>
+            <Text size="2" color="gray">{release.catalogNumber}</Text>
+          </Flex>
           {release.folderId && <DriveLinkButton url={folderUrl} />}
         </Flex>
         <Text size="3">
@@ -39,7 +49,11 @@ const folderUrl = `https://drive.google.com/drive/folders/${release.folderId}`;
         }
       </Badge>
     </Box>
-    <TaskList releaseId={release.id} server:defer>
+    <TaskList
+      releaseId={release.id}
+      taskFolderUrls={taskFolderUrls}
+      server:defer
+    >
       <Badge
         color="gray"
         variant="soft"

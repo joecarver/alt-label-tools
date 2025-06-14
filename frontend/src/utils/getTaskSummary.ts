@@ -6,8 +6,8 @@ export const getTaskSummary = (tasks: ReleaseTask[]) => {
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter(
     (task) =>
-      task.taskStatus?.completionStatus === CompletionStatus.DONE_DETECTED ||
-      task.taskStatus?.completionStatus === CompletionStatus.DONE_MANUALLY
+      task.completionStatus === CompletionStatus.DONE_DETECTED ||
+      task.completionStatus === CompletionStatus.DONE_MANUALLY
   ).length;
 
   const releaseDate = tasks.find(

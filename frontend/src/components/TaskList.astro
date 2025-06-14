@@ -6,9 +6,10 @@ import { TaskItem } from "./TaskItem";
 
 interface Props {
   releaseId: string;
+  taskFolderUrls: Record<string, string>;
 }
 
-const { releaseId } = Astro.props;
+const { releaseId, taskFolderUrls } = Astro.props;
 
 const tasks = await getTasks(releaseId);
 ---
@@ -28,7 +29,7 @@ const tasks = await getTasks(releaseId);
               new Date(b.startDate || "").getTime()
           )
           .map((task) => (
-            <TaskItem client:load task={task} releaseId={releaseId} />
+            <TaskItem client:load task={task} taskFolderUrls={taskFolderUrls} />
           ))
       }
     </Flex>
