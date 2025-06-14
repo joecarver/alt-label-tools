@@ -38,9 +38,11 @@ export async function serve(req: Request) {
     const statusUpdates = await Promise.all(
       tasks.map(async (task) => {
         const folderId = getFolderIdForTask(task);
+        const permittedMimeTypes = getPermittedMimeTypesForTask(task);
 
         const status = await getTaskCompletionStatus({
           folderId,
+          permittedMimeTypes,
           dueDate: task.end_date ?? undefined,
         });
 
@@ -122,6 +124,21 @@ function getFolderIdForTask(task: ReleaseTask): string | null {
       return release.artwork_folder_id ?? null;
     default:
       return null;
+  }
+}
+
+function getPermittedMimeTypesForTask(task: ReleaseTask): string[] {
+  switch (task.name) {
+    case ReleaseTaskName.ContractCreated:
+      return ["application/pdf"];
+    case ReleaseTaskName.PreMastersSubmitted:
+      return ["audio/wav", "audio/flac", "audio/aiff"];
+    case ReleaseTaskName.MastersSubmitted:
+      return ["audio/wav", "audio/flac", "audio/aiff"];
+    case ReleaseTaskName.ArtworkCreation:
+      return ["image/jpeg", "image/png", "image/tiff"];
+    default:
+      return [];
   }
 }
 

@@ -8,6 +8,7 @@ import type { TaskStatus } from "@/types/TaskStatus.ts";
 interface TaskCompletionParams {
   folderId: string | null;
   dueDate?: string;
+  permittedMimeTypes?: string[];
 }
 
 export const getCompletionStatusColor = (
@@ -69,6 +70,7 @@ export const getDueDateStatus = (
 
 export async function getTaskCompletionStatus({
   folderId,
+  permittedMimeTypes,
   dueDate,
 }: TaskCompletionParams): Promise<TaskStatus> {
   if (!folderId) {
@@ -79,7 +81,7 @@ export async function getTaskCompletionStatus({
     };
   }
 
-  const files = await listFilesInFolder(folderId);
+  const files = await listFilesInFolder(folderId, permittedMimeTypes);
 
   if (!files || files.length === 0) {
     const dueDateStatus = getDueDateStatus(dueDate, false);
