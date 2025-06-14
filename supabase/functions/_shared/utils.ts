@@ -8,6 +8,7 @@ export const supabase = createClient<Database>(
 );
 
 export function handleError(error: unknown) {
+  console.error("Error:", error);
   return new Response(
     JSON.stringify({
       error: error instanceof Error ? error.message : "Unknown error occurred",

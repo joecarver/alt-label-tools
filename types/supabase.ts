@@ -273,6 +273,57 @@ export type Database = {
           },
         ]
       }
+      task_files: {
+        Row: {
+          created_at: string
+          drive_link: string | null
+          file_created_at: string | null
+          file_id: string
+          file_updated_at: string | null
+          id: number
+          mime_type: string | null
+          name: string | null
+          task_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          drive_link?: string | null
+          file_created_at?: string | null
+          file_id: string
+          file_updated_at?: string | null
+          id?: number
+          mime_type?: string | null
+          name?: string | null
+          task_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          drive_link?: string | null
+          file_created_at?: string | null
+          file_id?: string
+          file_updated_at?: string | null
+          id?: number
+          mime_type?: string | null
+          name?: string | null
+          task_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_files_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_status_file_task_status_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "task_statuses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       task_statuses: {
         Row: {
           color: string
@@ -317,7 +368,9 @@ export type Database = {
       tasks: {
         Row: {
           completed_at: string | null
+          completion_status: string | null
           created_at: string
+          due_date_status: string | null
           end_date: string | null
           id: string
           is_detectable: boolean | null
@@ -328,7 +381,9 @@ export type Database = {
         }
         Insert: {
           completed_at?: string | null
+          completion_status?: string | null
           created_at?: string
+          due_date_status?: string | null
           end_date?: string | null
           id?: string
           is_detectable?: boolean | null
@@ -339,7 +394,9 @@ export type Database = {
         }
         Update: {
           completed_at?: string | null
+          completion_status?: string | null
           created_at?: string
+          due_date_status?: string | null
           end_date?: string | null
           id?: string
           is_detectable?: boolean | null

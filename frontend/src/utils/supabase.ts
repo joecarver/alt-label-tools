@@ -3,7 +3,7 @@ import { getSecret } from "astro:env/server";
 import type { LabelClient } from "@/types/LabelClient";
 import type { Release } from "@/types/Release";
 import type { ReleaseTask } from "@/types/ReleaseTask";
-import type { TaskStatus } from "@/types/TaskCompletionStatus";
+import type { TaskStatus } from "@/types/TaskStatus";
 import { CompletionStatus } from "@/types/CompletionStatus";
 import { keysToCamelCase } from "./case";
 import type { Artist } from "@/types/Artist";

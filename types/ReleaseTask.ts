@@ -1,4 +1,4 @@
-import type { TaskStatus } from "./TaskCompletionStatus";
+import type { TaskStatus } from "./TaskStatus";
 import type { Database } from "./supabase";
 import type { KeysToCamelCase } from "./utils";
 

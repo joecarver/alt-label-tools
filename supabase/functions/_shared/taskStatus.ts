@@ -1,10 +1,10 @@
-import type { FileInfo } from "@/types/FileInfo.ts";
 import { CompletionStatus } from "@/types/CompletionStatus.ts";
 import { BadgeColor } from "@/types/BadgeColor.ts";
 import { DueDateStatus } from "@/types/DueDateStatus.ts";
 import { ReleaseTaskName } from "@/types/ReleaseTask.ts";
 import { parseISO } from "https://esm.sh/date-fns@4.1.0";
 import { getFileInfo } from "./drive.ts";
+import type { TaskStatus } from "@/types/TaskStatus.ts";
 
 interface TaskCompletionParams {
   taskName: ReleaseTaskName;
@@ -71,13 +71,6 @@ export const getDueDateStatus = (
   return DueDateStatus.UNKNOWN;
 };
 
-export interface TaskStatus {
-  completionStatus: CompletionStatus;
-  dueDateStatus: DueDateStatus;
-  color: BadgeColor;
-  fileInfo: FileInfo | null;
-}
-
 export async function getTaskCompletionStatus({
   taskName,
   completedAt,
@@ -91,8 +84,7 @@ export async function getTaskCompletionStatus({
     return {
       completionStatus: CompletionStatus.DONE_MANUALLY,
       dueDateStatus,
-      color: getCompletionStatusColor(CompletionStatus.DONE_MANUALLY),
-      fileInfo: null,
+      files: [],
     };
   }
 
@@ -100,8 +92,7 @@ export async function getTaskCompletionStatus({
     return {
       completionStatus: CompletionStatus.TODO,
       dueDateStatus,
-      color: getCompletionStatusColor(CompletionStatus.TODO),
-      fileInfo: null,
+      files: [],
     };
   }
 
@@ -123,8 +114,7 @@ export async function getTaskCompletionStatus({
     return {
       completionStatus: CompletionStatus.TODO,
       dueDateStatus,
-      color: getCompletionStatusColor(CompletionStatus.TODO),
-      fileInfo: null,
+      files: [],
     };
   }
 
@@ -133,8 +123,7 @@ export async function getTaskCompletionStatus({
   return {
     completionStatus: status,
     dueDateStatus,
-    color: getCompletionStatusColor(status),
-    fileInfo,
+    files: [fileInfo],
   };
 }
 

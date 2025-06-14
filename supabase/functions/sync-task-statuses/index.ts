@@ -1,5 +1,7 @@
 import { supabase, handleError, successResponse } from "../_shared/utils.ts";
 import { getTaskStatus } from "../_shared/taskStatus.ts";
+import { ReleaseTaskName } from "@/types/ReleaseTask.ts";
+import type { TaskFile } from "../../../types/TaskFile.ts";
 
 export async function serve(req: Request) {
   try {
@@ -15,59 +17,85 @@ export async function serve(req: Request) {
         end_date,
         completed_at,
         is_detectable,
+        completion_status,
+        due_date_status,
         releases (
           folder_id
         )
       `
       )
       .order("updated_at", { ascending: false })
+      .eq("is_detectable", true)
       .limit(100); // Process in batches to avoid timeouts
 
     if (tasksError) throw tasksError;
-
-    // Get existing statuses to determine created vs updated
-    const { data: existingStatuses } = await supabase
-      .from("task_statuses")
-      .select("task_id");
-
-    const existingIds = new Set(existingStatuses?.map((s) => s.task_id) ?? []);
 
     const statusUpdates = await Promise.all(
       tasks.map(async (task) => {
         const release = Array.isArray(task.releases)
           ? task.releases[0]
           : task.releases;
+
         const status = await getTaskStatus(
           task.id,
-          task.name,
+          task.name as ReleaseTaskName,
           release.folder_id,
           task.completed_at,
-          task.is_detectable,
+          task.is_detectable ?? false,
           task.end_date
         );
-        return { ...status, taskId: task.id };
+
+        return {
+          ...status,
+          ...task,
+        };
       })
     );
 
-    const { error: updateError } = await supabase.from("task_statuses").upsert(
-      statusUpdates.map((status) => ({
-        task_id: status.taskId,
-        completion_status: status.completionStatus,
-        due_date_status: status.dueDateStatus,
-        color: status.color,
-        file_info: status.fileInfo,
-      })),
-      { onConflict: "task_id" }
+    const updateErrors = await Promise.all(
+      statusUpdates
+        .filter(
+          (status) =>
+            status.completionStatus !== status.completion_status ||
+            status.dueDateStatus !== status.due_date_status
+        )
+        .map((task) =>
+          supabase
+            .from("tasks")
+            .update({
+              completion_status: task.completionStatus,
+              due_date_status: task.dueDateStatus,
+            })
+            .eq("id", task.id)
+        )
     );
 
-    if (updateError) throw updateError;
+    if (updateErrors.some((error) => error.error)) {
+      throw updateErrors.find((error) => error.error);
+    }
+
+    const filesToUpdate = statusUpdates.flatMap((status) =>
+      status.files.map((file: TaskFile) => ({
+        task_id: status.id,
+        name: file.name,
+        drive_link: file.webViewLink,
+        file_created_at: file.createdTime,
+        file_updated_at: file.updatedTime,
+        file_id: file.id,
+        mime_type: file.mimeType,
+      }))
+    );
+
+    const { error: fileUpdateError } = await supabase
+      .from("task_files")
+      .upsert(filesToUpdate, { onConflict: "file_id" });
+
+    if (fileUpdateError) {
+      throw fileUpdateError;
+    }
 
     const result = {
       recordsProcessed: statusUpdates.length,
-      recordsCreated: statusUpdates.filter((s) => !existingIds.has(s.taskId))
-        .length,
-      recordsUpdated: statusUpdates.filter((s) => existingIds.has(s.taskId))
-        .length,
     };
 
     console.log(

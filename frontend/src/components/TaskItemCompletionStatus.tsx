@@ -4,7 +4,7 @@ import { formatSingleDate } from "../utils/date";
 import { TaskCompletionButton } from "./TaskCompletionButton";
 import { CompletionStatus } from "@/types/CompletionStatus";
 import { type ReleaseTask } from "@/types/ReleaseTask";
-import { type TaskStatus } from "@/types/TaskCompletionStatus";
+import { type TaskStatus } from "@/types/TaskStatus";
 
 interface TaskItemCompletionStatusProps {
   task: ReleaseTask;
