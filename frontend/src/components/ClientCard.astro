@@ -1,6 +1,6 @@
 ---
 import { Badge, Card, Flex, Text } from "@radix-ui/themes";
-import LinkButton from "./LinkButton.astro";
+import { DriveLinkButton } from "./DriveLinkButton";
 import type { LabelClient } from "../types/LabelClient";
 import { isAfter, isBefore } from "date-fns";
 
@@ -30,7 +30,7 @@ const upcomingReleases = client.releases.filter((release) =>
           {client.name}
         </Text>
       </a>
-      <LinkButton
+      <DriveLinkButton
         url={`https://drive.google.com/drive/folders/${client.folderId}`}
       />
     </Flex>
