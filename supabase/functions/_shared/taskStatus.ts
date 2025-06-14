@@ -1,15 +1,11 @@
 import { CompletionStatus } from "@/types/CompletionStatus.ts";
 import { BadgeColor } from "@/types/BadgeColor.ts";
 import { DueDateStatus } from "@/types/DueDateStatus.ts";
-import { ReleaseTaskName } from "@/types/ReleaseTask.ts";
 import { parseISO } from "https://esm.sh/date-fns@4.1.0";
-import { getFileInfo } from "./drive.ts";
+import { listFilesInFolder } from "./drive.ts";
 import type { TaskStatus } from "@/types/TaskStatus.ts";
 
 interface TaskCompletionParams {
-  taskName: ReleaseTaskName;
-  completedAt?: string;
-  isDetectable: boolean;
   folderId: string | null;
   dueDate?: string;
 }
@@ -72,23 +68,21 @@ export const getDueDateStatus = (
 };
 
 export async function getTaskCompletionStatus({
-  taskName,
-  completedAt,
-  isDetectable,
   folderId,
   dueDate,
 }: TaskCompletionParams): Promise<TaskStatus> {
-  const dueDateStatus = getDueDateStatus(dueDate, !!completedAt);
-
-  if (completedAt) {
+  if (!folderId) {
     return {
-      completionStatus: CompletionStatus.DONE_MANUALLY,
-      dueDateStatus,
+      completionStatus: CompletionStatus.TODO,
+      dueDateStatus: DueDateStatus.UNKNOWN,
       files: [],
     };
   }
 
-  if (!isDetectable || !folderId) {
+  const files = await listFilesInFolder(folderId);
+
+  if (!files || files.length === 0) {
+    const dueDateStatus = getDueDateStatus(dueDate, false);
     return {
       completionStatus: CompletionStatus.TODO,
       dueDateStatus,
@@ -96,56 +90,11 @@ export async function getTaskCompletionStatus({
     };
   }
 
-  let searchFile = "";
-
-  if (taskName === ReleaseTaskName.ContractCreated) {
-    searchFile = "contract";
-  } else if (taskName === ReleaseTaskName.PreMastersSubmitted) {
-    searchFile = "premasters.zip";
-  } else if (taskName === ReleaseTaskName.MastersSubmitted) {
-    searchFile = "masters.zip";
-  } else if (taskName === ReleaseTaskName.ArtworkCreation) {
-    searchFile = "artwork.png";
-  }
-
-  const fileInfo = await getFileInfo(folderId, searchFile);
-
-  if (!fileInfo) {
-    return {
-      completionStatus: CompletionStatus.TODO,
-      dueDateStatus,
-      files: [],
-    };
-  }
-
-  const status = CompletionStatus.DONE_DETECTED;
+  const dueDateStatus = getDueDateStatus(dueDate, true);
 
   return {
-    completionStatus: status,
+    completionStatus: CompletionStatus.DONE_DETECTED,
     dueDateStatus,
-    files: [fileInfo],
+    files,
   };
-}
-
-export async function getTaskStatus(
-  taskId: string,
-  taskName: ReleaseTaskName,
-  folderId: string,
-  completedAt: string | null | undefined,
-  isDetectable: boolean,
-  dueDate: string | null | undefined
-): Promise<TaskStatus> {
-  const params = {
-    taskName,
-    completedAt: typeof completedAt === "string" ? completedAt : undefined,
-    folderId,
-    isDetectable,
-    dueDate: dueDate ? dueDate : undefined,
-  };
-
-  const status = await getTaskCompletionStatus(params);
-  if (!status) {
-    throw new Error(`Failed to get task status for task ${taskId}`);
-  }
-  return status;
 }

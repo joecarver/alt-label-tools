@@ -1,7 +1,8 @@
 import { supabase, handleError, successResponse } from "../_shared/utils.ts";
-import { getTaskStatus } from "../_shared/taskStatus.ts";
+import { getTaskCompletionStatus } from "../_shared/taskStatus.ts";
 import { ReleaseTaskName } from "@/types/ReleaseTask.ts";
 import type { TaskFile } from "../../../types/TaskFile.ts";
+import type { ReleaseTask } from "../../../types/ReleaseTask.ts";
 
 export async function serve(req: Request) {
   try {
@@ -20,7 +21,11 @@ export async function serve(req: Request) {
         completion_status,
         due_date_status,
         releases (
-          folder_id
+          folder_id,
+          premasters_folder_id,
+          masters_folder_id,
+          artwork_folder_id,
+          documentation_folder_id
         )
       `
       )
@@ -32,18 +37,12 @@ export async function serve(req: Request) {
 
     const statusUpdates = await Promise.all(
       tasks.map(async (task) => {
-        const release = Array.isArray(task.releases)
-          ? task.releases[0]
-          : task.releases;
+        const folderId = getFolderIdForTask(task);
 
-        const status = await getTaskStatus(
-          task.id,
-          task.name as ReleaseTaskName,
-          release.folder_id,
-          task.completed_at,
-          task.is_detectable ?? false,
-          task.end_date
-        );
+        const status = await getTaskCompletionStatus({
+          folderId,
+          dueDate: task.end_date ?? undefined,
+        });
 
         return {
           ...status,
@@ -104,6 +103,25 @@ export async function serve(req: Request) {
     return successResponse(result);
   } catch (error) {
     return handleError(error);
+  }
+}
+
+function getFolderIdForTask(task: ReleaseTask): string | null {
+  const release = Array.isArray(task.releases)
+    ? task.releases[0]
+    : task.releases;
+
+  switch (task.name) {
+    case ReleaseTaskName.ContractCreated:
+      return release.documentation_folder_id ?? null;
+    case ReleaseTaskName.PreMastersSubmitted:
+      return release.premasters_folder_id ?? null;
+    case ReleaseTaskName.MastersSubmitted:
+      return release.masters_folder_id ?? null;
+    case ReleaseTaskName.ArtworkCreation:
+      return release.artwork_folder_id ?? null;
+    default:
+      return null;
   }
 }
 
