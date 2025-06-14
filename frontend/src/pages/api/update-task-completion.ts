@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { updateTaskCompletion } from "../../utils/supabase";
+import { updateTaskCompletion } from "@/utils/supabase";
 
 export const POST: APIRoute = async ({ request }) => {
   try {

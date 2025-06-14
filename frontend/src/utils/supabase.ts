@@ -1,12 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
 import { getSecret } from "astro:env/server";
-import type { LabelClient } from "../types/LabelClient";
-import type { Release } from "../types/Release";
-import type { ReleaseTask } from "../types/ReleaseTask";
-import type { TaskStatus } from "../types/TaskCompletionStatus";
-import { CompletionStatus } from "../types/CompletionStatus";
+import type { LabelClient } from "@/types/LabelClient";
+import type { Release } from "@/types/Release";
+import type { ReleaseTask } from "@/types/ReleaseTask";
+import type { TaskStatus } from "@/types/TaskCompletionStatus";
+import { CompletionStatus } from "@/types/CompletionStatus";
 import { keysToCamelCase } from "./case";
-import type { Artist } from "src/types/Artist";
+import type { Artist } from "@/types/Artist";
 
 // Initialize Supabase client
 const supabaseUrl = getSecret("SUPABASE_URL");
@@ -73,8 +73,6 @@ async function getArtists(releaseId: string): Promise<Artist[]> {
     console.error("Error fetching artists:", error);
     throw error;
   }
-
-  console.log(data);
 
   return keysToCamelCase<Artist[]>(data.map((row) => row.artist));
 }

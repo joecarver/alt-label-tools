@@ -1,7 +1,7 @@
-import { Text, Flex, Badge, Box, Card } from "@radix-ui/themes";
-import { type ReleaseTask } from "../types/ReleaseTask";
-import { CompletionStatus } from "../types/CompletionStatus";
-import { DueDateStatus } from "../types/DueDateStatus";
+import { Text, Flex, Badge, Card } from "@radix-ui/themes";
+import { type ReleaseTask } from "@/types/ReleaseTask";
+import { CompletionStatus } from "@/types/CompletionStatus";
+import { DueDateStatus } from "@/types/DueDateStatus";
 import { formatDateRange } from "../utils/date";
 import { ClockIcon } from "@radix-ui/react-icons";
 
@@ -9,7 +9,6 @@ import { getDueDateStatusColor } from "../utils/getStatusColor";
 import { DriveLinkButton } from "./DriveLinkButton";
 import { useState } from "react";
 import styles from "./TaskItem.module.css";
-import { TaskCompletionButton } from "./TaskCompletionButton";
 import { TaskItemCompletionStatus } from "./TaskItemCompletionStatus";
 
 interface Props {
@@ -72,8 +71,6 @@ export function TaskItem({ task: initialTask, releaseId }: Props) {
     : isOverdue
     ? styles.taskItemOverdue
     : styles.taskItemNotCompleted;
-
-  const completedAt = task.completedAt || undefined;
 
   return (
     <Card className={`${styles.taskItem} ${taskClass}`}>

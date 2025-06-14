@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { createClient } from "@supabase/supabase-js";
-import type { Database } from "../../../../supabase/types";
-import { createDriveFolder } from "../../utils/drive";
+import type { Database } from "@/types/supabase";
+import { createDriveFolder } from "@/utils/drive";
 import { getSecret } from "astro:env/server";
 
 export const POST: APIRoute = async ({ request }) => {

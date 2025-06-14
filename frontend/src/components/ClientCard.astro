@@ -1,7 +1,7 @@
 ---
 import { Badge, Card, Flex, Text } from "@radix-ui/themes";
 import { DriveLinkButton } from "./DriveLinkButton";
-import type { LabelClient } from "../types/LabelClient";
+import type { LabelClient } from "@/types/LabelClient";
 import { isAfter, isBefore } from "date-fns";
 
 interface Props {
@@ -11,11 +11,11 @@ interface Props {
 const { client } = Astro.props;
 
 const completedReleases = client.releases.filter((release) =>
-  isBefore(new Date(release.releaseDate), new Date())
+  isBefore(new Date(release.releaseDate || ""), new Date())
 );
 
 const upcomingReleases = client.releases.filter((release) =>
-  isAfter(new Date(release.releaseDate), new Date())
+  isAfter(new Date(release.releaseDate || ""), new Date())
 );
 ---
 

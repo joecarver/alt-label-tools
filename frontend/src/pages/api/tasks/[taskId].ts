@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
-import { supabase } from "../../../utils/supabase";
-import { keysToCamelCase } from "../../../utils/case";
-import type { ReleaseTask } from "../../../types/ReleaseTask";
+import { supabase } from "@/utils/supabase";
+import { keysToCamelCase } from "@/utils/case";
+import type { ReleaseTask } from "@/types/ReleaseTask";
 
 export const GET: APIRoute = async ({ params }) => {
   try {

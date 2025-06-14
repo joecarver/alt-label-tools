@@ -1,20 +1,10 @@
 ---
-import {
-  Grid,
-  Container,
-  Box,
-  Button,
-  Flex,
-  Link,
-  Text,
-  Heading,
-} from "@radix-ui/themes";
+import { Grid, Container, Box, Button, Link, Heading } from "@radix-ui/themes";
 import ClientCard from "./ClientCard.astro";
-import { isAdmin } from "../utils/authorization";
-import type { LabelClient } from "../types/LabelClient";
+import type { LabelClient } from "@/types/LabelClient";
 import { BiPlus } from "react-icons/bi";
 
-const { user, clients } = Astro.locals;
+const { isAdmin, clients } = Astro.locals;
 ---
 
 <Container size="3">
@@ -26,7 +16,7 @@ const { user, clients } = Astro.locals;
       <Grid columns="1" gap="4">
         {clients.map((client: LabelClient) => <ClientCard client={client} />)}
         {
-          user.email && isAdmin(user.email) && (
+          isAdmin && (
             <Link href="/client/new">
               <Button size="2" variant="soft" style={{ cursor: "pointer" }}>
                 <BiPlus />

@@ -1,16 +1,15 @@
 import type { APIRoute } from "astro";
-import { getAuthTokenFromCookies, getUserFromToken } from "../../utils/auth";
-import { isAdmin } from "../../utils/authorization";
-import { supabase } from "../../utils/supabase";
+import { getAuthTokenFromCookies, getUserFromToken } from "@/utils/auth";
+import { supabase } from "@/utils/supabase";
 
-export const GET: APIRoute = async ({ cookies }) => {
+export const GET: APIRoute = async ({ cookies, locals }) => {
   const token = getAuthTokenFromCookies(cookies);
   if (!token) {
     return new Response(JSON.stringify([]), { status: 401 });
   }
   const user = await getUserFromToken(token);
-  if (!user || !user.email || !isAdmin(user.email)) {
-    return new Response(JSON.stringify([]), { status: 403 });
+  if (!user || !user.email || !locals.isAdmin) {
+    return new Response(JSON.stringify([]), { status: 401 });
   }
   const { data, error } = await supabase.from("users").select("id, email");
   if (error) {

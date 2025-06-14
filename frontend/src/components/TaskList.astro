@@ -24,7 +24,8 @@ const tasks = await getTasks(releaseId);
         tasks
           .sort(
             (a, b) =>
-              new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+              new Date(a.startDate || "").getTime() -
+              new Date(b.startDate || "").getTime()
           )
           .map((task) => (
             <TaskItem client:load task={task} releaseId={releaseId} />

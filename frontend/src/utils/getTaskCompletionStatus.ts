@@ -1,8 +1,8 @@
-import { CompletionStatus } from "frontend/src/types/CompletionStatus";
+import { CompletionStatus } from "@/types/CompletionStatus";
 import { getFileInfo } from "./drive";
-import { ReleaseTaskName } from "frontend/src/types/ReleaseTask";
+import { ReleaseTaskName } from "@/types/ReleaseTask";
 import { getCompletionStatusColor } from "./getStatusColor";
-import type { TaskStatus } from "frontend/src/types/TaskCompletionStatus";
+import type { TaskStatus } from "@/types/TaskCompletionStatus";
 
 import { getDueDateStatus } from "./getDueDateStatus";
 

@@ -5,7 +5,7 @@ import {
   signOut,
   getUserFromToken,
   getAuthTokenFromCookies,
-} from "../../utils/auth";
+} from "@/utils/auth";
 import { getSecret } from "astro:env/server";
 
 // POST /api/auth - login or signup

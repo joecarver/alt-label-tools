@@ -1,11 +1,10 @@
 ---
-import { Button, Flex, Link, Text } from "@radix-ui/themes";
+import { Button, Flex, Link } from "@radix-ui/themes";
 import { BiArrowBack } from "react-icons/bi";
-import { isAdmin } from "../utils/authorization";
 
-const { user } = Astro.locals;
+const { user, isAdmin } = Astro.locals;
 
-if (!user.email || !isAdmin(user.email)) {
+if (!user.email || !isAdmin) {
   return;
 }
 ---

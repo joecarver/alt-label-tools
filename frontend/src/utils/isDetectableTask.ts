@@ -1,10 +1,10 @@
-import { ReleaseTaskName } from "frontend/src/types/ReleaseTask";
+import { ReleaseTaskName } from "@/types/ReleaseTask";
 
 export const isDetectableTask = (taskName: string) => {
-    return [
-        ReleaseTaskName.ContractCreated,
-        ReleaseTaskName.PreMastersSubmitted,
-        ReleaseTaskName.MastersSubmitted,
-        ReleaseTaskName.ArtworkCreation,
-    ].includes(taskName as ReleaseTaskName);
+  return [
+    ReleaseTaskName.ContractCreated,
+    ReleaseTaskName.PreMastersSubmitted,
+    ReleaseTaskName.MastersSubmitted,
+    ReleaseTaskName.ArtworkCreation,
+  ].includes(taskName as ReleaseTaskName);
 };

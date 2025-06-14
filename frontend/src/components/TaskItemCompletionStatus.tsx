@@ -2,9 +2,9 @@ import { Badge } from "@radix-ui/themes";
 import { CheckIcon } from "@radix-ui/react-icons";
 import { formatSingleDate } from "../utils/date";
 import { TaskCompletionButton } from "./TaskCompletionButton";
-import { CompletionStatus } from "../types/CompletionStatus";
-import { type ReleaseTask } from "../types/ReleaseTask";
-import { type TaskStatus } from "../types/TaskCompletionStatus";
+import { CompletionStatus } from "@/types/CompletionStatus";
+import { type ReleaseTask } from "@/types/ReleaseTask";
+import { type TaskStatus } from "@/types/TaskCompletionStatus";
 
 interface TaskItemCompletionStatusProps {
   task: ReleaseTask;

@@ -1,9 +1,8 @@
 import type { APIRoute } from "astro";
-import { getAuthTokenFromCookies, getUserFromToken } from "../../utils/auth";
-import { isAdmin } from "../../utils/authorization";
-import { assignUserToClient, removeUserFromClient } from "../../utils/supabase";
+import { getAuthTokenFromCookies, getUserFromToken } from "@/utils/auth";
+import { assignUserToClient, removeUserFromClient } from "@/utils/supabase";
 
-export const POST: APIRoute = async ({ request, cookies }) => {
+export const POST: APIRoute = async ({ request, cookies, locals }) => {
   const token = getAuthTokenFromCookies(cookies);
   if (!token) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -11,7 +10,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
   }
   const user = await getUserFromToken(token);
-  if (!user || !user.email || !isAdmin(user.email)) {
+  if (!user || !user.email || !locals.isAdmin) {
     return new Response(JSON.stringify({ error: "Forbidden" }), {
       status: 403,
     });
@@ -36,7 +35,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   return new Response(JSON.stringify({ success: true }), { status: 200 });
 };
 
-export const DELETE: APIRoute = async ({ request, cookies }) => {
+export const DELETE: APIRoute = async ({ request, cookies, locals }) => {
   const token = getAuthTokenFromCookies(cookies);
   if (!token) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -44,7 +43,7 @@ export const DELETE: APIRoute = async ({ request, cookies }) => {
     });
   }
   const user = await getUserFromToken(token);
-  if (!user || !user.email || !isAdmin(user.email)) {
+  if (!user || !user.email || !locals.isAdmin) {
     return new Response(JSON.stringify({ error: "Forbidden" }), {
       status: 403,
     });

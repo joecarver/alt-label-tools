@@ -1,4 +1,4 @@
-import type { Database } from "../../../supabase/types";
+import type { Database } from "./supabase";
 import type { KeysToCamelCase } from "./utils";
 
 export type Artist = KeysToCamelCase<

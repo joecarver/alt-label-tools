@@ -1,7 +1,7 @@
 /// <reference types="astro/client" />
 
-import type { User } from "./types/User";
-import type { LabelClient } from "./types/LabelClient";
+import type { User } from "@supabase/supabase-js";
+import type { LabelClient } from "@/types/LabelClient";
 
 interface ImportMetaEnv {
   readonly NODE_ENV: string;

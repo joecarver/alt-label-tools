@@ -1,4 +1,4 @@
-import type { FileInfo } from "../types/FileInfo";
+import type { FileInfo } from "@/types/FileInfo";
 import { getSecret } from "astro:env/server";
 
 // Cache for storing folder paths to their IDs

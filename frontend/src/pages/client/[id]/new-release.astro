@@ -1,13 +1,11 @@
 ---
-import Layout from "../../../layouts/Layout.astro";
-import { Card, Text, Flex, Button, Container, Theme } from "@radix-ui/themes";
-import "@radix-ui/themes/styles.css";
+import Layout from "@/layouts/Layout.astro";
+import { Card, Text, Flex, Button, Container } from "@radix-ui/themes";
 
-import type { LabelClient } from "../../../types/LabelClient";
-import { isAdmin } from "src/utils/authorization";
+import type { LabelClient } from "@/types/LabelClient";
 
 const { id } = Astro.params;
-const { clients, user } = Astro.locals;
+const { clients, isAdmin } = Astro.locals;
 const client = clients.find((c: LabelClient) => c.id === id);
 
 if (!client) {
@@ -22,7 +20,7 @@ if (!client) {
         <Flex justify="between" align="center">
           <Text size="6" weight="bold">New Release for {client.name}</Text>
           {
-            user.email && isAdmin(user.email) && (
+            isAdmin && (
               <Button id="fillTestData" variant="soft" size="2">
                 Fill Test Data
               </Button>

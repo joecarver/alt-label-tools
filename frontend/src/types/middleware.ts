@@ -1,9 +1,12 @@
-import type { User } from "./User";
-import type { LabelClient } from "./LabelClient";
+import type { User } from "@supabase/supabase-js";
+import type { LabelClient } from "@/types/LabelClient";
 
-declare module "astro" {
-  interface Locals {
-    user: User;
-    clients: LabelClient[];
+declare global {
+  namespace App {
+    interface Locals {
+      user: User;
+      isAdmin: boolean;
+      clients: LabelClient[];
+    }
   }
 }

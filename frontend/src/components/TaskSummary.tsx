@@ -1,43 +1,15 @@
 import { Badge, Flex } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
-import { formatSingleDate } from "../utils/date";
-import { type ReleaseTask } from "../types/ReleaseTask";
+import { type ReleaseTask } from "@/types/ReleaseTask";
+import { BadgeColor } from "@/types/BadgeColor";
 import { getTaskSummary } from "../utils/getTaskSummary";
 import { LuListTree } from "react-icons/lu";
-
-type BadgeColor =
-  | "green"
-  | "yellow"
-  | "ruby"
-  | "gray"
-  | "gold"
-  | "bronze"
-  | "brown"
-  | "amber"
-  | "orange"
-  | "tomato"
-  | "red"
-  | "crimson"
-  | "pink"
-  | "plum"
-  | "purple"
-  | "violet"
-  | "iris"
-  | "indigo"
-  | "blue"
-  | "cyan"
-  | "teal"
-  | "jade"
-  | "grass"
-  | "mint"
-  | "lime"
-  | "sky";
 
 interface TaskSummaryData {
   completedTasks: number;
   totalTasks: number;
   color: BadgeColor;
-  releaseDate?: string;
+  releaseDate?: string | null;
 }
 
 interface Props {

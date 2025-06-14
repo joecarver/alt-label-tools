@@ -1,5 +1,5 @@
 ---
-import Layout from "../../../layouts/Layout.astro";
+import Layout from "@/layouts/Layout.astro";
 import {
   Card,
   Flex,
@@ -10,17 +10,15 @@ import {
   Button,
   Link,
 } from "@radix-ui/themes";
-import { DriveLinkButton } from "../../../components/DriveLinkButton";
-import ReleaseList from "../../../components/ReleaseList.astro";
-import LoadingSpinner from "../../../components/LoadingSpinner.astro";
+import { DriveLinkButton } from "@/components/DriveLinkButton";
+import ReleaseList from "@/components/ReleaseList.astro";
+import LoadingSpinner from "@/components/LoadingSpinner.astro";
 import { BiPlus } from "react-icons/bi";
-import type { LabelClient } from "../../../types/LabelClient";
+import type { LabelClient } from "@/types/LabelClient";
 
 const { id } = Astro.params;
 const { clients } = Astro.locals;
 const client = clients.find((c: LabelClient) => c.id === id);
-
-console.log(clients);
 
 if (!client) {
   return Astro.redirect("/");
@@ -44,7 +42,6 @@ if (!client) {
           </Flex>
           <Flex direction="column" gap="4">
             <ReleaseList
-              clientId={client.id}
               clientName={client.name}
               releases={client.releases}
               server:defer

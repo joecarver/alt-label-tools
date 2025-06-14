@@ -1,5 +1,5 @@
 import type { TaskStatus } from "./TaskCompletionStatus";
-import type { Database } from "../../../supabase/types";
+import type { Database } from "./supabase";
 import type { KeysToCamelCase } from "./utils";
 
 export enum ReleaseTaskName {

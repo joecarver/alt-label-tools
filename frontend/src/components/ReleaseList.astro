@@ -1,24 +1,20 @@
 ---
-import { Grid, Box } from "@radix-ui/themes";
+import { Grid } from "@radix-ui/themes";
 import ReleaseCard from "./ReleaseCard.astro";
-import type { Release } from "../types/Release";
+import type { Release } from "@/types/Release";
 
 interface Props {
-    clientId: string;
-    clientName: string;
-    releases: Release[];
+  clientName: string;
+  releases: Release[];
 }
 
-const { clientId, clientName, releases } = Astro.props;
+const { clientName, releases } = Astro.props;
 ---
 
 <Grid columns="1" gap="4">
-    {
-        releases.map((release: Release) => (
-            <ReleaseCard
-                release={release}
-                clientName={clientName}
-            />
-        ))
-    }
+  {
+    releases.map((release: Release) => (
+      <ReleaseCard release={release} clientName={clientName} />
+    ))
+  }
 </Grid>

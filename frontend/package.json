@@ -6,7 +6,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "lint": "eslint . --ext .ts,.astro,.tsx",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.5.2",
@@ -21,6 +23,8 @@
     "react-icons": "^5.5.0"
   },
   "devDependencies": {
+    "eslint": "^9.22.0",
+    "typescript": "^5.8.2",
     "@types/react": "^19.1.2"
   }
 }

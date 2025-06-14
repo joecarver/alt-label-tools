@@ -1,11 +1,5 @@
 {
-  "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-      "@/types/*": ["../types/*"]
-    },
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -16,14 +10,18 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "preserve"
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@/types/*": ["../types/*"]
+    }
   },
   "include": [
-    ".astro/types.d.ts",
-    "src/**/*"
+    "**/*.ts",
+    "**/*.tsx"
   ],
   "exclude": [
-    "dist",
-    "node_modules"
+    "node_modules",
+    ".wrangler"
   ]
-}
+} 
