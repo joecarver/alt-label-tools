@@ -1,7 +1,8 @@
 import "https://deno.land/std@0.204.0/dotenv/load.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import type { Database } from "@/types/supabase.ts";
 
-export const supabase = createClient(
+export const supabase = createClient<Database>(
   Deno.env.get("SUPABASE_URL") ?? "",
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
 );

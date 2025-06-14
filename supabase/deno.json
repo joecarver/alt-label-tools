@@ -8,7 +8,8 @@
     },
     "imports": {
         "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.49.4",
-        "date-fns": "https://esm.sh/date-fns@4.1.0"
+        "date-fns": "https://esm.sh/date-fns@4.1.0",
+        "@/types/": "../types/"
     },
     "nodeModulesDir": "auto",
     "tasks": {

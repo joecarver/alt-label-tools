@@ -1,9 +1,9 @@
-import type { FileInfo } from "../../types/FileInfo.ts";
-import { CompletionStatus } from "../../types/CompletionStatus.ts";
-import { BadgeColor } from "../../types/BadgeColor.ts";
-import { DueDateStatus } from "../../types/DueDateStatus.ts";
+import type { FileInfo } from "@/types/FileInfo.ts";
+import { CompletionStatus } from "@/types/CompletionStatus.ts";
+import { BadgeColor } from "@/types/BadgeColor.ts";
+import { DueDateStatus } from "@/types/DueDateStatus.ts";
+import { ReleaseTaskName } from "@/types/ReleaseTask.ts";
 import { parseISO } from "https://esm.sh/date-fns@4.1.0";
-import { ReleaseTaskName } from "../../types/ReleaseTask.ts";
 import { getFileInfo } from "./drive.ts";
 
 interface TaskCompletionParams {

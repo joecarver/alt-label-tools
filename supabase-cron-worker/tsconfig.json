@@ -10,11 +10,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./*"],
-      "@/types/*": ["../types/*"]
-    }
+    "baseUrl": "."
   },
   "include": [
     "**/*.ts",
