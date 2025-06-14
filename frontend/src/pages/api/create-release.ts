@@ -33,10 +33,23 @@ export const POST: APIRoute = async ({ request }) => {
       client_folder_id,
     } = data;
 
+    const releaseFolderName = `${catalog_number} - ${artist_name} - ${name}`;
+
     // Create a Google Drive folder for the release under the client's folder if provided
     const releaseFolderId = await createDriveFolder(
-      name,
+      releaseFolderName,
       client_folder_id || undefined
+    );
+
+    const preMastersFolderId = await createDriveFolder(
+      "Premasters",
+      releaseFolderId
+    );
+    const mastersFolderId = await createDriveFolder("Masters", releaseFolderId);
+    const artworkFolderId = await createDriveFolder("Artwork", releaseFolderId);
+    const documentationFolderId = await createDriveFolder(
+      "Documentation",
+      releaseFolderId
     );
 
     // First, create or get the artist
@@ -93,6 +106,10 @@ export const POST: APIRoute = async ({ request }) => {
         designer: designer.id,
         client_id,
         folder_id: releaseFolderId,
+        premasters_folder_id: preMastersFolderId,
+        masters_folder_id: mastersFolderId,
+        artwork_folder_id: artworkFolderId,
+        documentation_folder_id: documentationFolderId,
       })
       .select()
       .single();
