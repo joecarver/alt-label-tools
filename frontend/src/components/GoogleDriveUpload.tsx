@@ -11,6 +11,7 @@ interface GoogleDriveUploadProps {
   taskId: string;
   taskName: string;
   permittedMimeTypes: string[];
+  multiple?: boolean;
 }
 
 const GoogleDriveUpload: React.FC<GoogleDriveUploadProps> = ({
@@ -20,43 +21,59 @@ const GoogleDriveUpload: React.FC<GoogleDriveUploadProps> = ({
   taskId,
   permittedMimeTypes,
   taskName,
+  multiple = false,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{
+    current: number;
+    total: number;
+  } | null>(null);
 
   const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const validationFunction =
-      taskName === ReleaseTaskName.PreMastersSubmitted
-        ? () => validateAudioFileName(file.name, false)
-        : () => validateAudioFileName(file.name, true);
-
-    const error = validationFunction();
-    if (error) {
-      alert(error);
-      return;
-    }
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
 
     setIsLoading(true);
+    setUploadProgress({ current: 0, total: files.length });
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      if (parentId) {
-        formData.append("parentId", parentId);
-      }
-      formData.append("taskId", taskId);
+      for (const [index, file] of Array.from(files).entries()) {
+        const validationFunction =
+          taskName === ReleaseTaskName.PreMastersSubmitted
+            ? () => validateAudioFileName(file.name, false)
+            : () => validateAudioFileName(file.name, true);
 
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+        const error = validationFunction();
+        if (error) {
+          alert(`Error with file ${file.name}: ${error}`);
+          continue;
+        }
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to upload file");
+        const formData = new FormData();
+        formData.append("file", file);
+        if (parentId) {
+          formData.append("parentId", parentId);
+        }
+        formData.append("taskId", taskId);
+
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            `Failed to upload ${file.name}: ${
+              errorData.error || "Unknown error"
+            }`
+          );
+        }
+
+        setUploadProgress((prev) =>
+          prev ? { ...prev, current: index + 1 } : null
+        );
       }
 
       if (onUploadComplete) {
@@ -69,10 +86,19 @@ const GoogleDriveUpload: React.FC<GoogleDriveUploadProps> = ({
       }
     } finally {
       setIsLoading(false);
+      setUploadProgress(null);
     }
   };
 
   const elementId = `file-upload-${taskId}`;
+
+  const getButtonText = () => {
+    if (!isLoading) return "Upload files";
+    if (!uploadProgress) return "Uploading...";
+    return `Uploading ${uploadProgress.current + 1}/${
+      uploadProgress.total
+    } files...`;
+  };
 
   return (
     <div>
@@ -83,6 +109,7 @@ const GoogleDriveUpload: React.FC<GoogleDriveUploadProps> = ({
         onChange={handleFileSelect}
         disabled={isLoading}
         accept={permittedMimeTypes.join(",")}
+        multiple={multiple}
       />
       <Button
         onClick={() => document.getElementById(elementId)?.click()}
@@ -91,7 +118,7 @@ const GoogleDriveUpload: React.FC<GoogleDriveUploadProps> = ({
         size="2"
       >
         <UploadIcon />
-        {isLoading ? "Uploading..." : "Upload to Google Drive"}
+        {getButtonText()}
       </Button>
     </div>
   );

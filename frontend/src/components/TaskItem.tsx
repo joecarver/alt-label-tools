@@ -115,6 +115,10 @@ export function TaskItem({ task: initialTask, taskFolderIds }: Props) {
               taskName={task.name}
               onUploadComplete={handleUploadComplete}
               permittedMimeTypes={getPermittedMimeTypesForTask(task)}
+              multiple={
+                task.name === ReleaseTaskName.PreMastersSubmitted ||
+                task.name === ReleaseTaskName.MastersSubmitted
+              }
             />
           )}
         </Flex>

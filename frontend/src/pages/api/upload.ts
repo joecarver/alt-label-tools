@@ -53,18 +53,25 @@ export const POST: APIRoute = async ({ request }) => {
       throw taskFileError;
     }
 
-    // Update task completion
-    const { error: taskError } = await supabase
-      .from("tasks")
-      .update({
-        completion_status: CompletionStatus.DONE_DETECTED,
-        due_date_status: DueDateStatus.UNKNOWN,
-        completed_at: new Date().toISOString(),
-      })
-      .eq("id", taskId);
+    // Update task completion only if this is the first file
+    const { data: existingFiles } = await supabase
+      .from("task_files")
+      .select("id")
+      .eq("task_id", taskId);
 
-    if (taskError) {
-      throw taskError;
+    if (!existingFiles || existingFiles.length === 1) {
+      const { error: taskError } = await supabase
+        .from("tasks")
+        .update({
+          completion_status: CompletionStatus.DONE_DETECTED,
+          due_date_status: DueDateStatus.UNKNOWN,
+          completed_at: new Date().toISOString(),
+        })
+        .eq("id", taskId);
+
+      if (taskError) {
+        throw taskError;
+      }
     }
 
     return new Response(JSON.stringify({ fileId, taskFile }), {
