@@ -1,69 +1,53 @@
 ---
 import { Card, Text, Flex, Badge, Spinner, Box } from "@radix-ui/themes";
-import TaskList from "./TaskList.astro";
 import type { Release } from "@/types/Release";
 
 import { formatSingleDate } from "../utils/date";
-import { DriveLinkButton } from "./DriveLinkButton";
-import { ReleaseTaskName } from "@/types/ReleaseTask";
+import { TaskSummary } from "./TaskSummary";
+import { getTasks } from "@/utils/supabase";
 
 interface Props {
   release: Release;
-  clientName: string;
 }
 
 const { release } = Astro.props;
 
-const folderUrl = `https://drive.google.com/drive/folders/${release.folderId}`;
-
-const taskFolderUrls = {
-  [ReleaseTaskName.PreMastersSubmitted]: `https://drive.google.com/drive/folders/${release.premastersFolderId}`,
-  [ReleaseTaskName.MastersSubmitted]: `https://drive.google.com/drive/folders/${release.mastersFolderId}`,
-  [ReleaseTaskName.ArtworkCreation]: `https://drive.google.com/drive/folders/${release.artworkFolderId}`,
-  [ReleaseTaskName.ContractCreated]: `https://drive.google.com/drive/folders/${release.documentationFolderId}`,
-};
+const tasks = await getTasks(release.id);
 ---
 
-<Card size="2">
-  <Flex direction="column" gap="3">
-    <Flex justify="between" align="center">
-      <Flex direction="column" gap="1" width="100%">
-        <Flex justify="between" width="100%">
-          <Flex align="baseline" gap="2">
-            <Text size="4" weight="bold">
-              {release.name}
-            </Text>
-            <Text size="2" color="gray">{release.catalogNumber}</Text>
+<a href={`/releases/${release.id}`}>
+  <Card size="2">
+    <Flex direction="column" gap="3">
+      <Flex justify="between" align="center">
+        <Flex direction="column" gap="1" width="100%">
+          <Flex justify="between" width="100%">
+            <Flex align="baseline" gap="2">
+              <Text size="4" weight="bold">
+                {release.name}
+              </Text>
+              <Text size="2" color="gray">{release.catalogNumber}</Text>
+            </Flex>
           </Flex>
-          {release.folderId && <DriveLinkButton url={folderUrl} />}
+          <Text size="3">
+            {release.artists.map((artist) => artist.artistName).join(", ")}
+          </Text>
         </Flex>
-        <Text size="3">
-          {release.artists.map((artist) => artist.artistName).join(", ")}
-        </Text>
       </Flex>
+      <Box>
+        <Badge size="2" color="blue" variant="soft">
+          Release Date: {
+            release.releaseDate ? formatSingleDate(release.releaseDate) : "TBD"
+          }
+        </Badge>
+      </Box>
+      <TaskSummary client:load releaseId={release.id} initialTasks={tasks} />
     </Flex>
-    <Box>
-      <Badge size="2" color="blue" variant="soft">
-        Release Date: {
-          release.releaseDate ? formatSingleDate(release.releaseDate) : "TBD"
-        }
-      </Badge>
-    </Box>
-    <TaskList
-      releaseId={release.id}
-      taskFolderUrls={taskFolderUrls}
-      server:defer
-    >
-      <Badge
-        color="gray"
-        variant="soft"
-        size="2"
-        style={{ width: "fit-content" }}
-        slot="fallback"
-      >
-        <Spinner size="1" />
-        Loading tasks...
-      </Badge>
-    </TaskList>
-  </Flex>
-</Card>
+  </Card>
+</a>
+
+<style>
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+</style>

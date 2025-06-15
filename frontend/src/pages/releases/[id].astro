@@ -1,0 +1,23 @@
+---
+import ReleaseDetails from "@/components/ReleaseDetails.astro";
+import Layout from "@/layouts/Layout.astro";
+
+const { id } = Astro.params;
+const { clients } = Astro.locals;
+
+if (!id) {
+  return Astro.redirect("/");
+}
+
+const release = clients
+  .flatMap((client) => client.releases)
+  .find((release) => release.id === id);
+
+if (!release) {
+  return Astro.redirect("/");
+}
+---
+
+<Layout title={release.name}>
+  <ReleaseDetails release={release} />
+</Layout>

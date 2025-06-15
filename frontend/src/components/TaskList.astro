@@ -14,30 +14,20 @@ const { releaseId, taskFolderUrls } = Astro.props;
 const tasks = await getTasks(releaseId);
 ---
 
-<details>
-  <summary>
-    <TaskSummary client:load releaseId={releaseId} initialTasks={tasks} />
-  </summary>
+<TaskSummary client:load releaseId={releaseId} initialTasks={tasks} />
 
-  <Box style={{ backgroundColor: "var(--gray-2)" }} className="task-list">
-    <Flex direction="column" gap="4">
-      {
-        tasks
-          .sort(
-            (a, b) =>
-              new Date(a.startDate || "").getTime() -
-              new Date(b.startDate || "").getTime()
-          )
-          .map((task) => (
-            <TaskItem client:load task={task} taskFolderUrls={taskFolderUrls} />
-          ))
-      }
-    </Flex>
-
-    <style>
-      summary {
-        list-style: none;
-      }
-    </style>
-  </Box>
-</details>
+<Box style={{ backgroundColor: "var(--gray-2)" }} className="task-list">
+  <Flex direction="column" gap="4">
+    {
+      tasks
+        .sort(
+          (a, b) =>
+            new Date(a.startDate || "").getTime() -
+            new Date(b.startDate || "").getTime()
+        )
+        .map((task) => (
+          <TaskItem client:load task={task} taskFolderUrls={taskFolderUrls} />
+        ))
+    }
+  </Flex>
+</Box>

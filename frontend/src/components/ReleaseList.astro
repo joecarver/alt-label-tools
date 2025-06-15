@@ -12,9 +12,5 @@ const { clientName, releases } = Astro.props;
 ---
 
 <Grid columns="1" gap="4">
-  {
-    releases.map((release: Release) => (
-      <ReleaseCard release={release} clientName={clientName} />
-    ))
-  }
+  {releases.map((release: Release) => <ReleaseCard release={release} />)}
 </Grid>
