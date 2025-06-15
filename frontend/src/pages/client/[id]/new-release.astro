@@ -41,6 +41,12 @@ if (!client) {
             name="client_folder_id"
             value={client.folderId}
           />
+          <input
+            type="hidden"
+            id="client_name"
+            name="client_name"
+            value={client.name}
+          />
           <Flex direction="column" gap="4">
             <Card size="2">
               <Flex direction="column" gap="3">
@@ -481,7 +487,12 @@ if (!client) {
               </Flex>
             </Card>
 
-            <Button type="submit" size="3" style={{ width: "100%" }}>
+            <Button
+              type="submit"
+              size="3"
+              style={{ width: "100%" }}
+              color="blue"
+            >
               Submit Release
             </Button>
           </Flex>
@@ -491,10 +502,20 @@ if (!client) {
   </Container>
 </Layout>
 
+<style>
+  button[type="submit"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+</style>
+
 <script>
   const form = document.getElementById("releaseForm") as HTMLFormElement;
   const fillTestDataButton = document.getElementById(
     "fillTestData"
+  ) as HTMLButtonElement;
+  const submitButton = form.querySelector(
+    "button[type='submit']"
   ) as HTMLButtonElement;
 
   const testData = {
@@ -557,6 +578,7 @@ if (!client) {
   });
 
   form.addEventListener("submit", async (e) => {
+    submitButton.disabled = true;
     e.preventDefault();
 
     const formData = new FormData(form);
@@ -586,6 +608,7 @@ if (!client) {
       ),
       client_id: formData.get("client_id"),
       client_folder_id: formData.get("client_folder_id"),
+      client_name: formData.get("client_name"),
     };
 
     try {
@@ -597,16 +620,24 @@ if (!client) {
         body: JSON.stringify(data),
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to submit release");
+        throw new Error(result.error);
       }
 
-      const result = await response.json();
       alert("Release submitted successfully!");
       window.location.href = `/client/${data.client_id}`;
-    } catch (error) {
-      console.error("Error submitting release:", error);
-      alert("Failed to submit release. Please try again.");
+    } catch (error: any) {
+      submitButton.disabled = false;
+      console.error(error.message);
+      if (error.message.includes("releases_client_id_catalog_number_key")) {
+        alert(
+          "Catalog number already exists. Please use a different catalog number."
+        );
+      } else {
+        alert("Failed to submit release. Please try again.");
+      }
     }
   });
 </script>

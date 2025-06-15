@@ -4,7 +4,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@/types/*": ["../types/*"]
+      "@/types/*": ["../types/*"],
+      "@/mailer/*": ["../mailer/*"]
     },
     "target": "ESNext",
     "module": "ESNext",

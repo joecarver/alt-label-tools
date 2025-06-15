@@ -3,6 +3,10 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/supabase";
 import { createDriveFolder } from "@/utils/drive";
 import { getSecret } from "astro:env/server";
+import { artistSigned } from "@/mailer/emails/artistSigned";
+import { sendEmail } from "@/mailer/index";
+import { ReleaseTaskName } from "@/types/ReleaseTask";
+import { formatSingleDate } from "@/utils/date";
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -30,6 +34,7 @@ export const POST: APIRoute = async ({ request }) => {
       campaign_length,
       services_required,
       client_id,
+      client_name,
       client_folder_id,
     } = data;
 
@@ -55,12 +60,17 @@ export const POST: APIRoute = async ({ request }) => {
     // First, create or get the artist
     const { data: artist, error: artistError } = await supabase
       .from("artists")
-      .upsert({
-        artist_name,
-        email,
-        address,
-        gov_name,
-      })
+      .upsert(
+        {
+          artist_name,
+          email,
+          address,
+          gov_name,
+        },
+        {
+          onConflict: "email",
+        }
+      )
       .select()
       .single();
 
@@ -69,10 +79,15 @@ export const POST: APIRoute = async ({ request }) => {
     // Create or get the mastering engineer
     const { data: masteringEngineer, error: masteringError } = await supabase
       .from("mastering_engineer")
-      .upsert({
-        email: mastering_engineer_email,
-        name: mastering_engineer_email,
-      })
+      .upsert(
+        {
+          email: mastering_engineer_email,
+          name: mastering_engineer_email,
+        },
+        {
+          onConflict: "email",
+        }
+      )
       .select()
       .single();
 
@@ -81,10 +96,15 @@ export const POST: APIRoute = async ({ request }) => {
     // Create or get the designer
     const { data: designer, error: designerError } = await supabase
       .from("designer")
-      .upsert({
-        email: designer_email,
-        name: designer_email,
-      })
+      .upsert(
+        {
+          email: designer_email,
+          name: designer_email,
+        },
+        {
+          onConflict: "email",
+        }
+      )
       .select()
       .single();
 
@@ -216,19 +236,39 @@ export const POST: APIRoute = async ({ request }) => {
       if (statusError) throw statusError;
     }
 
+    // Send email to artist
+    const artistSignedEmail = artistSigned({
+      artistName: artist_name,
+      artistEmail: email,
+      premasterDueDate: formatSingleDate(
+        taskInserts.find(
+          (task) => task.name === ReleaseTaskName.PreMastersSubmitted
+        )?.start_date || ""
+      ),
+      labelName: client_name,
+      googleDriveFolder: `https://drive.google.com/drive/folders/${preMastersFolderId}`,
+    });
+
+    sendEmail(artistSignedEmail);
+
     return new Response(JSON.stringify({ success: true, release }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating release:", error);
-    return new Response(JSON.stringify({ error: "Failed to create release" }), {
-      status: 500,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    return new Response(
+      JSON.stringify({
+        error: "Failed to create release, error: " + error.message,
+      }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
   }
 };
