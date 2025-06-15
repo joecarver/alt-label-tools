@@ -1,4 +1,4 @@
-import type { FileInfo } from "../../types/FileInfo.ts";
+import type { TaskFile } from "../../../types/TaskFile.ts";
 
 // Service account credentials
 const serviceAccountEmail = Deno.env.get("GOOGLE_SERVICE_ACCOUNT_EMAIL");
@@ -104,7 +104,7 @@ interface DriveFile {
   modifiedTime?: string;
 }
 
-export function convertToFileInfo(file: DriveFile): FileInfo | null {
+export function convertToFileInfo(file: DriveFile): TaskFile | null {
   if (!file.id || !file.name || !file.webViewLink || !file.mimeType) {
     return null;
   }
@@ -121,7 +121,7 @@ export function convertToFileInfo(file: DriveFile): FileInfo | null {
 export async function listFilesInFolder(
   folderId: string,
   permittedMimeTypes?: string[]
-): Promise<FileInfo[]> {
+): Promise<TaskFile[]> {
   try {
     const token = await generateServiceAccountToken();
     const response = await fetch(
@@ -152,7 +152,7 @@ export async function listFilesInFolder(
 export async function getFileInfo(
   folderId: string | null,
   fileName: string
-): Promise<FileInfo | null> {
+): Promise<TaskFile | null> {
   if (!folderId) {
     return null;
   }
