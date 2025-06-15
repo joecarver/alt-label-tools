@@ -121,3 +121,46 @@ export async function createDriveFolder(
   const data = await response.json();
   return data.id;
 }
+
+// Upload a file to Google Drive
+export async function uploadFile(
+  file: File,
+  parentId?: string
+): Promise<string> {
+  const token = await generateServiceAccountToken();
+
+  // Create file metadata
+  const metadata = {
+    name: file.name,
+    mimeType: file.type,
+    parents: parentId ? [parentId] : undefined,
+  };
+
+  // Create form data for upload
+  const formData = new FormData();
+  formData.append(
+    "metadata",
+    new Blob([JSON.stringify(metadata)], { type: "application/json" })
+  );
+  formData.append("file", file);
+
+  // Upload to Google Drive
+  const response = await fetch(
+    "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to upload file: ${errorText}`);
+  }
+
+  const result = await response.json();
+  return result.id;
+}

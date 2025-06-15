@@ -10,13 +10,15 @@ import { DriveLinkButton } from "./DriveLinkButton";
 import { useState } from "react";
 import styles from "./TaskItem.module.css";
 import { TaskItemCompletionStatus } from "./TaskItemCompletionStatus";
+import GoogleDriveUpload from "./GoogleDriveUpload";
+import type { TaskFile } from "@/types/TaskFile";
 
 interface Props {
   task: ReleaseTask;
-  taskFolderUrls: Record<string, string>;
+  taskFolderIds: Record<string, string | null>;
 }
 
-export function TaskItem({ task: initialTask, taskFolderUrls }: Props) {
+export function TaskItem({ task: initialTask, taskFolderIds }: Props) {
   const [task, setTask] = useState(initialTask);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -65,6 +67,19 @@ export function TaskItem({ task: initialTask, taskFolderUrls }: Props) {
     }
   };
 
+  const handleUploadComplete = async () => {
+    // Refresh the task data
+    const updatedTaskResponse = await fetch(`/api/tasks/${task.id}`);
+    const updatedTask = await updatedTaskResponse.json();
+    setTask(updatedTask);
+
+    document.body.dispatchEvent(
+      new CustomEvent("taskCompletionUpdated", {
+        detail: { releaseId: task.releaseId },
+      })
+    );
+  };
+
   const isCompleted =
     task.completionStatus === CompletionStatus.DONE_DETECTED ||
     task.completionStatus === CompletionStatus.DONE_MANUALLY;
@@ -85,14 +100,21 @@ export function TaskItem({ task: initialTask, taskFolderUrls }: Props) {
     ? styles.taskItemOverdue
     : styles.taskItemNotCompleted;
 
-  const folderUrl = taskFolderUrls[task.name];
+  const folderId = taskFolderIds[task.name];
 
   return (
     <Card className={`${styles.taskItem} ${taskClass}`}>
       <Flex direction="column" gap="1">
         <Flex gap="2" align="center" justify="between">
           <Text weight="medium">{task.name}</Text>
-          {folderUrl && <DriveLinkButton url={folderUrl} />}
+          {folderId && (
+            <GoogleDriveUpload
+              key={task.id}
+              parentId={folderId}
+              taskId={task.id}
+              onUploadComplete={handleUploadComplete}
+            />
+          )}
         </Flex>
         <Flex gap="1" wrap="wrap">
           <Badge

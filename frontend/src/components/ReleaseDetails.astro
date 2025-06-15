@@ -15,11 +15,11 @@ const { release } = Astro.props;
 
 const folderUrl = `https://drive.google.com/drive/folders/${release.folderId}`;
 
-const taskFolderUrls = {
-  [ReleaseTaskName.PreMastersSubmitted]: `https://drive.google.com/drive/folders/${release.premastersFolderId}`,
-  [ReleaseTaskName.MastersSubmitted]: `https://drive.google.com/drive/folders/${release.mastersFolderId}`,
-  [ReleaseTaskName.ArtworkCreation]: `https://drive.google.com/drive/folders/${release.artworkFolderId}`,
-  [ReleaseTaskName.ContractCreated]: `https://drive.google.com/drive/folders/${release.documentationFolderId}`,
+const taskFolderIds: Record<string, string> = {
+  [ReleaseTaskName.PreMastersSubmitted]: release.premastersFolderId || "",
+  [ReleaseTaskName.MastersSubmitted]: release.mastersFolderId || "",
+  [ReleaseTaskName.ArtworkCreation]: release.artworkFolderId || "",
+  [ReleaseTaskName.ContractCreated]: release.documentationFolderId || "",
 };
 ---
 
@@ -48,11 +48,7 @@ const taskFolderUrls = {
         }
       </Badge>
     </Box>
-    <TaskList
-      releaseId={release.id}
-      taskFolderUrls={taskFolderUrls}
-      server:defer
-    >
+    <TaskList releaseId={release.id} taskFolderIds={taskFolderIds} server:defer>
       <Badge
         color="gray"
         variant="soft"

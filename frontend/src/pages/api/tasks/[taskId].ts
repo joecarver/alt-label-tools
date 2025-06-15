@@ -36,18 +36,17 @@ export const GET: APIRoute = async ({ params }) => {
       });
     }
 
-    // Fetch the task status
-    const { data: taskStatus, error: statusError } = await supabase
-      .from("task_statuses")
+    // Fetch task files
+    const { data: taskFiles, error: filesError } = await supabase
+      .from("task_files")
       .select("*")
       .eq("task_id", taskId)
-      .single();
+      .order("created_at", { ascending: false });
 
-    if (statusError && statusError.code !== "PGRST116") {
-      // PGRST116 is the error code for no rows returned, which is fine
-      console.error("Error fetching task status:", statusError);
+    if (filesError) {
+      console.error("Error fetching task files:", filesError);
       return new Response(
-        JSON.stringify({ error: "Failed to fetch task status" }),
+        JSON.stringify({ error: "Failed to fetch task files" }),
         {
           status: 500,
           headers: {
@@ -59,7 +58,7 @@ export const GET: APIRoute = async ({ params }) => {
 
     const fullTask: ReleaseTask = {
       ...keysToCamelCase(task),
-      taskStatus: taskStatus ? keysToCamelCase(taskStatus) : null,
+      taskFiles: keysToCamelCase(taskFiles || []),
     };
 
     return new Response(JSON.stringify(fullTask), {
