@@ -1,12 +1,16 @@
 import React, { useState } from "react";
 import { Button } from "@radix-ui/themes";
 import { UploadIcon } from "@radix-ui/react-icons";
+import { validateAudioFileName } from "@/utils/validateFIleName";
+import { ReleaseTaskName } from "@/types/ReleaseTask";
 
 interface GoogleDriveUploadProps {
   onUploadComplete?: () => void;
   onError?: (error: Error) => void;
   parentId?: string;
   taskId: string;
+  taskName: string;
+  permittedMimeTypes: string[];
 }
 
 const GoogleDriveUpload: React.FC<GoogleDriveUploadProps> = ({
@@ -14,6 +18,8 @@ const GoogleDriveUpload: React.FC<GoogleDriveUploadProps> = ({
   onError,
   parentId,
   taskId,
+  permittedMimeTypes,
+  taskName,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -22,6 +28,17 @@ const GoogleDriveUpload: React.FC<GoogleDriveUploadProps> = ({
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    const validationFunction =
+      taskName === ReleaseTaskName.PreMastersSubmitted
+        ? () => validateAudioFileName(file.name, false)
+        : () => validateAudioFileName(file.name, true);
+
+    const error = validationFunction();
+    if (error) {
+      alert(error);
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -65,10 +82,13 @@ const GoogleDriveUpload: React.FC<GoogleDriveUploadProps> = ({
         style={{ display: "none" }}
         onChange={handleFileSelect}
         disabled={isLoading}
+        accept={permittedMimeTypes.join(",")}
       />
       <Button
         onClick={() => document.getElementById(elementId)?.click()}
         disabled={isLoading}
+        style={{ cursor: "pointer" }}
+        size="2"
       >
         <UploadIcon />
         {isLoading ? "Uploading..." : "Upload to Google Drive"}
