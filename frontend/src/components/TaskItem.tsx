@@ -29,6 +29,8 @@ interface Props {
   licenseAllowPharmaceuticals: boolean;
   licenseAllowFastFood: boolean;
   licenseAllowFastFashion: boolean;
+  masteringDueDate: string;
+  masteringEngineerEmail: string;
 }
 
 export function TaskItem({
@@ -47,6 +49,8 @@ export function TaskItem({
   licenseAllowPharmaceuticals,
   licenseAllowFastFood,
   licenseAllowFastFashion,
+  masteringDueDate,
+  masteringEngineerEmail,
 }: Props) {
   const [task, setTask] = useState(initialTask);
   const [isLoading, setIsLoading] = useState(false);
@@ -124,6 +128,8 @@ export function TaskItem({
             licenseAllowPharmaceuticals,
             licenseAllowFastFood,
             licenseAllowFastFashion,
+            masteringDueDate,
+            masteringEngineerEmail,
           }),
         });
       } catch (error) {

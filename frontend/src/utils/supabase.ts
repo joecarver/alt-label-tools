@@ -38,6 +38,9 @@ export async function getClients(userId?: string): Promise<LabelClient[]> {
           client.releases.map(async (release) => ({
             ...release,
             artists: await getArtists(release.id),
+            masteringEngineerEmail: await getMasteringEngineerEmail(
+              release.masteringEngineer ?? 0
+            ),
           }))
         ),
       }))
@@ -77,6 +80,20 @@ async function getArtists(releaseId: string): Promise<Artist[]> {
   return keysToCamelCase<Artist[]>(data.map((row) => row.artist));
 }
 
+async function getMasteringEngineerEmail(
+  masteringEngineer: number
+): Promise<string> {
+  const { data, error } = await supabase
+    .from("mastering_engineers")
+    .select("email")
+    .eq("id", masteringEngineer);
+  if (error) {
+    console.error("Error fetching mastering engineer email:", error);
+    throw error;
+  }
+  return data[0].email;
+}
+
 // Fetch tasks for a specific release
 export async function getTasks(releaseId: string): Promise<ReleaseTask[]> {
   const { data, error } = await supabase
@@ -90,21 +107,6 @@ export async function getTasks(releaseId: string): Promise<ReleaseTask[]> {
   }
 
   return keysToCamelCase<ReleaseTask[]>(data);
-}
-
-export async function getTaskStatus(taskId: string): Promise<TaskStatus> {
-  const { data, error } = await supabase
-    .from("task_statuses")
-    .select("*")
-    .eq("task_id", taskId)
-    .single();
-
-  if (error) {
-    console.error("Error fetching task status:", error);
-    throw error;
-  }
-
-  return keysToCamelCase<TaskStatus>(data);
 }
 
 // Update task completion status
@@ -133,7 +135,7 @@ export async function getClientsForUser(
   userId: string
 ): Promise<LabelClient[]> {
   const { data, error } = await supabase
-    .from("client_users")
+    .from("user_client_permissions")
     .select("client:clients(*)")
     .eq("user_id", userId);
 
@@ -164,7 +166,7 @@ export async function assignUserToClient(
   clientId: string
 ): Promise<boolean> {
   const { error } = await supabase
-    .from("client_users")
+    .from("user_client_permissions")
     .insert([{ user_id: userId, client_id: clientId }]);
   if (error) {
     console.error("Error assigning user to client:", error);
@@ -178,7 +180,7 @@ export async function getUsersForClient(
   clientId: string
 ): Promise<{ user_id: string; email: string }[]> {
   const { data, error } = await supabase
-    .from("client_users")
+    .from("user_client_permissions")
     .select("user_id")
     .eq("client_id", clientId);
 
@@ -214,7 +216,7 @@ export async function removeUserFromClient(
   clientId: string
 ): Promise<boolean> {
   const { error } = await supabase
-    .from("client_users")
+    .from("user_client_permissions")
     .delete()
     .eq("user_id", userId)
     .eq("client_id", clientId);
@@ -238,4 +240,28 @@ export async function setReleasePreamastersEmailsSent(
     console.error("Error setting release pre-masters emails sent:", error);
     throw error;
   }
+}
+
+// Helper to get or create a user by email
+export async function getOrCreateUser(email: string) {
+  let { data: userList, error: listError } =
+    await supabase.auth.admin.listUsers();
+
+  if (listError) {
+    throw listError;
+  }
+  let user = userList?.users.find((u: any) => u.email === email);
+  if (!user) {
+    const { data: created, error: createError } =
+      await supabase.auth.admin.createUser({
+        email,
+        email_confirm: true,
+      });
+    if (createError) {
+      throw createError;
+    }
+
+    user = created.user;
+  }
+  return user;
 }

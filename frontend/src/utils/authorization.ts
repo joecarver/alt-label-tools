@@ -12,13 +12,13 @@ export function isAdmin(email: string): boolean {
   return ADMIN_EMAILS.includes(email);
 }
 
-// Checks if a user has access to a client via the client_users table
+// Checks if a user has access to a client via the user_client_permissions table
 export async function userHasAccessToClient(
   userId: string,
   clientId: string
 ): Promise<boolean> {
   const { data, error } = await supabase
-    .from("client_users")
+    .from("user_client_permissions")
     .select("id")
     .eq("user_id", userId)
     .eq("client_id", clientId)

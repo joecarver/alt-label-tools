@@ -1,11 +1,13 @@
 import type { APIRoute } from "astro";
 import { premastersSubmitted } from "@/mailer/emails/premastersSubmitted";
+import { notifyMasteringEngineer } from "@/mailer/emails/notifyMasteringEngineer";
 import { sendEmail } from "@/mailer/index";
 import { setReleasePreamastersEmailsSent } from "@/utils/supabase";
 import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
 import { formatSingleDate } from "@/utils/date";
 import type { Artist } from "@/types/Artist";
 import { copyAndReplaceDocsInFolder } from "@/utils/drive";
+import { generateStaticUrl } from "@/utils/url";
 
 // Helper to compute replacements for a given artist and request body
 function buildReplacements({
@@ -69,6 +71,9 @@ export const POST: APIRoute = async ({ request }) => {
       licenseAllowPharmaceuticals,
       licenseAllowFastFood,
       licenseAllowFastFashion,
+      masteringEngineerEmail,
+      designerEmail,
+      masteringDueDate,
     } = body;
 
     if (
@@ -138,6 +143,22 @@ export const POST: APIRoute = async ({ request }) => {
           replacements
         );
       }
+    }
+
+    // send email to mastering engineer
+    if (masteringEngineerEmail) {
+      const url = await generateStaticUrl(releaseId, masteringEngineerEmail);
+
+      const email = notifyMasteringEngineer({
+        masteringEngineerEmail,
+        artistName: artists[0].artistName ?? artists[0].govName ?? "",
+        releaseName,
+        catalogNumber,
+        labelName,
+        dueDate: masteringDueDate,
+        url,
+      });
+      sendEmail(email);
     }
 
     // Update release to mark emails as sent

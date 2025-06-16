@@ -31,9 +31,9 @@ const initialFormState = {
 };
 
 const testData = {
-  artist_name: "Test Artist",
-  email: "test@example.com",
-  gov_name: "Test Artist Full Name",
+  artist_name: "DJ ojo",
+  email: "its.dj.ojo@gmail.com",
+  gov_name: "Joe",
   address: "123 Test Street\nTest City, TS 12345",
   spotify_url:
     "https://open.spotify.com/artist/6gnPiTUdUPttmm5N8j7Rvy?si=JxMY6XhgSSy8rv-6XYclPA",
@@ -43,8 +43,8 @@ const testData = {
   name: "Test Release",
   release_date: new Date().toISOString().split("T")[0],
   campaign_length: "8",
-  mastering_engineer_email: "mastering@example.com",
-  designer_email: "designer@example.com",
+  mastering_engineer_email: "joecarver@live.co.uk",
+  designer_email: "hello@joecarver.net",
   license_allow_politics: true,
   license_allow_alcohol: true,
   license_allow_pharmaceuticals: false,

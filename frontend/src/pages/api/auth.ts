@@ -31,19 +31,30 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       );
     }
 
+    // Verify the token works before setting it
+    const user = await getUserFromToken(access_token);
+    if (!user) {
+      return new Response(JSON.stringify({ error: "Failed to verify token" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     // Set the token in an HTTP-only cookie
     cookies.set("auth_token", access_token, {
       path: "/",
       httpOnly: true,
       secure: getSecret("NODE_ENV") === "production",
       maxAge: 60 * 60 * 24 * 7, // 1 week
+      sameSite: "lax",
     });
 
-    return new Response(JSON.stringify({ user: data.user }), {
+    return new Response(JSON.stringify({ user }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
   } catch (error: any) {
+    console.error("Auth error:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 401,
       headers: { "Content-Type": "application/json" },
@@ -61,30 +72,44 @@ export const GET: APIRoute = async ({ cookies }) => {
     });
   }
 
-  const user = await getUserFromToken(token);
-  if (!user) {
-    return new Response(JSON.stringify({ error: "Invalid token" }), {
-      status: 401,
+  try {
+    const user = await getUserFromToken(token);
+    if (!user) {
+      // Clear the invalid token
+      cookies.delete("auth_token", { path: "/" });
+      return new Response(JSON.stringify({ error: "Invalid token" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify({ user }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error("Error in GET /api/auth:", error);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
       headers: { "Content-Type": "application/json" },
     });
   }
-
-  return new Response(JSON.stringify({ user }), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
 };
 
 // DELETE /api/auth - sign out
 export const DELETE: APIRoute = async ({ cookies }) => {
   try {
-    await signOut();
+    const token = getAuthTokenFromCookies(cookies);
+    if (token) {
+      await signOut();
+    }
     cookies.delete("auth_token", { path: "/" });
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
   } catch (error: any) {
+    console.error("Error in DELETE /api/auth:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { "Content-Type": "application/json" },

@@ -45,32 +45,6 @@ export type Database = {
         }
         Relationships: []
       }
-      client_users: {
-        Row: {
-          client_id: string | null
-          created_at: string
-          user_id: string
-        }
-        Insert: {
-          client_id?: string | null
-          created_at?: string
-          user_id: string
-        }
-        Update: {
-          client_id?: string | null
-          created_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_users_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       clients: {
         Row: {
           created_at: string
@@ -423,6 +397,68 @@ export type Database = {
           },
         ]
       }
+      user_client_permissions: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_users_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_release_permissions: {
+        Row: {
+          created_at: string
+          release_id: string
+          role: Database["public"]["Enums"]["release_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          release_id: string
+          role: Database["public"]["Enums"]["release_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          release_id?: string
+          role?: Database["public"]["Enums"]["release_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_release_permissions_client_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_release_permissions_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "releases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -456,7 +492,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      release_role: "Artist" | "Designer" | "Mastering Engineer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -571,6 +607,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      release_role: ["Artist", "Designer", "Mastering Engineer"],
+    },
   },
 } as const

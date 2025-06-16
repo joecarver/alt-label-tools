@@ -21,6 +21,8 @@ interface Props {
   licenseAllowPharmaceuticals: boolean;
   licenseAllowFastFood: boolean;
   licenseAllowFastFashion: boolean;
+  masteringDueDate: string;
+  masteringEngineerEmail: string;
 }
 
 const {
@@ -40,6 +42,8 @@ const {
   licenseAllowPharmaceuticals,
   licenseAllowFastFood,
   licenseAllowFastFashion,
+  masteringDueDate,
+  masteringEngineerEmail,
 } = Astro.props;
 ---
 
@@ -72,6 +76,8 @@ const {
             licenseAllowPharmaceuticals={licenseAllowPharmaceuticals}
             licenseAllowFastFood={licenseAllowFastFood}
             licenseAllowFastFashion={licenseAllowFastFashion}
+            masteringDueDate={masteringDueDate}
+            masteringEngineerEmail={masteringEngineerEmail}
           />
         ))
     }

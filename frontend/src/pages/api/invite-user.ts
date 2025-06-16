@@ -45,7 +45,7 @@ export const POST: APIRoute = async ({ request }) => {
     // Add client_user rows
     for (const clientId of clients) {
       await adminSupabase
-        .from("client_users")
+        .from("user_client_permissions")
         .insert({ user_id: userId, client_id: clientId });
     }
     return new Response(JSON.stringify({ success: true }), {

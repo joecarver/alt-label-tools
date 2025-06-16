@@ -7,6 +7,8 @@ import { artistSigned } from "@/mailer/emails/artistSigned";
 import { sendEmail } from "@/mailer/index";
 import { ReleaseTaskName } from "@/types/ReleaseTask";
 import { formatSingleDate } from "@/utils/date";
+import { supabase as adminSupabase, getOrCreateUser } from "@/utils/supabase";
+import { randomBytes } from "crypto";
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -221,21 +223,6 @@ export const POST: APIRoute = async ({ request }) => {
       .select();
     if (tasksError) throw tasksError;
 
-    // Insert a task_status for each task
-    const statusInserts = (insertedTasks || []).map((task: any) => ({
-      task_id: task.id,
-      completion_status: "Not Started",
-      due_date_status: "On Time",
-      color: "gray",
-      file_info: null,
-    }));
-    if (statusInserts.length > 0) {
-      const { error: statusError } = await supabase
-        .from("task_statuses")
-        .insert(statusInserts);
-      if (statusError) throw statusError;
-    }
-
     // Send email to artist
     const artistSignedEmail = artistSigned({
       artistName: artist_name,
@@ -250,6 +237,33 @@ export const POST: APIRoute = async ({ request }) => {
     });
 
     sendEmail(artistSignedEmail);
+
+    // Get or create users for artist, mastering engineer, designer
+    const artistUser = await getOrCreateUser(email);
+    const masteringUser = await getOrCreateUser(mastering_engineer_email);
+    const designerUser = await getOrCreateUser(designer_email);
+
+    // Add user_release_permissions for each
+    const userReleasePermissions = [
+      {
+        user_id: artistUser.id,
+        release_id: release.id,
+        role: "Artist" as const,
+      },
+      {
+        user_id: masteringUser.id,
+        release_id: release.id,
+        role: "Mastering Engineer" as const,
+      },
+      {
+        user_id: designerUser.id,
+        release_id: release.id,
+        role: "Designer" as const,
+      },
+    ];
+    for (const perm of userReleasePermissions) {
+      await supabase.from("user_release_permissions").insert(perm);
+    }
 
     return new Response(JSON.stringify({ success: true, release }), {
       status: 200,
