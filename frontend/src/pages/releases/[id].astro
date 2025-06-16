@@ -14,10 +14,6 @@ let release: Release | undefined = clients
   .flatMap((client) => client.releases)
   .find((release) => release.id === id);
 
-const client = clients.find((client) =>
-  client.releases.some((release) => release.id === id)
-);
-
 if (!release) {
   release = releases.find((release) => release.id === id);
 }

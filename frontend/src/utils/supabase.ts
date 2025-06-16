@@ -3,10 +3,8 @@ import { getSecret } from "astro:env/server";
 import type { LabelClient } from "@/types/LabelClient";
 import type { Release } from "@/types/Release";
 import type { ReleaseTask } from "@/types/ReleaseTask";
-import type { TaskStatus } from "@/types/TaskStatus";
 import { CompletionStatus } from "@/types/CompletionStatus";
 import { keysToCamelCase } from "./case";
-import type { Artist } from "@/types/Artist";
 
 // Initialize Supabase client
 const supabaseUrl = getSecret("SUPABASE_URL");
@@ -24,27 +22,16 @@ export async function getClients(userId?: string): Promise<LabelClient[]> {
   if (!userId) {
     const { data, error } = await supabase
       .from("clients")
-      .select("*, releases(*)");
+      .select(
+        "*, releases(*, mastering_engineer(*), designer(*), artists(*), client:clients(*))"
+      );
 
     if (error) {
       console.error("Error fetching clients:", error);
       throw error;
     }
 
-    return await Promise.all(
-      keysToCamelCase<LabelClient[]>(data).map(async (client) => ({
-        ...client,
-        releases: await Promise.all(
-          client.releases.map(async (release) => ({
-            ...release,
-            artists: await getArtists(release.id),
-            masteringEngineerEmail: await getMasteringEngineerEmail(
-              release.masteringEngineer ?? 0
-            ),
-          }))
-        ),
-      }))
-    );
+    return keysToCamelCase<LabelClient[]>(data);
   }
 
   // For non-admin users, get only their assigned clients
@@ -55,7 +42,9 @@ export async function getClients(userId?: string): Promise<LabelClient[]> {
 export async function getReleases(clientIds: string[]): Promise<Release[]> {
   const { data, error } = await supabase
     .from("releases")
-    .select("*, artists(*)")
+    .select(
+      "*, artists(*), mastering_engineer(*), designer(*), client:clients(*)"
+    )
     .in("client_id", clientIds);
 
   if (error) {
@@ -70,7 +59,7 @@ export async function getReleasesForUser(userId: string): Promise<Release[]> {
   const { data, error } = await supabase
     .from("user_release_permissions")
     .select(
-      "release:releases(*, client:clients(name), mastering_engineer:mastering_engineer(email), artists:release_artists(*, artist:artists(*)))"
+      "release:releases(*, client:clients(*), mastering_engineer(*), designer(*), artists(*))"
     )
     .eq("user_id", userId);
 
@@ -82,36 +71,6 @@ export async function getReleasesForUser(userId: string): Promise<Release[]> {
   const releases = keysToCamelCase<Release[]>(data.map((row) => row.release));
 
   return releases;
-}
-
-async function getArtists(releaseId: string): Promise<Artist[]> {
-  const { data, error } = await supabase
-    .from("release_artists")
-    .select("artist:artists(*)")
-    .eq("release_id", releaseId);
-
-  if (error) {
-    console.error("Error fetching artists:", error);
-    throw error;
-  }
-
-  return keysToCamelCase<Artist[]>(data.map((row) => row.artist));
-}
-
-async function getMasteringEngineerEmail(
-  masteringEngineer: number
-): Promise<string> {
-  const { data, error } = await supabase
-    .from("mastering_engineer")
-    .select("email")
-    .eq("id", masteringEngineer)
-    .single();
-
-  if (error) {
-    console.error("Error fetching mastering engineer email:", error);
-    throw error;
-  }
-  return data.email;
 }
 
 // Fetch tasks for a specific release
@@ -156,7 +115,9 @@ export async function getClientsForUser(
 ): Promise<LabelClient[]> {
   const { data, error } = await supabase
     .from("user_client_permissions")
-    .select("client:clients(*)")
+    .select(
+      "client:clients(*, releases(*, mastering_engineer(*), designer(*), artists(*)))"
+    )
     .eq("user_id", userId);
 
   if (error) {
@@ -168,16 +129,7 @@ export async function getClientsForUser(
     return [];
   }
 
-  const releases = await getReleases(data.map((row: any) => row.client.id));
-
-  const clients = data
-    .map((row: any) => ({
-      ...row.client,
-      releases,
-    }))
-    .filter(Boolean);
-
-  return keysToCamelCase<LabelClient[]>(clients);
+  return keysToCamelCase<LabelClient[]>(data.map((row) => row.client));
 }
 
 // Assign a user to a client (admin only)
