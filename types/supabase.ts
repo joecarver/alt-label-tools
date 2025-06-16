@@ -16,7 +16,7 @@ export type Database = {
           artist_name: string | null
           bandcamp_url: string | null
           created_at: string
-          email: string | null
+          email: string
           gov_name: string | null
           id: number
           spotify_url: string | null
@@ -27,7 +27,7 @@ export type Database = {
           artist_name?: string | null
           bandcamp_url?: string | null
           created_at?: string
-          email?: string | null
+          email: string
           gov_name?: string | null
           id?: number
           spotify_url?: string | null
@@ -38,7 +38,7 @@ export type Database = {
           artist_name?: string | null
           bandcamp_url?: string | null
           created_at?: string
-          email?: string | null
+          email?: string
           gov_name?: string | null
           id?: number
           spotify_url?: string | null
@@ -119,19 +119,19 @@ export type Database = {
       mastering_engineer: {
         Row: {
           created_at: string
-          email: string | null
+          email: string
           id: number
           name: string | null
         }
         Insert: {
           created_at?: string
-          email?: string | null
+          email: string
           id?: number
           name?: string | null
         }
         Update: {
           created_at?: string
-          email?: string | null
+          email?: string
           id?: number
           name?: string | null
         }
@@ -189,6 +189,7 @@ export type Database = {
           mastering_engineer: number | null
           masters_folder_id: string | null
           name: string
+          premaster_emails_sent: boolean
           premasters_folder_id: string | null
           release_date: string | null
           services_required_dj_promo: boolean | null
@@ -219,6 +220,7 @@ export type Database = {
           mastering_engineer?: number | null
           masters_folder_id?: string | null
           name: string
+          premaster_emails_sent?: boolean
           premasters_folder_id?: string | null
           release_date?: string | null
           services_required_dj_promo?: boolean | null
@@ -249,6 +251,7 @@ export type Database = {
           mastering_engineer?: number | null
           masters_folder_id?: string | null
           name?: string
+          premaster_emails_sent?: boolean
           premasters_folder_id?: string | null
           release_date?: string | null
           services_required_dj_promo?: boolean | null

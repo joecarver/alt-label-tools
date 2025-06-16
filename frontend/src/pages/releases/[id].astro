@@ -13,11 +13,15 @@ const release = clients
   .flatMap((client) => client.releases)
   .find((release) => release.id === id);
 
-if (!release) {
+const client = clients.find((client) =>
+  client.releases.some((release) => release.id === id)
+);
+
+if (!release || !client) {
   return Astro.redirect("/");
 }
 ---
 
 <Layout title={release.name}>
-  <ReleaseDetails release={release} />
+  <ReleaseDetails release={release} label={client} />
 </Layout>

@@ -15,6 +15,7 @@ export enum ReleaseTaskName {
   PitchToAppleMusic = "Pitch to Apple",
   Release = "Release",
   UpdateScentric = "Update Scentric",
+  UploadToBandcamp = "Upload and Pitch to Bandcamp",
 }
 
 export type DetectableReleaseTask = Extract<
@@ -28,5 +29,6 @@ export type DetectableReleaseTask = Extract<
 export type ReleaseTask = KeysToCamelCase<
   Database["public"]["Tables"]["tasks"]["Row"]
 > & {
+  name: ReleaseTaskName;
   taskFiles: TaskFile[];
 };

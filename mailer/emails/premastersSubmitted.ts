@@ -1,9 +1,10 @@
 import type { EmailRequest } from "..";
 
-interface PremastersSubmittedEmail {
+export interface PremastersSubmittedEmail {
   artistName: string;
   artistEmail: string;
   releaseName: string;
+  catalogNumber: string;
   releaseDate: string;
   labelName: string;
   releaseSchedule: string[];
@@ -13,6 +14,7 @@ export const premastersSubmitted = ({
   artistName,
   artistEmail,
   releaseName,
+  catalogNumber,
   releaseDate,
   labelName,
   releaseSchedule,
@@ -21,7 +23,7 @@ export const premastersSubmitted = ({
     to: artistEmail,
     from: "info@altlabeltools.com",
     reply_to: "info@altlabeltools.com",
-    subject: `Pre-Masters Submitted: ${releaseName}`,
+    subject: `Pre-Masters Submitted: ${releaseName} (${catalogNumber})`,
     body: `Hey ${artistName}
 
 Hope you're well and excited for your ${labelName} release!

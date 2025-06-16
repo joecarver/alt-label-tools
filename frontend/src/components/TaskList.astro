@@ -1,17 +1,34 @@
 ---
 import { Flex, Box } from "@radix-ui/themes";
-import { getTasks } from "../utils/supabase";
 import { TaskSummary } from "./TaskSummary";
 import { TaskItem } from "./TaskItem";
+import type { ReleaseTask } from "@/types/ReleaseTask";
 
 interface Props {
   releaseId: string;
+  tasks: ReleaseTask[];
   taskFolderIds: Record<string, string>;
+  releaseName: string;
+  catalogNumber: string;
+  releaseDate: string;
+  labelName: string;
+  artists: any[];
+  tasksData: ReleaseTask[];
+  premastersEmailsSent: boolean;
 }
 
-const { releaseId, taskFolderIds } = Astro.props;
-
-const tasks = await getTasks(releaseId);
+const {
+  releaseId,
+  tasks,
+  taskFolderIds,
+  releaseName,
+  catalogNumber,
+  releaseDate,
+  labelName,
+  artists,
+  tasksData,
+  premastersEmailsSent,
+} = Astro.props;
 ---
 
 <TaskSummary client:load releaseId={releaseId} initialTasks={tasks} />
@@ -26,7 +43,18 @@ const tasks = await getTasks(releaseId);
             new Date(b.startDate || "").getTime()
         )
         .map((task) => (
-          <TaskItem client:load task={task} taskFolderIds={taskFolderIds} />
+          <TaskItem
+            client:load
+            task={task}
+            taskFolderIds={taskFolderIds}
+            releaseName={releaseName}
+            catalogNumber={catalogNumber}
+            releaseDate={releaseDate}
+            labelName={labelName}
+            artists={artists}
+            tasksData={tasksData}
+            premastersEmailsSent={premastersEmailsSent}
+          />
         ))
     }
   </Flex>

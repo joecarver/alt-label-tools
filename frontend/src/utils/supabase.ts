@@ -224,3 +224,18 @@ export async function removeUserFromClient(
   }
   return true;
 }
+
+export async function setReleasePreamastersEmailsSent(
+  releaseId: string,
+  premastersEmailsSent: boolean
+) {
+  const { error } = await supabase
+    .from("releases")
+    .update({ premaster_emails_sent: premastersEmailsSent })
+    .eq("id", releaseId);
+
+  if (error) {
+    console.error("Error setting release pre-masters emails sent:", error);
+    throw error;
+  }
+}

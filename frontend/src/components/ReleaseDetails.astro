@@ -6,12 +6,15 @@ import type { Release } from "@/types/Release";
 import { formatSingleDate } from "../utils/date";
 import { DriveLinkButton } from "./DriveLinkButton";
 import { ReleaseTaskName } from "@/types/ReleaseTask";
+import { getTasks } from "@/utils/supabase";
+import type { LabelClient } from "@/types/LabelClient";
 
 interface Props {
   release: Release;
+  label: LabelClient;
 }
 
-const { release } = Astro.props;
+const { release, label } = Astro.props;
 
 const folderUrl = `https://drive.google.com/drive/folders/${release.folderId}`;
 
@@ -21,6 +24,8 @@ const taskFolderIds: Record<string, string> = {
   [ReleaseTaskName.ArtworkCreation]: release.artworkFolderId || "",
   [ReleaseTaskName.ContractCreated]: release.documentationFolderId || "",
 };
+
+const tasks = await getTasks(release.id);
 ---
 
 <Card size="2">
@@ -48,7 +53,19 @@ const taskFolderIds: Record<string, string> = {
         }
       </Badge>
     </Box>
-    <TaskList releaseId={release.id} taskFolderIds={taskFolderIds} server:defer>
+    <TaskList
+      releaseId={release.id}
+      tasks={tasks}
+      taskFolderIds={taskFolderIds}
+      releaseName={release.name}
+      catalogNumber={release.catalogNumber ?? ""}
+      releaseDate={release.releaseDate ?? ""}
+      labelName={label.name}
+      artists={release.artists}
+      tasksData={tasks}
+      premastersEmailsSent={release.premasterEmailsSent ?? false}
+      server:defer
+    >
       <Badge
         color="gray"
         variant="soft"

@@ -12,14 +12,30 @@ import styles from "./TaskItem.module.css";
 import { TaskItemCompletionStatus } from "./TaskItemCompletionStatus";
 import GoogleDriveUpload from "./GoogleDriveUpload";
 import { getPermittedMimeTypesForTask } from "@/utils/getPermittedMimeTypesForTask";
-import { validateAudioFileName } from "@/utils/validateFIleName";
 
 interface Props {
   task: ReleaseTask;
   taskFolderIds: Record<string, string | null>;
+  releaseName: string;
+  catalogNumber: string;
+  releaseDate: string;
+  labelName: string;
+  artists: any[];
+  tasksData: ReleaseTask[];
+  premastersEmailsSent: boolean;
 }
 
-export function TaskItem({ task: initialTask, taskFolderIds }: Props) {
+export function TaskItem({
+  task: initialTask,
+  taskFolderIds,
+  releaseName,
+  catalogNumber,
+  releaseDate,
+  labelName,
+  artists,
+  tasksData,
+  premastersEmailsSent,
+}: Props) {
   const [task, setTask] = useState(initialTask);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -73,6 +89,29 @@ export function TaskItem({ task: initialTask, taskFolderIds }: Props) {
     const updatedTaskResponse = await fetch(`/api/tasks/${task.id}`);
     const updatedTask = await updatedTaskResponse.json();
     setTask(updatedTask);
+
+    if (
+      task.name === ReleaseTaskName.PreMastersSubmitted &&
+      !premastersEmailsSent
+    ) {
+      try {
+        await fetch("/api/handle-premaster-submission", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            releaseName,
+            catalogNumber,
+            releaseDate,
+            labelName,
+            artists,
+            tasks: tasksData,
+            releaseId: task.releaseId,
+          }),
+        });
+      } catch (error) {
+        console.error("Failed to handle premaster submission:", error);
+      }
+    }
 
     document.body.dispatchEvent(
       new CustomEvent("taskCompletionUpdated", {
