@@ -84,7 +84,7 @@ async function getMasteringEngineerEmail(
   masteringEngineer: number
 ): Promise<string> {
   const { data, error } = await supabase
-    .from("mastering_engineers")
+    .from("mastering_engineer")
     .select("email")
     .eq("id", masteringEngineer);
   if (error) {
