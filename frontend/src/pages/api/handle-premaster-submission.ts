@@ -5,6 +5,52 @@ import { setReleasePreamastersEmailsSent } from "@/utils/supabase";
 import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
 import { formatSingleDate } from "@/utils/date";
 import type { Artist } from "@/types/Artist";
+import { copyAndReplaceDocsInFolder } from "@/utils/drive";
+
+// Helper to compute replacements for a given artist and request body
+function buildReplacements({
+  catalogNumber,
+  labelName,
+  artist,
+  licenseAllowPolitics,
+  licenseAllowAlcohol,
+  licenseAllowPharmaceuticals,
+  licenseAllowFastFood,
+  licenseAllowFastFashion,
+}: {
+  catalogNumber: string;
+  labelName: string;
+  artist: Artist;
+  licenseAllowPolitics: boolean;
+  licenseAllowAlcohol: boolean;
+  licenseAllowPharmaceuticals: boolean;
+  licenseAllowFastFood: boolean;
+  licenseAllowFastFashion: boolean;
+}) {
+  return [
+    { search: "{{Release Number}}", replace: catalogNumber },
+    { search: "{{Artist Name}}", replace: artist.artistName ?? "" },
+    { search: "{{Label}}", replace: labelName },
+    { search: "{{Full Name}}", replace: artist.govName ?? "" },
+    {
+      search: "{{Timestamp}}",
+      replace: formatSingleDate(new Date().toISOString()),
+    },
+    { search: "{{Artist Address}}", replace: artist.address ?? "" },
+    { search: "{{Artist Email}}", replace: artist.email ?? "" },
+    { search: "{{Politics}}", replace: licenseAllowPolitics ? "No" : "Yes" },
+    { search: "{{Alcohol}}", replace: licenseAllowAlcohol ? "No" : "Yes" },
+    {
+      search: "{{Pharmaceuticals}}",
+      replace: licenseAllowPharmaceuticals ? "No" : "Yes",
+    },
+    { search: "{{Fast Food}}", replace: licenseAllowFastFood ? "No" : "Yes" },
+    {
+      search: "{{Fast Fashion}}",
+      replace: licenseAllowFastFashion ? "No" : "Yes",
+    },
+  ];
+}
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -17,6 +63,12 @@ export const POST: APIRoute = async ({ request }) => {
       artists,
       tasks,
       releaseId,
+      destFolderId,
+      licenseAllowPolitics,
+      licenseAllowAlcohol,
+      licenseAllowPharmaceuticals,
+      licenseAllowFastFood,
+      licenseAllowFastFashion,
     } = body;
 
     if (
@@ -67,6 +119,25 @@ export const POST: APIRoute = async ({ request }) => {
         releaseSchedule,
       });
       sendEmail(email);
+
+      // Copy and personalize Google Docs for this artist
+      if (destFolderId) {
+        const replacements = buildReplacements({
+          catalogNumber,
+          labelName,
+          artist,
+          licenseAllowPolitics,
+          licenseAllowAlcohol,
+          licenseAllowPharmaceuticals,
+          licenseAllowFastFood,
+          licenseAllowFastFashion,
+        });
+        await copyAndReplaceDocsInFolder(
+          destFolderId,
+          catalogNumber,
+          replacements
+        );
+      }
     }
 
     // Update release to mark emails as sent

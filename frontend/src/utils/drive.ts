@@ -164,3 +164,112 @@ export async function uploadFile(
   const result = await response.json();
   return result.id;
 }
+
+// Constant source folder ID containing the 4 template Google Docs
+const SOURCE_DOCS_FOLDER_ID = "1yyU1g4hk10iuWXg7qz0EMSLsWiGcAe4v";
+
+// Type for text replacements
+interface TextReplacement {
+  search: string;
+  replace: string;
+}
+
+/**
+ * Copies 4 specific Google Docs from the source folder to the destination folder, then performs text replacements in each.
+ * @param destFolderId The destination Google Drive folder ID
+ * @param catalogNumber The catalog number to use in the new file names (replaces 'ALT000')
+ * @param replacements Array of {search, replace} objects for text replacement in each doc
+ * @returns Array of new copied doc IDs
+ */
+export async function copyAndReplaceDocsInFolder(
+  destFolderId: string,
+  catalogNumber: string,
+  replacements: TextReplacement[]
+): Promise<string[]> {
+  const token = await generateServiceAccountToken();
+
+  // The 4 specific file names to fetch
+  const docNames = [
+    "ALT000 - Blank Factsheet - Template",
+    "ALT000 - Publishing - Exist. Comp. 30 Day",
+    "ALT000 - Music Publishing - Sync Licensing Authority - Template",
+    "ALT000 - Music Publishing - Master Sync Licensing Authority - Template",
+  ];
+
+  // 1. List the files in the source folder and filter for the 4 specific names
+  const listRes = await fetch(
+    `https://www.googleapis.com/drive/v3/files?q='${SOURCE_DOCS_FOLDER_ID}'+in+parents+and+mimeType='application/vnd.google-apps.document'+and+trashed=false&fields=files(id,name)`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+  if (!listRes.ok) {
+    const errorText = await listRes.text();
+    throw new Error(`Failed to list source docs: ${errorText}`);
+  }
+  const { files } = await listRes.json();
+  // Only keep the files that match the 4 required names
+  const docsToCopy = docNames.map((name) => {
+    const found = files.find((f: { name: string }) => f.name === name);
+    if (!found) throw new Error(`Source doc not found: ${name}`);
+    return found;
+  });
+
+  const newDocIds: string[] = [];
+
+  // 2. Copy each doc to the destination folder with the new name
+  for (const doc of docsToCopy) {
+    // Build the new file name
+    let newName = doc.name.replace(/^ALT000/, catalogNumber);
+    newName = newName.replace(/ - Template$/, "");
+    newName = newName.replace(/Blank Factsheet/, "Factsheet");
+
+    // Copy the file
+    const copyRes = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${doc.id}/copy`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: newName,
+          parents: [destFolderId],
+        }),
+      }
+    );
+    if (!copyRes.ok) {
+      const errorText = await copyRes.text();
+      throw new Error(`Failed to copy doc ${doc.id}: ${errorText}`);
+    }
+    const newDoc = await copyRes.json();
+    newDocIds.push(newDoc.id);
+
+    // 3. Perform text replacements using the Docs API batchUpdate
+    const batchUpdateRes = await fetch(
+      `https://docs.googleapis.com/v1/documents/${newDoc.id}:batchUpdate`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          requests: replacements.map(({ search, replace }) => ({
+            replaceAllText: {
+              containsText: { text: search, matchCase: true },
+              replaceText: replace,
+            },
+          })),
+        }),
+      }
+    );
+    if (!batchUpdateRes.ok) {
+      const errorText = await batchUpdateRes.text();
+      throw new Error(`Failed to update doc ${newDoc.id}: ${errorText}`);
+    }
+  }
+
+  return newDocIds;
+}

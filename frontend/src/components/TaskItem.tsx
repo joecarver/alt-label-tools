@@ -23,6 +23,12 @@ interface Props {
   artists: any[];
   tasksData: ReleaseTask[];
   premastersEmailsSent: boolean;
+  documentationFolderId: string;
+  licenseAllowPolitics: boolean;
+  licenseAllowAlcohol: boolean;
+  licenseAllowPharmaceuticals: boolean;
+  licenseAllowFastFood: boolean;
+  licenseAllowFastFashion: boolean;
 }
 
 export function TaskItem({
@@ -35,6 +41,12 @@ export function TaskItem({
   artists,
   tasksData,
   premastersEmailsSent,
+  documentationFolderId,
+  licenseAllowPolitics,
+  licenseAllowAlcohol,
+  licenseAllowPharmaceuticals,
+  licenseAllowFastFood,
+  licenseAllowFastFashion,
 }: Props) {
   const [task, setTask] = useState(initialTask);
   const [isLoading, setIsLoading] = useState(false);
@@ -106,6 +118,12 @@ export function TaskItem({
             artists,
             tasks: tasksData,
             releaseId: task.releaseId,
+            destFolderId: documentationFolderId,
+            licenseAllowPolitics,
+            licenseAllowAlcohol,
+            licenseAllowPharmaceuticals,
+            licenseAllowFastFood,
+            licenseAllowFastFashion,
           }),
         });
       } catch (error) {

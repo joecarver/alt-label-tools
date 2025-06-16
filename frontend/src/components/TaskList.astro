@@ -15,6 +15,12 @@ interface Props {
   artists: any[];
   tasksData: ReleaseTask[];
   premastersEmailsSent: boolean;
+  documentationFolderId: string;
+  licenseAllowPolitics: boolean;
+  licenseAllowAlcohol: boolean;
+  licenseAllowPharmaceuticals: boolean;
+  licenseAllowFastFood: boolean;
+  licenseAllowFastFashion: boolean;
 }
 
 const {
@@ -28,6 +34,12 @@ const {
   artists,
   tasksData,
   premastersEmailsSent,
+  documentationFolderId,
+  licenseAllowPolitics,
+  licenseAllowAlcohol,
+  licenseAllowPharmaceuticals,
+  licenseAllowFastFood,
+  licenseAllowFastFashion,
 } = Astro.props;
 ---
 
@@ -54,6 +66,12 @@ const {
             artists={artists}
             tasksData={tasksData}
             premastersEmailsSent={premastersEmailsSent}
+            documentationFolderId={documentationFolderId}
+            licenseAllowPolitics={licenseAllowPolitics}
+            licenseAllowAlcohol={licenseAllowAlcohol}
+            licenseAllowPharmaceuticals={licenseAllowPharmaceuticals}
+            licenseAllowFastFood={licenseAllowFastFood}
+            licenseAllowFastFashion={licenseAllowFastFashion}
           />
         ))
     }
