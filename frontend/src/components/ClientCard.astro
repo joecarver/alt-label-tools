@@ -19,34 +19,36 @@ const upcomingReleases = client.releases.filter((release) =>
 );
 ---
 
-<Card key={client.id} size="2">
-  <Flex direction="column" justify="between">
-    <Flex align="center" justify="between" gap="2" width="100%">
-      <a
-        href={`/client/${client.id}`}
-        style="text-decoration: none; color: inherit;"
-      >
+<a href={`/client/${client.id}`}>
+  <Card key={client.id} size="2">
+    <Flex direction="column" justify="between">
+      <Flex align="center" justify="between" gap="2" width="100%">
         <Text size="4" weight="bold">
           {client.name}
         </Text>
-      </a>
-      <DriveLinkButton
-        url={`https://drive.google.com/drive/folders/${client.folderId}`}
-      />
+      </Flex>
+      <Flex align="center" gap="2">
+        <Badge size="1" variant="outline" style={{ opacity: "0.8" }}>
+          {completedReleases.length} release{
+            completedReleases.length === 1 ? "" : "s"
+          }
+          completed
+        </Badge>
+        <Badge size="1" variant="outline" style={{ opacity: "0.8" }}>
+          {upcomingReleases.length} release{
+            upcomingReleases.length === 1 ? "" : "s"
+          }
+          upcoming
+        </Badge>
+      </Flex>
     </Flex>
-    <Flex align="center" gap="2">
-      <Badge size="1" variant="outline" style={{ opacity: "0.8" }}>
-        {completedReleases.length} release{
-          completedReleases.length === 1 ? "" : "s"
-        }
-        completed
-      </Badge>
-      <Badge size="1" variant="outline" style={{ opacity: "0.8" }}>
-        {upcomingReleases.length} release{
-          upcomingReleases.length === 1 ? "" : "s"
-        }
-        upcoming
-      </Badge>
-    </Flex>
-  </Flex>
-</Card>
+  </Card>
+</a>
+
+<style>
+  a {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+  }
+</style>

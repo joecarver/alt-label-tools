@@ -11,7 +11,7 @@ const { isAdmin, clients } = Astro.locals;
   <Grid columns="1" gap="6">
     <Box>
       <Heading as="h1" size="5" mb="4" style={{ opacity: "0.8" }}>
-        Clients
+        Labels
       </Heading>
       <Grid columns="1" gap="4">
         {clients.map((client: LabelClient) => <ClientCard client={client} />)}
@@ -20,7 +20,7 @@ const { isAdmin, clients } = Astro.locals;
             <Link href="/client/new">
               <Button size="2" variant="soft" style={{ cursor: "pointer" }}>
                 <BiPlus />
-                New Client
+                New Label
               </Button>
             </Link>
           )
