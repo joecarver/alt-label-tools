@@ -261,8 +261,22 @@ export const POST: APIRoute = async ({ request }) => {
         role: "Designer" as const,
       },
     ];
-    for (const perm of userReleasePermissions) {
-      await supabase.from("user_release_permissions").insert(perm);
+
+    const permissionResults = await Promise.all(
+      userReleasePermissions.map(async (perm) => {
+        const { error } = await supabase
+          .from("user_release_permissions")
+          .insert(perm);
+        if (error) {
+          console.error("Error adding user release permission:", error);
+          throw error;
+        }
+        return true;
+      })
+    );
+
+    if (permissionResults.some((result) => !result)) {
+      throw new Error("Failed to add some user release permissions");
     }
 
     return new Response(JSON.stringify({ success: true, release }), {

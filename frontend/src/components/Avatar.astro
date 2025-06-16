@@ -10,6 +10,8 @@ interface Props {
 }
 
 const { userInfo } = Astro.props;
+
+const { isAdmin } = Astro.locals;
 ---
 
 <div class="avatar-container">
@@ -25,7 +27,13 @@ const { userInfo } = Astro.props;
         {userInfo.email && <div class="email">{userInfo.email}</div>}
       </div>
       <div class="divider"></div>
-      <a href="/invite-user" class="invite-user-link">Invite user</a>
+      {
+        isAdmin && (
+          <a href="/invite-user" class="invite-user-link">
+            Invite user
+          </a>
+        )
+      }
       <form action="/api/auth/logout" method="POST">
         <button type="submit" class="logout-button">Sign out</button>
       </form>

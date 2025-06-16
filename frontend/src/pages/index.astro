@@ -2,12 +2,30 @@
 import Layout from "@/layouts/Layout.astro";
 import ClientList from "@/components/ClientList.astro";
 import LoadingSpinner from "@/components/LoadingSpinner.astro";
+import ReleaseList from "@/components/ReleaseList.astro";
 
-const { clients } = Astro.locals;
+const { clients, releases } = Astro.locals;
 ---
 
 <Layout title="ALT Label Tools">
-  <ClientList clients={clients} server:defer>
-    <LoadingSpinner text="Loading clients..." slot="fallback" />
-  </ClientList>
+  {
+    clients.length > 0 ? (
+      <ClientList clients={clients} server:defer>
+        <LoadingSpinner text="Loading clients..." slot="fallback" />
+      </ClientList>
+    ) : releases && releases.length > 0 ? (
+      <ReleaseList releases={releases} server:defer>
+        <LoadingSpinner text="Loading releases..." slot="fallback" />
+      </ReleaseList>
+    ) : (
+      <div class="flex flex-col items-center justify-center h-screen">
+        <h1 class="text-2xl font-bold">
+          No access to data.
+          <a href="mailto:info@altlabeltools.com" class="text-blue-500">
+            Please contact ALT
+          </a>
+        </h1>
+      </div>
+    )
+  }
 </Layout>

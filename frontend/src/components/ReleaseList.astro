@@ -4,11 +4,10 @@ import ReleaseCard from "./ReleaseCard.astro";
 import type { Release } from "@/types/Release";
 
 interface Props {
-  clientName: string;
   releases: Release[];
 }
 
-const { clientName, releases } = Astro.props;
+const { releases } = Astro.props;
 ---
 
 <Grid columns="1" gap="4">

@@ -1,15 +1,16 @@
 ---
 import ReleaseDetails from "@/components/ReleaseDetails.astro";
 import Layout from "@/layouts/Layout.astro";
+import type { Release } from "@/types/Release";
 
 const { id } = Astro.params;
-const { clients } = Astro.locals;
+const { clients, releases } = Astro.locals;
 
 if (!id) {
   return Astro.redirect("/");
 }
 
-const release = clients
+let release: Release | undefined = clients
   .flatMap((client) => client.releases)
   .find((release) => release.id === id);
 
@@ -17,11 +18,15 @@ const client = clients.find((client) =>
   client.releases.some((release) => release.id === id)
 );
 
-if (!release || !client) {
+if (!release) {
+  release = releases.find((release) => release.id === id);
+}
+
+if (!release) {
   return Astro.redirect("/");
 }
 ---
 
 <Layout title={release.name}>
-  <ReleaseDetails release={release} label={client} />
+  <ReleaseDetails release={release} />
 </Layout>

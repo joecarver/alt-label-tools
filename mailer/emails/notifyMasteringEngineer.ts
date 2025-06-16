@@ -7,7 +7,7 @@ export interface NotifyMasteringEngineerEmail {
   catalogNumber: string;
   labelName: string;
   dueDate: string;
-  url: string;
+  inviteLink: string;
 }
 export const notifyMasteringEngineer = ({
   masteringEngineerEmail,
@@ -16,7 +16,7 @@ export const notifyMasteringEngineer = ({
   catalogNumber,
   labelName,
   dueDate,
-  url,
+  inviteLink,
 }: NotifyMasteringEngineerEmail): EmailRequest => {
   return {
     to: masteringEngineerEmail,
@@ -26,7 +26,9 @@ export const notifyMasteringEngineer = ({
     body: `Hi,
 Hope you're well.
 
-${artistName} has uploaded their premasters, you can take a listen and download them [here](${url})
+${artistName} has uploaded their premasters, you can take a listen and download them using the link below. Please note that you will need to first set a password to access the premasters.
+
+${inviteLink}
 
 Please master the tracks and upload them to the same link by ${dueDate}
 

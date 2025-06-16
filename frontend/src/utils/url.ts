@@ -1,14 +1,16 @@
-import { supabase } from "./auth";
+import { adminSupabase } from "./auth";
 
-export const generateStaticUrl = async (
-  releaseId: string,
-  masteringEngineerEmail: string
+export const generateInviteLink = async (
+  masteringEngineerEmail: string,
+  afterAcceptInviteRedirectTo: string
 ) => {
-  const { data, error } = await supabase.auth.admin.generateLink({
+  const { data, error } = await adminSupabase.auth.admin.generateLink({
     email: masteringEngineerEmail,
-    type: "magiclink",
+    type: "recovery",
     options: {
-      redirectTo: `${process.env.PUBLIC_SITE_URL}/release/${releaseId}`,
+      redirectTo: `${
+        process.env.PUBLIC_SITE_URL || "http://localhost:4321"
+      }/accept-invite?redirectTo=${afterAcceptInviteRedirectTo}`,
     },
   });
   if (error) {

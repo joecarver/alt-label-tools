@@ -1,8 +1,9 @@
 import type { APIContext } from "astro";
 import { getUserFromToken } from "./utils/auth";
-import { getClients } from "./utils/supabase";
+import { getClients, getReleasesForUser } from "./utils/supabase";
 import type { LabelClient } from "@/types/LabelClient";
 import { isAdmin } from "./utils/authorization";
+import type { Release } from "@/types/Release";
 
 export async function onRequest(
   context: APIContext,
@@ -42,13 +43,20 @@ export async function onRequest(
       clients = await getClients(userIsAdmin ? undefined : user.id);
     } catch (error) {
       console.error("Error fetching clients:", error);
-      return context.redirect("/login");
+    }
+
+    let releases: Release[] = [];
+    try {
+      releases = await getReleasesForUser(user.id);
+    } catch (error) {
+      console.error("Error fetching releases for user:", error);
     }
 
     // Attach user and clients to context
     context.locals.user = user;
     context.locals.isAdmin = userIsAdmin;
     context.locals.clients = clients;
+    context.locals.releases = releases;
 
     // Only redirect to single client on the main clients page
     if (url.pathname === "/" && clients.length === 1) {

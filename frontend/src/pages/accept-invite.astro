@@ -179,9 +179,9 @@ import "@radix-ui/themes/styles.css";
               return;
             }
             alert(
-              "Password updated successfully. Please login with your password."
+              "Thanks for signing up. You are now logged in and can access your account."
             );
-            window.location.href = "/login";
+            window.location.href = urlParams.get("redirectTo") || "/";
           } catch (err) {
             errorText.textContent = "An error occurred. Please try again.";
             errorText.style.display = "block";

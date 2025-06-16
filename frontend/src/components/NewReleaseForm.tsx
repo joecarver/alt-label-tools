@@ -43,7 +43,7 @@ const testData = {
   name: "Test Release",
   release_date: new Date().toISOString().split("T")[0],
   campaign_length: "8",
-  mastering_engineer_email: "joecarver@live.co.uk",
+  mastering_engineer_email: "hello@joecarver.net",
   designer_email: "hello@joecarver.net",
   license_allow_politics: true,
   license_allow_alcohol: true,

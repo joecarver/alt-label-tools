@@ -3,12 +3,17 @@ import { getSecret } from "astro:env/server";
 
 const SUPABASE_URL = getSecret("SUPABASE_URL");
 const SUPABASE_ANON_KEY = getSecret("SUPABASE_ANON_KEY");
+const SUPABASE_SERVICE_ROLE_KEY = getSecret("SUPABASE_SERVICE_ROLE_KEY");
 
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error("Supabase environment variables are not set");
 }
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+export const adminSupabase = createClient(
+  SUPABASE_URL,
+  SUPABASE_SERVICE_ROLE_KEY
+);
 
 // Sign up a new user
 export async function signUpWithEmail(email: string, password: string) {

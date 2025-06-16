@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
-import { getAuthTokenFromCookies, getUserFromToken } from "@/utils/auth";
+import { getUserFromToken } from "@/utils/auth";
 import { supabase } from "@/utils/supabase";
+import { getSecret } from "astro:env/server";
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   const { password, token } = await request.json();
@@ -34,8 +35,38 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       headers: { "Content-Type": "application/json" },
     });
   }
+
+  const { data, error: signInError } = await supabase.auth.signInWithPassword({
+    email: user.email ?? "",
+    password,
+  });
+
+  if (signInError) {
+    return new Response(JSON.stringify({ error: signInError.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const access_token = data.session?.access_token;
+  if (!access_token) {
+    return new Response(JSON.stringify({ error: "No access token received" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+  cookies.set("auth_token", access_token, {
+    path: "/",
+    httpOnly: true,
+    secure: getSecret("NODE_ENV") === "production",
+    maxAge: 60 * 60 * 24 * 7, // 1 week
+    sameSite: "lax",
+  });
+
   return new Response(JSON.stringify({ success: true }), {
     status: 200,
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
 };

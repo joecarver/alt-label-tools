@@ -1,5 +1,8 @@
 import type { APIRoute } from "astro";
 import { supabase as adminSupabase } from "@/utils/supabase";
+import { generateInviteLink } from "@/utils/url";
+import { inviteUserEmail } from "@/mailer/emails/inviteUserEmail";
+import { sendEmail } from "@/mailer/index";
 
 export const POST: APIRoute = async ({ request }) => {
   const { email, name, clients, isResendInvite } = await request.json();
@@ -10,6 +13,21 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
   try {
+    if (isResendInvite) {
+      const inviteLink = await generateInviteLink(email, `/`);
+      const emailContents = inviteUserEmail({
+        email,
+        name,
+        inviteLink,
+      });
+      sendEmail(emailContents);
+
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     // Invite user via Supabase (send invite email)
     const { data, error } = await adminSupabase.auth.admin.inviteUserByEmail(
       email,
@@ -31,13 +49,6 @@ export const POST: APIRoute = async ({ request }) => {
     if (!userId) {
       return new Response(JSON.stringify({ error: "User creation failed" }), {
         status: 500,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    if (isResendInvite) {
-      return new Response(JSON.stringify({ success: true }), {
-        status: 200,
         headers: { "Content-Type": "application/json" },
       });
     }

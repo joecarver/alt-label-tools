@@ -7,7 +7,7 @@ import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
 import { formatSingleDate } from "@/utils/date";
 import type { Artist } from "@/types/Artist";
 import { copyAndReplaceDocsInFolder } from "@/utils/drive";
-import { generateStaticUrl } from "@/utils/url";
+import { generateInviteLink } from "@/utils/url";
 
 // Helper to compute replacements for a given artist and request body
 function buildReplacements({
@@ -147,7 +147,10 @@ export const POST: APIRoute = async ({ request }) => {
 
     // send email to mastering engineer
     if (masteringEngineerEmail) {
-      const url = await generateStaticUrl(releaseId, masteringEngineerEmail);
+      const inviteLink = await generateInviteLink(
+        masteringEngineerEmail,
+        `/releases/${releaseId}`
+      );
 
       const email = notifyMasteringEngineer({
         masteringEngineerEmail,
@@ -155,8 +158,8 @@ export const POST: APIRoute = async ({ request }) => {
         releaseName,
         catalogNumber,
         labelName,
-        dueDate: masteringDueDate,
-        url,
+        dueDate: formatSingleDate(masteringDueDate),
+        inviteLink,
       });
       sendEmail(email);
     }

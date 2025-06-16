@@ -7,14 +7,12 @@ import { formatSingleDate } from "../utils/date";
 import { DriveLinkButton } from "./DriveLinkButton";
 import { ReleaseTaskName } from "@/types/ReleaseTask";
 import { getTasks } from "@/utils/supabase";
-import type { LabelClient } from "@/types/LabelClient";
 
 interface Props {
   release: Release;
-  label: LabelClient;
 }
 
-const { release, label } = Astro.props;
+const { release } = Astro.props;
 
 const folderUrl = `https://drive.google.com/drive/folders/${release.folderId}`;
 
@@ -64,7 +62,7 @@ const masteringDueDate = tasks.find(
       releaseName={release.name}
       catalogNumber={release.catalogNumber ?? ""}
       releaseDate={release.releaseDate ?? ""}
-      labelName={label.name}
+      labelName={release.client.name}
       artists={release.artists}
       tasksData={tasks}
       premastersEmailsSent={release.premasterEmailsSent ?? false}
@@ -75,7 +73,7 @@ const masteringDueDate = tasks.find(
       licenseAllowFastFood={release.licenseAllowFastfood ?? false}
       licenseAllowFastFashion={release.licenseAllowFastfashion ?? false}
       masteringDueDate={masteringDueDate ?? ""}
-      masteringEngineerEmail={release.masteringEngineerEmail ?? ""}
+      masteringEngineerEmail={release.masteringEngineer?.email ?? ""}
       server:defer
     >
       <Badge

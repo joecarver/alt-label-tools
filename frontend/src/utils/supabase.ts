@@ -66,6 +66,24 @@ export async function getReleases(clientIds: string[]): Promise<Release[]> {
   return keysToCamelCase<Release[]>(data);
 }
 
+export async function getReleasesForUser(userId: string): Promise<Release[]> {
+  const { data, error } = await supabase
+    .from("user_release_permissions")
+    .select(
+      "release:releases(*, client:clients(name), mastering_engineer:mastering_engineer(email), artists:release_artists(*, artist:artists(*)))"
+    )
+    .eq("user_id", userId);
+
+  if (error) {
+    console.error("Error fetching releases for user:", error);
+    throw error;
+  }
+
+  const releases = keysToCamelCase<Release[]>(data.map((row) => row.release));
+
+  return releases;
+}
+
 async function getArtists(releaseId: string): Promise<Artist[]> {
   const { data, error } = await supabase
     .from("release_artists")
@@ -86,12 +104,14 @@ async function getMasteringEngineerEmail(
   const { data, error } = await supabase
     .from("mastering_engineer")
     .select("email")
-    .eq("id", masteringEngineer);
+    .eq("id", masteringEngineer)
+    .single();
+
   if (error) {
     console.error("Error fetching mastering engineer email:", error);
     throw error;
   }
-  return data[0].email;
+  return data.email;
 }
 
 // Fetch tasks for a specific release
