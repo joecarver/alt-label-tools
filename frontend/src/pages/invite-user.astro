@@ -1,0 +1,167 @@
+---
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Text,
+  Theme,
+  Checkbox,
+} from "@radix-ui/themes";
+import "@radix-ui/themes/styles.css";
+import Layout from "@/layouts/Layout.astro";
+---
+
+<Layout title="Invite User">
+  <div class="container">
+    <Box>
+      <Flex direction="column" gap="4" className="login-card">
+        <Heading as="h1" size="7">Invite User</Heading>
+        <form id="inviteForm" style="width: 100%;">
+          <Flex direction="column" gap="3">
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Email"
+              required
+            />
+            <input
+              type="text"
+              id="name"
+              name="name"
+              placeholder="Name"
+              required
+            />
+            <div id="clientsList">
+              <span style="display:block; font-size:1rem; margin-bottom:0.5rem;"
+                >Assign to clients:</span
+              >
+              <!-- Client checkboxes will be rendered here -->
+            </div>
+            <Button
+              type="submit"
+              color="blue"
+              size="4"
+              className="login-button"
+              id="inviteButton"
+            >
+              Send Invite
+            </Button>
+            <span
+              id="inviteError"
+              class="login-error hidden"
+              style="color: #ef4444; display: block; margin-top: 0.5rem;"
+            ></span>
+            <span
+              id="inviteMessage"
+              class="login-message hidden"
+              style="color: #22c55e; display: block; margin-top: 0.5rem;"
+            ></span>
+          </Flex>
+        </form>
+      </Flex>
+    </Box>
+    <script type="module">
+      async function fetchClients() {
+        const res = await fetch("/api/clients");
+        if (!res.ok) return [];
+        return await res.json();
+      }
+      const clientsList = document.getElementById("clientsList");
+      fetchClients().then((clients) => {
+        if (!clientsList) return;
+        if (!clients.length) {
+          clientsList.innerHTML += "<div>No clients found.</div>";
+          return;
+        }
+        clients.forEach((client) => {
+          const id = `client_${client.id}`;
+          const label = document.createElement("label");
+          label.style.display = "block";
+          label.innerHTML = `<input type='checkbox' name='clients' value='${client.id}' /> ${client.name}`;
+          clientsList.appendChild(label);
+        });
+      });
+      const form = document.getElementById("inviteForm");
+      const inviteButton = document.getElementById("inviteButton");
+      const inviteMessage = document.getElementById("inviteMessage");
+      const inviteError = document.getElementById("inviteError");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        inviteMessage.classList.add("hidden");
+        inviteError.classList.add("hidden");
+        inviteButton.classList.add("disabled");
+        const email = form.email.value;
+        const name = form.name.value;
+        const clients = Array.from(
+          form.querySelectorAll("input[name='clients']:checked")
+        ).map((cb) => cb.value);
+        try {
+          const response = await fetch("/api/invite-user", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, name, clients }),
+          });
+          const result = await response.json();
+          if (!response.ok) {
+            inviteError.textContent = result.error || "Failed to send invite.";
+            inviteError.classList.remove("hidden");
+            return;
+          }
+          inviteMessage.textContent = "Invite sent!";
+          inviteMessage.classList.remove("hidden");
+          form.reset();
+        } catch (err) {
+          inviteError.textContent = "An error occurred. Please try again.";
+          inviteError.classList.remove("hidden");
+        } finally {
+          inviteButton.classList.remove("disabled");
+        }
+      });
+    </script>
+  </div>
+</Layout>
+
+<style>
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, Cantarell, sans-serif;
+    background-color: #f9fafb;
+  }
+
+  .login-card {
+    max-width: 28rem;
+    width: 100%;
+    padding: 2rem;
+    background-color: var(--gray-5);
+    border-radius: 0.5rem;
+  }
+  input {
+    width: 100%;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    font-size: 1rem;
+  }
+  .login-button {
+    width: 100%;
+    font-size: 1rem;
+    &.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+  .login-error {
+    display: none;
+  }
+  .login-message {
+    margin-top: 0.5rem;
+  }
+  .hidden {
+    display: none;
+  }
+  .visible {
+    display: block;
+  }
+</style>

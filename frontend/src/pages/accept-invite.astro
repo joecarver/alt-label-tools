@@ -1,0 +1,250 @@
+---
+import { Box, Button, Flex, Heading, Text, Theme } from "@radix-ui/themes";
+import "@radix-ui/themes/styles.css";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accept Invite - Alt Label Tools</title>
+  </head>
+  <body>
+    <Theme
+      appearance="dark"
+      accentColor="yellow"
+      grayColor="slate"
+      scaling="100%"
+    >
+      <Box className="login-container">
+        <Flex direction="column" gap="4" className="login-card">
+          <Heading as="h1" size="9"> ALT </Heading>
+          <Heading as="h2" size="4"> Automated Label Tools </Heading>
+
+          <div id="otpExpiredError" style="display:none;">
+            <span style="color: #ef4444; margin-bottom: 1rem; display: block;"
+              >Your invite link has expired. Please request a new invite below.</span
+            >
+            <form id="requestInviteForm" style="width: 100%;">
+              <Flex direction="column" gap="3">
+                <input
+                  type="email"
+                  id="inviteEmail"
+                  name="inviteEmail"
+                  placeholder="Enter your email"
+                  required
+                />
+                <Button
+                  type="submit"
+                  color="yellow"
+                  size="3"
+                  id="inviteButton"
+                  className="login-button"
+                >
+                  Request new invite
+                </Button>
+                <span
+                  id="inviteMessage"
+                  class="login-message hidden"
+                  style="color: #22c55e;"></span>
+                <span
+                  id="inviteError"
+                  class="login-error hidden"
+                  style="color: #ef4444;"></span>
+              </Flex>
+            </form>
+          </div>
+
+          <form id="passwordForm" style="width: 100%;">
+            <Flex direction="column" gap="3">
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="New Password"
+                required
+              />
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                placeholder="Confirm Password"
+                required
+              />
+              <Button
+                type="submit"
+                color="blue"
+                size="4"
+                className="login-button"
+                id="passwordButton"
+              >
+                Set Password
+                <Text id="passwordError" color="red" className="login-error" />
+              </Button>
+            </Flex>
+          </form>
+        </Flex>
+      </Box>
+      <script type="module">
+        function getParams() {
+          const searchParams = new URLSearchParams(window.location.search);
+          if (window.location.hash && window.location.hash.startsWith("#")) {
+            const hashParams = new URLSearchParams(
+              window.location.hash.slice(1)
+            );
+            for (const [key, value] of hashParams.entries()) {
+              searchParams.set(key, value);
+            }
+          }
+          return searchParams;
+        }
+        const urlParams = getParams();
+        const errorCode = urlParams.get("error_code");
+        const otpExpiredError = document.getElementById("otpExpiredError");
+        const passwordForm = document.getElementById("passwordForm");
+        if (errorCode === "otp_expired") {
+          otpExpiredError.style.display = "block";
+          passwordForm.style.display = "none";
+        }
+        // Invite request form logic
+        const requestInviteForm = document.getElementById("requestInviteForm");
+        if (requestInviteForm) {
+          const inviteButton = document.getElementById("inviteButton");
+          const inviteEmail = document.getElementById("inviteEmail");
+          const inviteMessage = document.getElementById("inviteMessage");
+          const inviteError = document.getElementById("inviteError");
+          requestInviteForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            inviteMessage.classList.add("hidden");
+            inviteError.classList.add("hidden");
+            inviteButton.classList.add("disabled");
+            try {
+              const response = await fetch("/api/invite-user", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  email: inviteEmail.value,
+                  name: "",
+                  clients: [],
+                  isResendInvite: true,
+                }),
+              });
+              const result = await response.json();
+              if (!response.ok) {
+                inviteError.textContent =
+                  result.error || "Failed to send invite.";
+                inviteError.classList.remove("hidden");
+                return;
+              }
+              inviteMessage.textContent = "Invite email sent!";
+              inviteMessage.classList.remove("hidden");
+            } catch (err) {
+              inviteError.textContent = "An error occurred. Please try again.";
+              inviteError.classList.remove("hidden");
+            } finally {
+              inviteButton.classList.remove("disabled");
+            }
+          });
+        }
+        // Password form logic
+        const form = document.getElementById("passwordForm");
+        const errorText = document.getElementById("passwordError");
+        const submitButton = document.getElementById("passwordButton");
+        const token = urlParams.get("access_token");
+        if (!token && (!errorCode || errorCode !== "otp_expired")) {
+          window.location.href = "/login";
+        }
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          errorText.style.display = "none";
+          const password = form.password.value;
+          const confirmPassword = form.confirmPassword.value;
+          if (password !== confirmPassword) {
+            errorText.textContent = "Passwords do not match.";
+            errorText.style.display = "block";
+            return;
+          }
+          submitButton.classList.add("disabled");
+          try {
+            const response = await fetch("/api/update-password", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ password, token }),
+            });
+            if (!response.ok) {
+              const result = await response.json();
+              errorText.textContent = result.error || "Password update failed.";
+              errorText.style.display = "block";
+              return;
+            }
+            alert(
+              "Password updated successfully. Please login with your password."
+            );
+            window.location.href = "/login";
+          } catch (err) {
+            errorText.textContent = "An error occurred. Please try again.";
+            errorText.style.display = "block";
+          } finally {
+            submitButton.classList.remove("disabled");
+          }
+        });
+      </script>
+    </Theme>
+
+    <style>
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        background-color: #f9fafb;
+      }
+
+      .login-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .login-card {
+        max-width: 28rem;
+        width: 100%;
+        padding: 2rem;
+        background-color: var(--gray-5);
+        border-radius: 0.5rem;
+      }
+
+      input {
+        width: 100%;
+        padding: 0.5rem;
+        box-sizing: border-box;
+        font-size: 1rem;
+      }
+
+      .login-button {
+        width: 100%;
+        font-size: 1rem;
+
+        &.disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+
+      .login-error {
+        display: none;
+      }
+
+      .login-message {
+        margin-top: 0.5rem;
+      }
+      .hidden {
+        display: none;
+      }
+      .visible {
+        display: block;
+      }
+    </style>
+  </body>
+</html>

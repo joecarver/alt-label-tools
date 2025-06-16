@@ -1,121 +1,139 @@
 ---
-import { Badge } from '@radix-ui/themes';
+import { Badge } from "@radix-ui/themes";
 
 interface Props {
-    userInfo: {
-        name?: string | null;
-        email?: string | null;
-        picture?: string | null;
-    };
+  userInfo: {
+    name?: string | null;
+    email?: string | null;
+    picture?: string | null;
+  };
 }
 
 const { userInfo } = Astro.props;
 ---
 
 <div class="avatar-container">
-    <details class="dropdown">
-        <summary class="avatar">
-            <Badge size="3" color="gray" variant="soft">
-                {userInfo.name?.charAt(0) || userInfo.email?.charAt(0) || "U"}
-            </Badge>
-        </summary>
-        <div class="dropdown-content">
-            <div class="user-info">
-                {userInfo.name && <div class="name">{userInfo.name}</div>}
-                {userInfo.email && <div class="email">{userInfo.email}</div>}
-            </div>
-            <div class="divider"></div>
-            <form action="/api/auth/logout" method="POST">
-                <button type="submit" class="logout-button">Sign out</button>
-            </form>
-        </div>
-    </details>
+  <details class="dropdown">
+    <summary class="avatar">
+      <Badge size="3" color="gray" variant="soft">
+        {userInfo.name?.charAt(0) || userInfo.email?.charAt(0) || "U"}
+      </Badge>
+    </summary>
+    <div class="dropdown-content">
+      <div class="user-info">
+        {userInfo.name && <div class="name">{userInfo.name}</div>}
+        {userInfo.email && <div class="email">{userInfo.email}</div>}
+      </div>
+      <div class="divider"></div>
+      <a href="/invite-user" class="invite-user-link">Invite user</a>
+      <form action="/api/auth/logout" method="POST">
+        <button type="submit" class="logout-button">Sign out</button>
+      </form>
+    </div>
+  </details>
 </div>
 
 <style>
-    .avatar-container {
-        position: relative;
-    }
+  .avatar-container {
+    position: relative;
+  }
 
-    .dropdown {
-        position: relative;
-    }
+  .dropdown {
+    position: relative;
+  }
 
-    .dropdown summary {
-        list-style: none;
-        cursor: pointer;
-    }
+  .dropdown summary {
+    list-style: none;
+    cursor: pointer;
+  }
 
-    .dropdown summary::-webkit-details-marker {
-        display: none;
-    }
+  .dropdown summary::-webkit-details-marker {
+    display: none;
+  }
 
-    .avatar {
-        width: 40px;
-        height: 40px;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        position: relative;
-        transition: transform 0.2s ease;
-        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.04);
-        text-transform: uppercase;
-    }
+  .avatar {
+    width: 40px;
+    height: 40px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    position: relative;
+    transition: transform 0.2s ease;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+    text-transform: uppercase;
+  }
 
-    .dropdown[open] .avatar {
-        transform: scale(1.05);
-    }
+  .dropdown[open] .avatar {
+    transform: scale(1.05);
+  }
 
-    .dropdown-content {
-        position: absolute;
-        right: 0;
-        top: calc(100% + 8px);
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        min-width: 240px;
-        padding: 12px;
-        z-index: 100;
-        text-align: right;
-        background: var(--gray-1, #fff);
-    }
+  .dropdown-content {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    min-width: 240px;
+    padding: 12px;
+    z-index: 100;
+    text-align: right;
+    background: var(--gray-1, #fff);
+  }
 
-    .user-info {
-        padding: 8px;
-    }
+  .user-info {
+    padding: 8px;
+  }
 
-    .name {
-        font-weight: 600;
-        color: var(--gray-12, #18181b);
-        margin-bottom: 4px;
-    }
+  .name {
+    font-weight: 600;
+    color: var(--gray-12, #18181b);
+    margin-bottom: 4px;
+  }
 
-    .email {
-        font-size: 0.875rem;
-        color: var(--gray-11, #52525b);
-    }
+  .email {
+    font-size: 0.875rem;
+    color: var(--gray-11, #52525b);
+  }
 
-    .divider {
-        height: 1px;
-        background: var(--gray-5, #e4e4e7);
-        margin: 8px 0;
-    }
+  .divider {
+    height: 1px;
+    background: var(--gray-5, #e4e4e7);
+    margin: 8px 0;
+  }
 
-    .logout-button {
-        width: 100%;
-        padding: 8px 12px;
-        border: none;
-        background: none;
-        color: var(--red-11, #be123c);
-        font-size: 0.875rem;
-        text-align: right;
-        cursor: pointer;
-        border-radius: 4px;
-        transition: background-color 0.2s ease;
-    }
+  .logout-button {
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    background: none;
+    color: var(--red-11, #be123c);
+    font-size: 0.875rem;
+    text-align: right;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+  }
 
-    .logout-button:hover {
-        background: var(--red-3, #fee2e2);
-    }
+  .logout-button:hover {
+    background: var(--red-3, #fee2e2);
+  }
+
+  .invite-user-link {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    color: var(--blue-11, #2563eb);
+    font-size: 0.875rem;
+    text-align: right;
+    text-decoration: none;
+    border-radius: 4px;
+    margin-top: 4px;
+    transition: background-color 0.2s ease;
+  }
+
+  .invite-user-link:hover {
+    background: var(--blue-3, #dbeafe);
+  }
 </style>
