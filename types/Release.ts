@@ -8,6 +8,9 @@ export type Release = KeysToCamelCase<
   artists: Artist[];
   masteringEngineer: Database["public"]["Tables"]["mastering_engineer"]["Row"];
   client: Database["public"]["Tables"]["clients"]["Row"];
+  userReleasePermissions: {
+    role: Database["public"]["Enums"]["release_role"];
+  }[];
 };
 
 export type ReleaseWithArtists = Release;

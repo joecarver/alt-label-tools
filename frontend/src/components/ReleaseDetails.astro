@@ -23,11 +23,16 @@ const taskFolderIds: Record<string, string> = {
   [ReleaseTaskName.ContractCreated]: release.documentationFolderId || "",
 };
 
-const tasks = await getTasks(release.id);
+const tasks = await getTasks(
+  release.id,
+  release.userReleasePermissions.map((permission) => permission.role)
+);
 
 const masteringDueDate = tasks.find(
   (task) => task.name === ReleaseTaskName.MastersSubmitted
 )?.startDate;
+
+console.log(release.userReleasePermissions);
 ---
 
 <Card size="2">

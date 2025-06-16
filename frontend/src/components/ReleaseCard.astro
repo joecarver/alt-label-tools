@@ -12,7 +12,10 @@ interface Props {
 
 const { release } = Astro.props;
 
-const tasks = await getTasks(release.id);
+const tasks = await getTasks(
+  release.id,
+  release.userReleasePermissions.map((permission) => permission.role)
+);
 ---
 
 <a href={`/releases/${release.id}`}>

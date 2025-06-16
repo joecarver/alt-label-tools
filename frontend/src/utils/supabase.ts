@@ -2,8 +2,13 @@ import { createClient } from "@supabase/supabase-js";
 import { getSecret } from "astro:env/server";
 import type { LabelClient } from "@/types/LabelClient";
 import type { Release } from "@/types/Release";
-import type { ReleaseTask } from "@/types/ReleaseTask";
+import {
+  ARTIST_SPECIFIC_TASKS,
+  ReleaseTaskName,
+  type ReleaseTask,
+} from "@/types/ReleaseTask";
 import { CompletionStatus } from "@/types/CompletionStatus";
+import type { UserReleasePermissionRole } from "@/types/UserReleasePermissionRole";
 import { keysToCamelCase } from "./case";
 
 // Initialize Supabase client
@@ -38,7 +43,7 @@ export async function getClients(userId?: string): Promise<LabelClient[]> {
   return getClientsForUser(userId);
 }
 
-// Fetch releases for a specific client
+// Fetch releases for specific clients
 export async function getReleases(clientIds: string[]): Promise<Release[]> {
   const { data, error } = await supabase
     .from("releases")
@@ -59,22 +64,24 @@ export async function getReleasesForUser(userId: string): Promise<Release[]> {
   const { data, error } = await supabase
     .from("user_release_permissions")
     .select(
-      "release:releases(*, client:clients(*), mastering_engineer(*), designer(*), artists(*))"
+      "release:releases(*, user_release_permissions(role), client:clients(*), mastering_engineer(*), designer(*), artists(*))"
     )
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .eq("release.user_release_permissions.user_id", userId);
 
   if (error) {
     console.error("Error fetching releases for user:", error);
     throw error;
   }
 
-  const releases = keysToCamelCase<Release[]>(data.map((row) => row.release));
-
-  return releases;
+  return keysToCamelCase<Release[]>(data.map((row) => row.release));
 }
 
 // Fetch tasks for a specific release
-export async function getTasks(releaseId: string): Promise<ReleaseTask[]> {
+export async function getTasks(
+  releaseId: string,
+  userReleasePermissions?: UserReleasePermissionRole[]
+): Promise<ReleaseTask[]> {
   const { data, error } = await supabase
     .from("tasks")
     .select("*, task_files(*)")
@@ -85,7 +92,33 @@ export async function getTasks(releaseId: string): Promise<ReleaseTask[]> {
     throw error;
   }
 
-  return keysToCamelCase<ReleaseTask[]>(data);
+  if (!userReleasePermissions) {
+    return keysToCamelCase<ReleaseTask[]>(data);
+  }
+
+  const filteredTasks = data.filter((task) => {
+    if (
+      task.name === ReleaseTaskName.MastersSubmitted &&
+      userReleasePermissions.includes("Mastering Engineer")
+    ) {
+      return true;
+    }
+
+    if (
+      task.name === ReleaseTaskName.ArtworkCreation &&
+      userReleasePermissions.includes("Designer")
+    ) {
+      return true;
+    }
+
+    if (userReleasePermissions.includes("Artist")) {
+      return ARTIST_SPECIFIC_TASKS.includes(task.name);
+    }
+
+    return false;
+  });
+
+  return keysToCamelCase<ReleaseTask[]>(filteredTasks);
 }
 
 // Update task completion status

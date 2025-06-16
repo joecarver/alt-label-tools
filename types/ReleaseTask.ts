@@ -18,6 +18,12 @@ export enum ReleaseTaskName {
   UploadToBandcamp = "Upload and Pitch to Bandcamp",
 }
 
+export const ARTIST_SPECIFIC_TASKS = [
+  ReleaseTaskName.ReleaseDate,
+  ReleaseTaskName.ContractCreated,
+  ReleaseTaskName.PreMastersSubmitted,
+];
+
 export type DetectableReleaseTask = Extract<
   ReleaseTaskName,
   | ReleaseTaskName.ContractCreated
