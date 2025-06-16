@@ -57,6 +57,47 @@ if (token) {
               </Button>
             </Flex>
           </form>
+          <Button
+            variant="ghost"
+            color="gray"
+            size="2"
+            id="showResetFormBtn"
+            className="forgot-password-btn"
+            type="button"
+          >
+            Forgot password?
+          </Button>
+          <form
+            id="resetForm"
+            style="width: 100%; display: none; margin-top: 1rem;"
+          >
+            <Flex direction="column" gap="3">
+              <input
+                type="email"
+                id="resetEmail"
+                name="resetEmail"
+                placeholder="Enter your email"
+                required
+              />
+              <Button
+                type="submit"
+                color="yellow"
+                size="3"
+                id="resetButton"
+                className="login-button"
+              >
+                Send reset link
+              </Button>
+              <span
+                id="resetMessage"
+                class="login-message hidden"
+                style="color: #22c55e;"></span>
+              <span
+                id="resetError"
+                class="login-error hidden"
+                style="color: #ef4444;"></span>
+            </Flex>
+          </form>
         </Flex>
       </Box>
       <script type="module">
@@ -88,6 +129,47 @@ if (token) {
             errorText.style.display = "block";
           } finally {
             submitButton.classList.remove("disabled");
+          }
+        });
+
+        // Password reset logic
+        const showResetFormBtn = document.getElementById("showResetFormBtn");
+        const resetForm = document.getElementById("resetForm");
+        const resetButton = document.getElementById("resetButton");
+        const resetEmail = document.getElementById("resetEmail");
+        const resetMessage = document.getElementById("resetMessage");
+        const resetError = document.getElementById("resetError");
+
+        showResetFormBtn.addEventListener("click", () => {
+          resetForm.style.display =
+            resetForm.style.display === "none" ? "block" : "none";
+        });
+
+        resetForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          resetMessage.classList.add("hidden");
+          resetError.classList.add("hidden");
+          resetButton.classList.add("disabled");
+          try {
+            const response = await fetch("/api/request-password-reset", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email: resetEmail.value }),
+            });
+            const result = await response.json();
+            if (!response.ok) {
+              resetError.textContent =
+                result.error || "Failed to send reset email.";
+              resetError.classList.remove("hidden");
+              return;
+            }
+            resetMessage.textContent = "Password reset email sent!";
+            resetMessage.classList.remove("hidden");
+          } catch (err) {
+            resetError.textContent = "An error occurred. Please try again.";
+            resetError.classList.remove("hidden");
+          } finally {
+            resetButton.classList.remove("disabled");
           }
         });
       </script>
@@ -135,6 +217,20 @@ if (token) {
 
       .login-error {
         display: none;
+      }
+
+      .login-message {
+        margin-top: 0.5rem;
+      }
+      .hidden {
+        display: none;
+      }
+      .visible {
+        display: block;
+      }
+
+      .forgot-password-btn {
+        margin-top: 1rem;
       }
     </style>
   </body>

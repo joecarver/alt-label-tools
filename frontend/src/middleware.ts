@@ -10,7 +10,12 @@ export async function onRequest(
 ) {
   // Skip auth check for login page and API endpoints
   const url = new URL(context.request.url);
-  if (url.pathname === "/login" || url.pathname.startsWith("/api/")) {
+  if (
+    url.pathname === "/login" ||
+    url.pathname.startsWith("/api/") ||
+    url.pathname === "/reset-password" ||
+    url.pathname === "/accept-invite"
+  ) {
     return next();
   }
 
