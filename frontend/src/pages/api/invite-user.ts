@@ -3,6 +3,7 @@ import { supabase as adminSupabase } from "@/utils/supabase";
 import { generateInviteLink } from "@/utils/url";
 import { inviteUserEmail } from "@/mailer/emails/inviteUserEmail";
 import { sendEmail } from "@/mailer/index";
+import { getSecret } from "astro:env/server";
 
 export const POST: APIRoute = async ({ request }) => {
   const { email, name, clients, isResendInvite } = await request.json();
@@ -33,7 +34,7 @@ export const POST: APIRoute = async ({ request }) => {
       email,
       {
         redirectTo: `${
-          process.env.PUBLIC_SITE_URL || "http://localhost:4321"
+          getSecret("PUBLIC_SITE_URL") || "http://localhost:4321"
         }/accept-invite`,
         data: { name },
       }

@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { supabase } from "@/utils/supabase";
+import { getSecret } from "astro:env/server";
 
 export const POST: APIRoute = async ({ request }) => {
   const { email } = await request.json();
@@ -11,7 +12,7 @@ export const POST: APIRoute = async ({ request }) => {
   }
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${
-      process.env.PUBLIC_SITE_URL || "http://localhost:4321"
+      getSecret("PUBLIC_SITE_URL") || "http://localhost:4321"
     }/reset-password`,
   });
   if (error) {

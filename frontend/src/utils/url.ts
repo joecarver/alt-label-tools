@@ -1,4 +1,5 @@
 import { adminSupabase } from "./auth";
+import { getSecret } from "astro:env/server";
 
 export const generateInviteLink = async (
   masteringEngineerEmail: string,
@@ -9,7 +10,7 @@ export const generateInviteLink = async (
     type: "recovery",
     options: {
       redirectTo: `${
-        process.env.PUBLIC_SITE_URL || "http://localhost:4321"
+        getSecret("PUBLIC_SITE_URL") || "http://localhost:4321"
       }/accept-invite?redirectTo=${afterAcceptInviteRedirectTo}`,
     },
   });
