@@ -47,11 +47,7 @@ if (!client) {
             </Flex>
           </Flex>
           <Flex direction="column" gap="4">
-            <ReleaseList
-              clientName={client.name}
-              releases={client.releases}
-              server:defer
-            >
+            <ReleaseList releases={client.releases} server:defer>
               <LoadingSpinner text="Loading releases..." slot="fallback" />
             </ReleaseList>
 

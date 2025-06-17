@@ -273,3 +273,58 @@ export async function copyAndReplaceDocsInFolder(
 
   return newDocIds;
 }
+
+// List all files in a Google Drive folder
+export async function listFilesInFolder(folderId: string): Promise<any[]> {
+  const token = await generateServiceAccountToken();
+  let files: any[] = [];
+  let pageToken: string | undefined = undefined;
+  do {
+    const url: string =
+      `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+trashed=false&fields=files(id,name,mimeType),nextPageToken` +
+      (pageToken ? `&pageToken=${pageToken}` : "");
+    const res: Response = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`Failed to list files: ${errorText}`);
+    }
+    const data: { files: any[]; nextPageToken?: string } = await res.json();
+    files = files.concat(data.files);
+    pageToken = data.nextPageToken;
+  } while (pageToken);
+  return files;
+}
+
+// Download a file from Google Drive as a buffer
+export async function downloadDriveFile(
+  fileId: string
+): Promise<{ buffer: ArrayBuffer; fileName: string; mimeType: string }> {
+  const token = await generateServiceAccountToken();
+  // Get file metadata for name and mimeType
+  const metaRes = await fetch(
+    `https://www.googleapis.com/drive/v3/files/${fileId}?fields=name,mimeType`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+  if (!metaRes.ok) {
+    const errorText = await metaRes.text();
+    throw new Error(`Failed to get file metadata: ${errorText}`);
+  }
+  const { name, mimeType } = await metaRes.json();
+  // Download file content
+  const fileRes = await fetch(
+    `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+  if (!fileRes.ok) {
+    const errorText = await fileRes.text();
+    throw new Error(`Failed to download file: ${errorText}`);
+  }
+  const buffer = await fileRes.arrayBuffer();
+  return { buffer, fileName: name, mimeType };
+}

@@ -7,12 +7,14 @@ import { formatSingleDate } from "../utils/date";
 import { DriveLinkButton } from "./DriveLinkButton";
 import { ReleaseTaskName } from "@/types/ReleaseTask";
 import { getTasks } from "@/utils/supabase";
+import { DownloadButton } from "./DownloadButton";
 
 interface Props {
   release: Release;
 }
 
 const { release } = Astro.props;
+const { isAdmin } = Astro.locals;
 
 const folderUrl = `https://drive.google.com/drive/folders/${release.folderId}`;
 
@@ -49,7 +51,18 @@ const designerDueDate = tasks.find(
             </Text>
             <Text size="2" color="gray">{release.catalogNumber}</Text>
           </Flex>
-          {release.folderId && <DriveLinkButton url={folderUrl} />}
+          {
+            isAdmin ? (
+              <DriveLinkButton url={folderUrl} />
+            ) : (
+              <DownloadButton
+                text="Download Pre-Masters"
+                fileName={`${release.artists.map((artist) => artist.artistName).join(", ")} - ${release.name} (${release.catalogNumber}) [Premasters].zip`}
+                folderId={release.premastersFolderId ?? ""}
+                client:load
+              />
+            )
+          }
         </Flex>
         <Text size="3">
           {release.artists.map((artist) => artist.artistName).join(", ")}
