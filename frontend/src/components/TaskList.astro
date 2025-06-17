@@ -23,6 +23,8 @@ interface Props {
   licenseAllowFastFashion: boolean;
   masteringDueDate: string;
   masteringEngineerEmail: string;
+  designerEmail: string;
+  designerDueDate: string;
 }
 
 const {
@@ -44,6 +46,8 @@ const {
   licenseAllowFastFashion,
   masteringDueDate,
   masteringEngineerEmail,
+  designerEmail,
+  designerDueDate,
 } = Astro.props;
 ---
 
@@ -78,6 +82,8 @@ const {
             licenseAllowFastFashion={licenseAllowFastFashion}
             masteringDueDate={masteringDueDate}
             masteringEngineerEmail={masteringEngineerEmail}
+            designerEmail={designerEmail}
+            designerDueDate={designerDueDate}
           />
         ))
     }

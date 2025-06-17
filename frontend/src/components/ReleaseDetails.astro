@@ -23,16 +23,19 @@ const taskFolderIds: Record<string, string> = {
   [ReleaseTaskName.ContractCreated]: release.documentationFolderId || "",
 };
 
-const tasks = await getTasks(
-  release.id,
-  release.userReleasePermissions.map((permission) => permission.role)
-);
+const userReleasePermissions = release.userReleasePermissions
+  ? release.userReleasePermissions.map((permission) => permission.role)
+  : undefined;
+
+const tasks = await getTasks(release.id, userReleasePermissions);
 
 const masteringDueDate = tasks.find(
   (task) => task.name === ReleaseTaskName.MastersSubmitted
 )?.startDate;
 
-console.log(release.userReleasePermissions);
+const designerDueDate = tasks.find(
+  (task) => task.name === ReleaseTaskName.ArtworkCreation
+)?.startDate;
 ---
 
 <Card size="2">
@@ -79,6 +82,8 @@ console.log(release.userReleasePermissions);
       licenseAllowFastFashion={release.licenseAllowFastfashion ?? false}
       masteringDueDate={masteringDueDate ?? ""}
       masteringEngineerEmail={release.masteringEngineer?.email ?? ""}
+      designerEmail={release.designer?.email ?? ""}
+      designerDueDate={designerDueDate ?? ""}
       server:defer
     >
       <Badge

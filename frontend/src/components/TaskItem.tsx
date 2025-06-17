@@ -31,6 +31,8 @@ interface Props {
   licenseAllowFastFashion: boolean;
   masteringDueDate: string;
   masteringEngineerEmail: string;
+  designerEmail: string;
+  designerDueDate: string;
 }
 
 export function TaskItem({
@@ -51,6 +53,8 @@ export function TaskItem({
   licenseAllowFastFashion,
   masteringDueDate,
   masteringEngineerEmail,
+  designerEmail,
+  designerDueDate,
 }: Props) {
   const [task, setTask] = useState(initialTask);
   const [isLoading, setIsLoading] = useState(false);
@@ -130,6 +134,8 @@ export function TaskItem({
             licenseAllowFastFashion,
             masteringDueDate,
             masteringEngineerEmail,
+            designerEmail,
+            designerDueDate,
           }),
         });
       } catch (error) {
@@ -150,7 +156,7 @@ export function TaskItem({
 
   const completionDate =
     task.completionStatus === CompletionStatus.DONE_DETECTED
-      ? task.taskFiles[0].createdAt
+      ? task.taskFiles?.[0]?.createdAt ?? null
       : task.completionStatus === CompletionStatus.DONE_MANUALLY
       ? task.completedAt
       : null;

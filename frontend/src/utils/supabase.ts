@@ -10,6 +10,7 @@ import {
 import { CompletionStatus } from "@/types/CompletionStatus";
 import type { UserReleasePermissionRole } from "@/types/UserReleasePermissionRole";
 import { keysToCamelCase } from "./case";
+import { deduplicateObjectArray } from "./deduplicateObjectArray";
 
 // Initialize Supabase client
 const supabaseUrl = getSecret("SUPABASE_URL");
@@ -74,7 +75,12 @@ export async function getReleasesForUser(userId: string): Promise<Release[]> {
     throw error;
   }
 
-  return keysToCamelCase<Release[]>(data.map((row) => row.release));
+  // Force a new array reference to ensure React re-renders
+  const releases = [...(data ?? [])].map(
+    (row: any) => row.release as unknown as Release
+  );
+  const deduped = deduplicateObjectArray<Release>(releases, "id");
+  return keysToCamelCase<Release[]>(deduped);
 }
 
 // Fetch tasks for a specific release

@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { premastersSubmitted } from "@/mailer/emails/premastersSubmitted";
 import { notifyMasteringEngineer } from "@/mailer/emails/notifyMasteringEngineer";
+import { notifyDesigner } from "@/mailer/emails/notifyDesigner";
 import { sendEmail } from "@/mailer/index";
 import { setReleasePreamastersEmailsSent } from "@/utils/supabase";
 import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
@@ -74,6 +75,7 @@ export const POST: APIRoute = async ({ request }) => {
       masteringEngineerEmail,
       designerEmail,
       masteringDueDate,
+      designerDueDate,
     } = body;
 
     if (
@@ -161,6 +163,26 @@ export const POST: APIRoute = async ({ request }) => {
         dueDate: formatSingleDate(masteringDueDate),
         inviteLink,
       });
+      sendEmail(email);
+    }
+
+    // send email to designer
+    if (designerEmail) {
+      const inviteLink = await generateInviteLink(
+        designerEmail,
+        `/releases/${releaseId}`
+      );
+
+      const email = notifyDesigner({
+        designerEmail,
+        artistName: artists[0].artistName ?? artists[0].govName ?? "",
+        releaseName,
+        catalogNumber,
+        labelName,
+        dueDate: formatSingleDate(designerDueDate),
+        inviteLink,
+      });
+
       sendEmail(email);
     }
 
