@@ -76,9 +76,7 @@ export async function getReleasesForUser(userId: string): Promise<Release[]> {
   }
 
   // Force a new array reference to ensure React re-renders
-  const releases = [...(data ?? [])].map(
-    (row: any) => row.release as unknown as Release
-  );
+  const releases = data.map((row) => row.release) as unknown as Release[];
   const deduped = deduplicateObjectArray<Release>(releases, "id");
   return keysToCamelCase<Release[]>(deduped);
 }

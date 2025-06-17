@@ -2,11 +2,11 @@ import { adminSupabase } from "./auth";
 import { getSecret } from "astro:env/server";
 
 export const generateInviteLink = async (
-  masteringEngineerEmail: string,
+  email: string,
   afterAcceptInviteRedirectTo: string
 ) => {
   const { data, error } = await adminSupabase.auth.admin.generateLink({
-    email: masteringEngineerEmail,
+    email,
     type: "recovery",
     options: {
       redirectTo: `${

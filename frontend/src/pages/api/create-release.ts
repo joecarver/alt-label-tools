@@ -7,8 +7,8 @@ import { artistSigned } from "@/mailer/emails/artistSigned";
 import { sendEmail } from "@/mailer/index";
 import { ReleaseTaskName } from "@/types/ReleaseTask";
 import { formatSingleDate } from "@/utils/date";
-import { supabase as adminSupabase, getOrCreateUser } from "@/utils/supabase";
-import { randomBytes } from "crypto";
+import { getOrCreateUser } from "@/utils/supabase";
+import { generateInviteLink } from "@/utils/url";
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -223,6 +223,11 @@ export const POST: APIRoute = async ({ request }) => {
       .select();
     if (tasksError) throw tasksError;
 
+    // Get or create users for artist, mastering engineer, designer
+    const artistUser = await getOrCreateUser(email);
+    const masteringUser = await getOrCreateUser(mastering_engineer_email);
+    const designerUser = await getOrCreateUser(designer_email);
+
     // Send email to artist
     const artistSignedEmail = artistSigned({
       artistName: artist_name,
@@ -233,15 +238,10 @@ export const POST: APIRoute = async ({ request }) => {
         )?.start_date || ""
       ),
       labelName: client_name,
-      googleDriveFolder: `https://drive.google.com/drive/folders/${preMastersFolderId}`,
+      inviteLink: await generateInviteLink(email, `/releases/${release.id}`),
     });
 
     sendEmail(artistSignedEmail);
-
-    // Get or create users for artist, mastering engineer, designer
-    const artistUser = await getOrCreateUser(email);
-    const masteringUser = await getOrCreateUser(mastering_engineer_email);
-    const designerUser = await getOrCreateUser(designer_email);
 
     // Add user_release_permissions for each
     const userReleasePermissions = [

@@ -5,7 +5,7 @@ interface ArtistSignedEmail {
   artistEmail: string;
   premasterDueDate: string;
   labelName: string;
-  googleDriveFolder: string;
+  inviteLink: string;
 }
 
 export const artistSigned = ({
@@ -13,7 +13,7 @@ export const artistSigned = ({
   artistEmail,
   premasterDueDate,
   labelName,
-  googleDriveFolder,
+  inviteLink,
 }: ArtistSignedEmail): EmailRequest => {
   return {
     to: artistEmail,
@@ -30,7 +30,9 @@ For now, we just need you to focus on the music and will be back in touch with a
 
 When submitting your pre-masters please make sure you are submitting all tracks and WAV's that have been mixed to -6db. If you are unsure of how to do this please find an Ableton tutorial here.
 
-Please ensure that the pre-masters are uploaded via Google Drive to the following folder: ${googleDriveFolder}. Files must be named in the following format:
+You can upload your pre-masters on the ALT platform using the following link. First you'll need to set a password or sign in: ${inviteLink}
+
+Files must be named in the following format:
 
 <track number> - <artist name> - <track name> [premaster].wav
 
