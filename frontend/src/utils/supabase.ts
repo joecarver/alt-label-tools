@@ -20,7 +20,26 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error("Missing Supabase credentials");
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Create a function to get a fresh client
+function getFreshClient() {
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error("Missing Supabase credentials");
+  }
+  return createClient(supabaseUrl, supabaseKey, {
+    global: {
+      headers: {
+        "Cache-Control": "no-cache",
+      },
+    },
+    auth: {
+      persistSession: false, // Don't persist the session
+      autoRefreshToken: false, // Don't auto refresh the token
+    },
+  });
+}
+
+// Export the default client for most operations
+export const supabase = getFreshClient();
 
 // Fetch all clients
 export async function getClients(userId?: string): Promise<LabelClient[]> {
@@ -61,23 +80,40 @@ export async function getReleases(clientIds: string[]): Promise<Release[]> {
   return keysToCamelCase<Release[]>(data);
 }
 
+// Use a fresh client for newly invited users
 export async function getReleasesForUser(userId: string): Promise<Release[]> {
-  const { data, error } = await supabase
+  // First get the release IDs the user has permission for
+  const freshClient = getFreshClient();
+  const { data: permissionData, error: permissionError } = await freshClient
     .from("user_release_permissions")
-    .select(
-      "release:releases(*, user_release_permissions(role), client:clients(*), mastering_engineer(*), designer(*), artists(*))"
-    )
-    .eq("user_id", userId)
-    .eq("release.user_release_permissions.user_id", userId);
+    .select("release_id")
+    .eq("user_id", userId);
 
-  if (error) {
-    console.error("Error fetching releases for user:", error);
-    throw error;
+  if (permissionError) {
+    console.error("Error fetching release permissions:", permissionError);
+    throw permissionError;
   }
 
-  // Force a new array reference to ensure React re-renders
-  const releases = data.map((row) => row.release) as unknown as Release[];
-  const deduped = deduplicateObjectArray<Release>(releases, "id");
+  if (!permissionData || permissionData.length === 0) {
+    return [];
+  }
+
+  // Then fetch the full release data for those IDs
+  const releaseIds = permissionData.map((p) => p.release_id);
+  const { data: releaseData, error: releaseError } = await freshClient
+    .from("releases")
+    .select(
+      "*, user_release_permissions(role), client:clients(*), mastering_engineer(*), designer(*), artists(*)"
+    )
+    .in("id", releaseIds)
+    .eq("user_release_permissions.user_id", userId);
+
+  if (releaseError) {
+    console.error("Error fetching releases:", releaseError);
+    throw releaseError;
+  }
+
+  const deduped = deduplicateObjectArray<Release>(releaseData || [], "id");
   return keysToCamelCase<Release[]>(deduped);
 }
 
