@@ -79,9 +79,16 @@ func ExtractMetadataFromFileName(fileName string) (MP3Metadata, error) {
 		return MP3Metadata{}, fmt.Errorf("invalid filename format: %s", fileName)
 	}
 
+	// Remove [master] or [Master] from the title if present
+	title := strings.TrimSpace(parts[2])
+	title = strings.TrimSuffix(title, " [master]")
+	title = strings.TrimSuffix(title, " [Master]")
+	title = strings.TrimSuffix(title, " [MASTER]")
+	title = strings.TrimSpace(title)
+
 	return MP3Metadata{
 		TrackNumber: parts[0],
 		Artist:      parts[1],
-		Title:       parts[2],
+		Title:       title,
 	}, nil
 }

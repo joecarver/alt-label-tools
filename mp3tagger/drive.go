@@ -3,9 +3,11 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/drive/v3"
@@ -28,18 +30,33 @@ type DriveFolder struct {
 // getDriveService authenticates and returns a Drive service client
 func getDriveService() (*drive.Service, error) {
 	ctx := context.Background()
-	f, err := os.Open("service-account.json")
-	if err != nil {
-		return nil, fmt.Errorf("failed to open service-account.json: %w", err)
-	}
-	defer f.Close()
 
-	creds, err := io.ReadAll(f)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read service-account.json: %w", err)
+	// Read service account credentials from environment variables
+	email := os.Getenv("GOOGLE_SERVICE_ACCOUNT_EMAIL")
+	privateKey := os.Getenv("GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY")
+	// Fix for .env files with escaped newlines
+	privateKey = strings.ReplaceAll(privateKey, "\\n", "\n")
+	privateKeyID := os.Getenv("GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_ID")
+	if email == "" || privateKey == "" || privateKeyID == "" {
+		return nil, fmt.Errorf("missing Google service account env vars")
 	}
 
-	conf, err := google.JWTConfigFromJSON(creds, drive.DriveScope)
+	// Construct the service account JSON
+	creds := map[string]string{
+		"type":                        "service_account",
+		"client_email":                email,
+		"private_key":                 privateKey,
+		"private_key_id":              privateKeyID,
+		"token_uri":                   "https://oauth2.googleapis.com/token",
+		"auth_uri":                    "https://accounts.google.com/o/oauth2/auth",
+		"auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+	}
+	credsJSON, err := json.Marshal(creds)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal service account JSON: %w", err)
+	}
+
+	conf, err := google.JWTConfigFromJSON(credsJSON, drive.DriveScope)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse service account JSON: %w", err)
 	}

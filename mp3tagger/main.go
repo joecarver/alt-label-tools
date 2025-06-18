@@ -25,7 +25,6 @@ func init() {
 	}
 	supabaseUrl = os.Getenv("SUPABASE_URL")
 	supabaseKey = os.Getenv("SUPABASE_KEY")
-	googleDriveApiKey = os.Getenv("GOOGLE_DRIVE_API_KEY")
 }
 
 func main() {
@@ -152,6 +151,115 @@ func main() {
 		}
 
 		c.JSON(http.StatusOK, gin.H{"status": "success"})
+	})
+
+	r.POST("/process-single-release", func(c *gin.Context) {
+		type Req struct {
+			ArtworkFolderID string `json:"artworkFolderId"`
+			MasterFolderID  string `json:"masterFolderId"`
+			ReleaseName     string `json:"releaseName"`
+			ReleaseYear     string `json:"releaseYear"`
+		}
+		var req Req
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+			return
+		}
+		if req.ArtworkFolderID == "" || req.MasterFolderID == "" || req.ReleaseName == "" || req.ReleaseYear == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "artworkFolderId, masterFolderId, releaseName, and releaseYear are required"})
+			return
+		}
+
+		masters, err := ListDriveFiles(req.MasterFolderID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list masters", "details": err.Error()})
+			return
+		}
+
+		artworks, err := ListDriveFiles(req.ArtworkFolderID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list artworks", "details": err.Error()})
+			return
+		}
+
+		if len(masters) == 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "No master files found"})
+			return
+		}
+
+		var artworkFile DriveFile
+		for _, art := range artworks {
+			if strings.Contains(strings.ToLower(art.Name), "album artwork small") {
+				artworkFile = art
+				break
+			}
+		}
+
+		if artworkFile.ID == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "No 'Album Artwork Small' image found in artwork folder"})
+			return
+		}
+
+		artworkData, err := DownloadDriveFile(artworkFile.ID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to download artwork", "details": err.Error()})
+			return
+		}
+
+		successCount := 0
+		errors := make([]string, 0)
+		for _, master := range masters {
+			if !strings.HasSuffix(strings.ToLower(master.Name), ".wav") &&
+				!strings.HasSuffix(strings.ToLower(master.Name), ".flac") &&
+				!strings.HasSuffix(strings.ToLower(master.Name), ".aiff") {
+				continue
+			}
+			masterData, err := DownloadDriveFile(master.ID)
+			if err != nil {
+				errors = append(errors, "Failed to download "+master.Name+": "+err.Error())
+				continue
+			}
+
+			metadata, err := ExtractMetadataFromFileName(master.Name)
+			if err != nil {
+				errors = append(errors, "Metadata error for "+master.Name+": "+err.Error())
+				continue
+			}
+
+			metadata.Artwork = artworkData
+			metadata.Album = req.ReleaseName
+			metadata.Year = req.ReleaseYear
+			mp3Data, err := ConvertToMP3(masterData, strings.TrimPrefix(filepath.Ext(master.Name), "."))
+			if err != nil {
+				errors = append(errors, "Conversion error for "+master.Name+": "+err.Error())
+				continue
+			}
+
+			taggedMP3, err := TagMP3(mp3Data, metadata)
+			if err != nil {
+				errors = append(errors, "Tagging error for "+master.Name+": "+err.Error())
+				continue
+			}
+
+			mp3Name := strings.TrimSuffix(master.Name, filepath.Ext(master.Name)) + ".mp3"
+			mp3FolderID, err := CreateDriveFolder(req.MasterFolderID, "MP3s")
+			if err != nil {
+				errors = append(errors, "Failed to create MP3 folder: "+err.Error())
+				continue
+			}
+
+			_, err = UploadDriveFile(mp3FolderID, mp3Name, taggedMP3, "audio/mpeg")
+			if err != nil {
+				errors = append(errors, "Upload error for "+mp3Name+": "+err.Error())
+				continue
+			}
+			successCount++
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"success":      successCount,
+			"errors":       errors,
+			"totalMasters": len(masters),
+		})
 	})
 
 	r.Run(":8080")
