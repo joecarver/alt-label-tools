@@ -13,3 +13,21 @@ export const validateAudioFileName = (fileName: string, isMaster: boolean) => {
   }
   return null;
 };
+
+const validArtworkFileNames = [
+  "Album Artwork Small",
+  "Single Artwork Small",
+  "Album Artwork Large",
+  "Single Artwork Large",
+  "Spotify Header",
+];
+
+export const validateArtworkFileName = (fileName: string) => {
+  const fileNameWithoutExtension = fileName.split(".")[0];
+  if (!validArtworkFileNames.includes(fileNameWithoutExtension)) {
+    return `Invalid file name. Must be one of: ${validArtworkFileNames.join(
+      ", "
+    )}`;
+  }
+  return null;
+};

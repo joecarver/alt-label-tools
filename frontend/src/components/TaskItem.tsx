@@ -12,52 +12,41 @@ import styles from "./TaskItem.module.css";
 import { TaskItemCompletionStatus } from "./TaskItemCompletionStatus";
 import GoogleDriveUpload from "./GoogleDriveUpload";
 import { getPermittedMimeTypesForTask } from "@/utils/getPermittedMimeTypesForTask";
+import type { Release } from "@/types/Release";
 
 interface Props {
   task: ReleaseTask;
   taskFolderIds: Record<string, string | null>;
-  releaseName: string;
-  catalogNumber: string;
-  releaseDate: string;
-  labelName: string;
-  artists: any[];
+  release: Release;
   tasksData: ReleaseTask[];
-  premastersEmailsSent: boolean;
-  documentationFolderId: string;
-  licenseAllowPolitics: boolean;
-  licenseAllowAlcohol: boolean;
-  licenseAllowPharmaceuticals: boolean;
-  licenseAllowFastFood: boolean;
-  licenseAllowFastFashion: boolean;
-  masteringDueDate: string;
-  masteringEngineerEmail: string;
-  designerEmail: string;
-  designerDueDate: string;
 }
 
 export function TaskItem({
   task: initialTask,
   taskFolderIds,
-  releaseName,
-  catalogNumber,
-  releaseDate,
-  labelName,
-  artists,
+  release,
   tasksData,
-  premastersEmailsSent,
-  documentationFolderId,
-  licenseAllowPolitics,
-  licenseAllowAlcohol,
-  licenseAllowPharmaceuticals,
-  licenseAllowFastFood,
-  licenseAllowFastFashion,
-  masteringDueDate,
-  masteringEngineerEmail,
-  designerEmail,
-  designerDueDate,
 }: Props) {
   const [task, setTask] = useState(initialTask);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Helper values from release
+  const premastersEmailsSent = release.premasterEmailsSent ?? false;
+  const documentationFolderId = release.documentationFolderId ?? "";
+  const masteringDueDate =
+    tasksData.find((t) => t.name === ReleaseTaskName.MastersSubmitted)
+      ?.startDate ?? "";
+  const designerDueDate =
+    tasksData.find((t) => t.name === ReleaseTaskName.ArtworkCreation)
+      ?.startDate ?? "";
+  const masteringEngineerEmail = release.masteringEngineer?.email ?? "";
+  const designerEmail = release.designer?.email ?? "";
+  const licenseAllowPolitics = release.licenseAllowPolitics ?? false;
+  const licenseAllowAlcohol = release.licenseAllowAlcohol ?? false;
+  const licenseAllowPharmaceuticals =
+    release.licenseAllowPharmaceuticals ?? false;
+  const licenseAllowFastFood = release.licenseAllowFastfood ?? false;
+  const licenseAllowFastFashion = release.licenseAllowFastfashion ?? false;
 
   const handleTaskCompletion = async () => {
     const taskId = task.id;
@@ -119,11 +108,11 @@ export function TaskItem({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            releaseName,
-            catalogNumber,
-            releaseDate,
-            labelName,
-            artists,
+            releaseName: release.name,
+            catalogNumber: release.catalogNumber,
+            releaseDate: release.releaseDate,
+            labelName: release.client.name,
+            artists: release.artists,
             tasks: tasksData,
             releaseId: task.releaseId,
             destFolderId: documentationFolderId,

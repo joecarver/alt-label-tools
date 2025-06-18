@@ -77,26 +77,9 @@ const designerDueDate = tasks.find(
       </Badge>
     </Box>
     <TaskList
-      releaseId={release.id}
+      release={release}
       tasks={tasks}
       taskFolderIds={taskFolderIds}
-      releaseName={release.name}
-      catalogNumber={release.catalogNumber ?? ""}
-      releaseDate={release.releaseDate ?? ""}
-      labelName={release.client.name}
-      artists={release.artists}
-      tasksData={tasks}
-      premastersEmailsSent={release.premasterEmailsSent ?? false}
-      documentationFolderId={release.documentationFolderId ?? ""}
-      licenseAllowPolitics={release.licenseAllowPolitics ?? false}
-      licenseAllowAlcohol={release.licenseAllowAlcohol ?? false}
-      licenseAllowPharmaceuticals={release.licenseAllowPharmaceuticals ?? false}
-      licenseAllowFastFood={release.licenseAllowFastfood ?? false}
-      licenseAllowFastFashion={release.licenseAllowFastfashion ?? false}
-      masteringDueDate={masteringDueDate ?? ""}
-      masteringEngineerEmail={release.masteringEngineer?.email ?? ""}
-      designerEmail={release.designer?.email ?? ""}
-      designerDueDate={designerDueDate ?? ""}
       server:defer
     >
       <Badge

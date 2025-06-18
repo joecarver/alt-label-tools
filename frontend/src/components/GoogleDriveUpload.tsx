@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { Button } from "@radix-ui/themes";
 import { UploadIcon } from "@radix-ui/react-icons";
-import { validateAudioFileName } from "@/utils/validateFIleName";
+import {
+  validateAudioFileName,
+  validateArtworkFileName,
+} from "@/utils/validateFIleName";
 import { ReleaseTaskName } from "@/types/ReleaseTask";
 
 interface GoogleDriveUploadProps {
@@ -40,9 +43,10 @@ const GoogleDriveUpload: React.FC<GoogleDriveUploadProps> = ({
     try {
       for (const [index, file] of Array.from(files).entries()) {
         const validationFunction =
-          taskName === ReleaseTaskName.PreMastersSubmitted
+          taskName === ReleaseTaskName.PreMastersSubmitted ||
+          taskName === ReleaseTaskName.MastersSubmitted
             ? () => validateAudioFileName(file.name, false)
-            : () => validateAudioFileName(file.name, true);
+            : () => validateArtworkFileName(file.name);
 
         const error = validationFunction();
         if (error) {

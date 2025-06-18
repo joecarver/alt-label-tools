@@ -3,55 +3,18 @@ import { Flex, Box } from "@radix-ui/themes";
 import { TaskSummary } from "./TaskSummary";
 import { TaskItem } from "./TaskItem";
 import type { ReleaseTask } from "@/types/ReleaseTask";
+import type { Release } from "@/types/Release";
 
 interface Props {
-  releaseId: string;
+  release: Release;
   tasks: ReleaseTask[];
   taskFolderIds: Record<string, string>;
-  releaseName: string;
-  catalogNumber: string;
-  releaseDate: string;
-  labelName: string;
-  artists: any[];
-  tasksData: ReleaseTask[];
-  premastersEmailsSent: boolean;
-  documentationFolderId: string;
-  licenseAllowPolitics: boolean;
-  licenseAllowAlcohol: boolean;
-  licenseAllowPharmaceuticals: boolean;
-  licenseAllowFastFood: boolean;
-  licenseAllowFastFashion: boolean;
-  masteringDueDate: string;
-  masteringEngineerEmail: string;
-  designerEmail: string;
-  designerDueDate: string;
 }
 
-const {
-  releaseId,
-  tasks,
-  taskFolderIds,
-  releaseName,
-  catalogNumber,
-  releaseDate,
-  labelName,
-  artists,
-  tasksData,
-  premastersEmailsSent,
-  documentationFolderId,
-  licenseAllowPolitics,
-  licenseAllowAlcohol,
-  licenseAllowPharmaceuticals,
-  licenseAllowFastFood,
-  licenseAllowFastFashion,
-  masteringDueDate,
-  masteringEngineerEmail,
-  designerEmail,
-  designerDueDate,
-} = Astro.props;
+const { release, tasks, taskFolderIds } = Astro.props;
 ---
 
-<TaskSummary client:load releaseId={releaseId} initialTasks={tasks} />
+<TaskSummary client:load releaseId={release.id} initialTasks={tasks} />
 
 <Box style={{ backgroundColor: "var(--gray-2)" }} className="task-list">
   <Flex direction="column" gap="4">
@@ -67,23 +30,8 @@ const {
             client:load
             task={task}
             taskFolderIds={taskFolderIds}
-            releaseName={releaseName}
-            catalogNumber={catalogNumber}
-            releaseDate={releaseDate}
-            labelName={labelName}
-            artists={artists}
-            tasksData={tasksData}
-            premastersEmailsSent={premastersEmailsSent}
-            documentationFolderId={documentationFolderId}
-            licenseAllowPolitics={licenseAllowPolitics}
-            licenseAllowAlcohol={licenseAllowAlcohol}
-            licenseAllowPharmaceuticals={licenseAllowPharmaceuticals}
-            licenseAllowFastFood={licenseAllowFastFood}
-            licenseAllowFastFashion={licenseAllowFastFashion}
-            masteringDueDate={masteringDueDate}
-            masteringEngineerEmail={masteringEngineerEmail}
-            designerEmail={designerEmail}
-            designerDueDate={designerDueDate}
+            release={release}
+            tasksData={tasks}
           />
         ))
     }
