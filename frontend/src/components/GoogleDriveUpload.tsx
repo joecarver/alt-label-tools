@@ -40,6 +40,7 @@ const GoogleDriveUpload: React.FC<GoogleDriveUploadProps> = ({
 
     setIsLoading(true);
     setUploadProgress({ current: 0, total: files.length });
+    let submissionError = false;
     try {
       for (const [index, file] of Array.from(files).entries()) {
         const validationFunction =
@@ -51,7 +52,8 @@ const GoogleDriveUpload: React.FC<GoogleDriveUploadProps> = ({
         const error = validationFunction();
         if (error) {
           alert(`Error with file ${file.name}: ${error}`);
-          continue;
+          submissionError = true;
+          break;
         }
 
         const formData = new FormData();
@@ -80,7 +82,7 @@ const GoogleDriveUpload: React.FC<GoogleDriveUploadProps> = ({
         );
       }
 
-      if (onUploadComplete) {
+      if (onUploadComplete && !submissionError) {
         onUploadComplete();
       }
     } catch (error) {
