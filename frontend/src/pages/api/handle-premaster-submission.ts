@@ -3,7 +3,7 @@ import { premastersSubmitted } from "@/mailer/emails/premastersSubmitted";
 import { notifyMasteringEngineer } from "@/mailer/emails/notifyMasteringEngineer";
 import { notifyDesigner } from "@/mailer/emails/notifyDesigner";
 import { sendEmail } from "@/mailer/index";
-import { setReleasePreamastersEmailsSent } from "@/utils/supabase";
+import { getTasks, setReleasePreamastersEmailsSent } from "@/utils/supabase";
 import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
 import { formatSingleDate } from "@/utils/date";
 import type { Artist } from "@/types/Artist";
@@ -64,7 +64,6 @@ export const POST: APIRoute = async ({ request }) => {
       releaseDate,
       labelName,
       artists,
-      tasks,
       releaseId,
       destFolderId,
       licenseAllowPolitics,
@@ -74,23 +73,16 @@ export const POST: APIRoute = async ({ request }) => {
       licenseAllowFastFashion,
       masteringEngineerEmail,
       designerEmail,
-      masteringDueDate,
-      designerDueDate,
     } = body;
 
-    if (
-      !releaseName ||
-      !releaseDate ||
-      !labelName ||
-      !artists ||
-      !tasks ||
-      !releaseId
-    ) {
+    if (!releaseName || !releaseDate || !labelName || !artists || !releaseId) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
+
+    const tasks = await getTasks(releaseId);
 
     // Build release schedule
     const releaseSchedule = tasks
@@ -154,13 +146,17 @@ export const POST: APIRoute = async ({ request }) => {
         `/releases/${releaseId}`
       );
 
+      const masteringDueDate = tasks.find(
+        (task) => task.name === ReleaseTaskName.MastersSubmitted
+      )?.startDate;
+
       const email = notifyMasteringEngineer({
         masteringEngineerEmail,
         artistName: artists[0].artistName ?? artists[0].govName ?? "",
         releaseName,
         catalogNumber,
         labelName,
-        dueDate: formatSingleDate(masteringDueDate),
+        dueDate: formatSingleDate(masteringDueDate!),
         inviteLink,
       });
       sendEmail(email);
@@ -173,13 +169,17 @@ export const POST: APIRoute = async ({ request }) => {
         `/releases/${releaseId}`
       );
 
+      const designerDueDate = tasks.find(
+        (task) => task.name === ReleaseTaskName.ArtworkCreation
+      )?.startDate;
+
       const email = notifyDesigner({
         designerEmail,
         artistName: artists[0].artistName ?? artists[0].govName ?? "",
         releaseName,
         catalogNumber,
         labelName,
-        dueDate: formatSingleDate(designerDueDate),
+        dueDate: formatSingleDate(designerDueDate!),
         inviteLink,
       });
 

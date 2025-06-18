@@ -44,9 +44,10 @@ const GoogleDriveUpload: React.FC<GoogleDriveUploadProps> = ({
     try {
       for (const [index, file] of Array.from(files).entries()) {
         const validationFunction =
-          taskName === ReleaseTaskName.PreMastersSubmitted ||
-          taskName === ReleaseTaskName.MastersSubmitted
+          taskName === ReleaseTaskName.PreMastersSubmitted
             ? () => validateAudioFileName(file.name, false)
+            : taskName === ReleaseTaskName.MastersSubmitted
+            ? () => validateAudioFileName(file.name, true)
             : () => validateArtworkFileName(file.name);
 
         const error = validationFunction();

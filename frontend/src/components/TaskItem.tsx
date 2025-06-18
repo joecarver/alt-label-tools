@@ -18,27 +18,15 @@ interface Props {
   task: ReleaseTask;
   taskFolderIds: Record<string, string | null>;
   release: Release;
-  tasksData: ReleaseTask[];
 }
 
-export function TaskItem({
-  task: initialTask,
-  taskFolderIds,
-  release,
-  tasksData,
-}: Props) {
+export function TaskItem({ task: initialTask, taskFolderIds, release }: Props) {
   const [task, setTask] = useState(initialTask);
   const [isLoading, setIsLoading] = useState(false);
 
   // Helper values from release
   const premastersEmailsSent = release.premasterEmailsSent ?? false;
   const documentationFolderId = release.documentationFolderId ?? "";
-  const masteringDueDate =
-    tasksData.find((t) => t.name === ReleaseTaskName.MastersSubmitted)
-      ?.startDate ?? "";
-  const designerDueDate =
-    tasksData.find((t) => t.name === ReleaseTaskName.ArtworkCreation)
-      ?.startDate ?? "";
   const masteringEngineerEmail = release.masteringEngineer?.email ?? "";
   const designerEmail = release.designer?.email ?? "";
   const licenseAllowPolitics = release.licenseAllowPolitics ?? false;
@@ -113,7 +101,6 @@ export function TaskItem({
             releaseDate: release.releaseDate,
             labelName: release.client.name,
             artists: release.artists,
-            tasks: tasksData,
             releaseId: task.releaseId,
             destFolderId: documentationFolderId,
             licenseAllowPolitics,
@@ -121,10 +108,8 @@ export function TaskItem({
             licenseAllowPharmaceuticals,
             licenseAllowFastFood,
             licenseAllowFastFashion,
-            masteringDueDate,
             masteringEngineerEmail,
             designerEmail,
-            designerDueDate,
           }),
         });
       } catch (error) {
