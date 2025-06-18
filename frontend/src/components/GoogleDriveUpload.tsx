@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Button } from "@radix-ui/themes";
 import { UploadIcon } from "@radix-ui/react-icons";
 import {
@@ -31,6 +31,7 @@ const GoogleDriveUpload: React.FC<GoogleDriveUploadProps> = ({
     current: number;
     total: number;
   } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -94,6 +95,9 @@ const GoogleDriveUpload: React.FC<GoogleDriveUploadProps> = ({
     } finally {
       setIsLoading(false);
       setUploadProgress(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
@@ -112,6 +116,7 @@ const GoogleDriveUpload: React.FC<GoogleDriveUploadProps> = ({
       <input
         type="file"
         id={elementId}
+        ref={fileInputRef}
         style={{ display: "none" }}
         onChange={handleFileSelect}
         disabled={isLoading}
