@@ -94,12 +94,47 @@ async function generateServiceAccountToken() {
 
 const CLIENT_FOLDER_PARENT_ID = "18FtD4JQnjWshaRXUpfSwiCf428fTzUgT";
 
+// Check if a folder with the given name exists in the specified parent folder
+async function checkFolderExists(
+  folderName: string,
+  parentId: string,
+  token: string
+): Promise<string | null> {
+  const query = [
+    `'${parentId}'+in+parents`,
+    `name='${folderName.replace(/'/g, "\\'")}'`,
+    "mimeType='application/vnd.google-apps.folder'",
+    "trashed=false",
+  ].join(" and ");
+  const searchUrl = `https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name)`;
+  const searchRes = await fetch(searchUrl, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!searchRes.ok) {
+    const errorText = await searchRes.text();
+    throw new Error(`Failed to search for existing folder: ${errorText}`);
+  }
+  const { files: existingFolders } = await searchRes.json();
+  if (existingFolders && existingFolders.length > 0) {
+    return existingFolders[0].id;
+  }
+  return null;
+}
+
 // Create a new folder in Google Drive
 export async function createDriveFolder(
   folderName: string,
   parentId: string = CLIENT_FOLDER_PARENT_ID
 ): Promise<string> {
   const token = await generateServiceAccountToken();
+
+  // Use the new checkFolderExists function
+  const existingFolderId = await checkFolderExists(folderName, parentId, token);
+  if (existingFolderId) {
+    return existingFolderId;
+  }
+
+  // Folder does not exist, create it
   const body: any = {
     name: folderName,
     mimeType: "application/vnd.google-apps.folder",

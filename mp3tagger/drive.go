@@ -131,12 +131,40 @@ func UploadDriveFile(folderID, fileName string, data []byte, mimeType string) (s
 	return created.Id, nil
 }
 
-// CreateDriveFolder creates a new folder in Google Drive
+// Check if a folder with the given name exists in the specified parent folder
+func CheckFolderExists(parentID, folderName string) (string, error) {
+	drv, err := getDriveService()
+	if err != nil {
+		return "", err
+	}
+	q := fmt.Sprintf("'%s' in parents and name = '%s' and mimeType = 'application/vnd.google-apps.folder' and trashed = false", parentID, folderName)
+	call := drv.Files.List().Q(q).Fields("files(id, name)")
+	resp, err := call.Do()
+	if err != nil {
+		return "", fmt.Errorf("failed to search for existing folder: %w", err)
+	}
+	if len(resp.Files) > 0 {
+		return resp.Files[0].Id, nil
+	}
+	return "", nil
+}
+
+// CreateDriveFolder creates a new folder in Google Drive, or returns the existing folder's ID if it already exists
 func CreateDriveFolder(parentID, folderName string) (string, error) {
 	drv, err := getDriveService()
 	if err != nil {
 		return "", err
 	}
+
+	// Check if folder exists
+	existingID, err := CheckFolderExists(parentID, folderName)
+	if err != nil {
+		return "", err
+	}
+	if existingID != "" {
+		return existingID, nil
+	}
+
 	file := &drive.File{
 		Name:     folderName,
 		MimeType: "application/vnd.google-apps.folder",
