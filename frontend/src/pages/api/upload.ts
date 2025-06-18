@@ -6,6 +6,8 @@ import { getSecret } from "astro:env/server";
 import { CompletionStatus } from "@/types/CompletionStatus";
 import { DueDateStatus } from "@/types/DueDateStatus";
 
+import { shouldTriggerMp3TaggingForUpload } from "@/utils/shouldTriggerMp3Tagging";
+
 export const POST: APIRoute = async ({ request }) => {
   try {
     const formData = await request.formData();
@@ -72,6 +74,30 @@ export const POST: APIRoute = async ({ request }) => {
       if (taskError) {
         throw taskError;
       }
+    }
+
+    // Check if we should trigger MP3 tagging
+    const taggingResult = await shouldTriggerMp3TaggingForUpload(
+      supabase,
+      taskId,
+      file.name
+    );
+    if (taggingResult.shouldTrigger) {
+      fetch(
+        "https://alt-label-tools-mp3tagger.onrender.com/process-single-release",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            artworkFolderId: taggingResult.release.artwork_folder_id,
+            masterFolderId: taggingResult.release.masters_folder_id,
+            releaseName: taggingResult.release.name,
+            releaseYear: new Date().getFullYear().toString(),
+          }),
+        }
+      );
     }
 
     return new Response(JSON.stringify({ fileId, taskFile }), {

@@ -1,4 +1,5 @@
 import { getSecret } from "astro:env/server";
+import type { ReleaseTask } from "@/types/ReleaseTask";
 
 // Service account credentials
 const serviceAccountEmail = getSecret("GOOGLE_SERVICE_ACCOUNT_EMAIL");
