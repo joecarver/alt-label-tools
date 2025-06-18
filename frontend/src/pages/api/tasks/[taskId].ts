@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { supabase } from "@/utils/supabase";
+import { getFreshClient } from "@/utils/supabase";
 import { keysToCamelCase } from "@/utils/case";
 import type { ReleaseTask } from "@/types/ReleaseTask";
 
@@ -18,6 +18,8 @@ export const GET: APIRoute = async ({ params }) => {
         }
       );
     }
+
+    const supabase = getFreshClient();
 
     // Fetch the task
     const { data: task, error: taskError } = await supabase

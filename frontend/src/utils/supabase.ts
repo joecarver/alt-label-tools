@@ -21,7 +21,7 @@ if (!supabaseUrl || !supabaseKey) {
 }
 
 // Create a function to get a fresh client
-function getFreshClient() {
+export function getFreshClient() {
   if (!supabaseUrl || !supabaseKey) {
     throw new Error("Missing Supabase credentials");
   }
