@@ -189,7 +189,7 @@ export async function getClientsForUser(
   const { data, error } = await supabase
     .from("user_client_permissions")
     .select(
-      "client:clients(*, releases(*, mastering_engineer(*), designer(*), artists(*)))"
+      "client:clients(*, releases(*, mastering_engineer(*), designer(*), artists(*), client:clients(*)))"
     )
     .eq("user_id", userId);
 
