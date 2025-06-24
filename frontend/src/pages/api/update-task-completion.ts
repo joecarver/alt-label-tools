@@ -6,6 +6,7 @@ export const POST: APIRoute = async ({ request }) => {
     const formData = await request.formData();
     const taskId = formData.get("taskId");
     const completedAt = formData.get("completedAt");
+    const dueDate = formData.get("dueDate");
 
     if (!taskId) {
       return new Response(
@@ -19,9 +20,9 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    if (!taskId) {
+    if (!dueDate) {
       return new Response(
-        JSON.stringify({ error: "Missing required taskId" }),
+        JSON.stringify({ error: "Missing required dueDate" }),
         {
           status: 400,
           headers: {
@@ -33,7 +34,8 @@ export const POST: APIRoute = async ({ request }) => {
 
     await updateTaskCompletion(
       taskId.toString(),
-      (completedAt || "").toString()
+      (completedAt || "").toString(),
+      dueDate.toString()
     );
 
     return new Response(JSON.stringify({ success: true }), {

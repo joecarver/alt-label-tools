@@ -52,6 +52,7 @@ export function TaskItem({ task: initialTask, taskFolderIds, release }: Props) {
     formData.append("taskId", taskId);
     formData.append("completedAt", newCompletedAt || "");
     formData.append("redirectTo", window.location.pathname);
+    formData.append("dueDate", task.endDate || "");
 
     try {
       const response = await fetch("/api/update-task-completion", {
@@ -92,7 +93,7 @@ export function TaskItem({ task: initialTask, taskFolderIds, release }: Props) {
       !premastersEmailsSent
     ) {
       try {
-        await fetch("/api/handle-premaster-submission", {
+        const response = await fetch("/api/handle-premaster-submission", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -146,22 +147,24 @@ export function TaskItem({ task: initialTask, taskFolderIds, release }: Props) {
 
   const folderId = taskFolderIds[task.name];
 
+  const isUploadable =
+    task.name === ReleaseTaskName.PreMastersSubmitted ||
+    task.name === ReleaseTaskName.MastersSubmitted ||
+    task.name === ReleaseTaskName.ArtworkCreation;
+
   return (
     <Card className={`${styles.taskItem} ${taskClass}`}>
       <Flex direction="column" gap="1">
         <Flex gap="2" align="center" justify="between">
           <Text weight="medium">{task.name}</Text>
-          {folderId && (
+          {folderId && isUploadable && (
             <GoogleDriveUpload
               parentId={folderId}
               taskId={task.id}
               taskName={task.name}
               onUploadComplete={handleUploadComplete}
               permittedMimeTypes={getPermittedMimeTypesForTask(task)}
-              multiple={
-                task.name === ReleaseTaskName.PreMastersSubmitted ||
-                task.name === ReleaseTaskName.MastersSubmitted
-              }
+              multiple={true}
             />
           )}
         </Flex>

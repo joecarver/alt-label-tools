@@ -3,7 +3,12 @@ import { premastersSubmitted } from "@/mailer/emails/premastersSubmitted";
 import { notifyMasteringEngineer } from "@/mailer/emails/notifyMasteringEngineer";
 import { notifyDesigner } from "@/mailer/emails/notifyDesigner";
 import { sendEmail } from "@/mailer/index";
-import { getTasks, setReleasePreamastersEmailsSent } from "@/utils/supabase";
+import {
+  getTasks,
+  setReleasePreamastersEmailsSent,
+  supabase,
+  updateTaskCompletion,
+} from "@/utils/supabase";
 import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
 import { formatSingleDate } from "@/utils/date";
 import type { Artist } from "@/types/Artist";
@@ -121,21 +126,39 @@ export const POST: APIRoute = async ({ request }) => {
 
       // Copy and personalize Google Docs for this artist
       if (destFolderId) {
-        const replacements = buildReplacements({
-          catalogNumber,
-          labelName,
-          artist,
-          licenseAllowPolitics,
-          licenseAllowAlcohol,
-          licenseAllowPharmaceuticals,
-          licenseAllowFastFood,
-          licenseAllowFastFashion,
-        });
-        await copyAndReplaceDocsInFolder(
-          destFolderId,
-          catalogNumber,
-          replacements
+        const contractsTask = tasks.find(
+          (task) => task.name === ReleaseTaskName.ContractCreated
         );
+        if (contractsTask) {
+          const replacements = buildReplacements({
+            catalogNumber,
+            labelName,
+            artist,
+            licenseAllowPolitics,
+            licenseAllowAlcohol,
+            licenseAllowPharmaceuticals,
+            licenseAllowFastFood,
+            licenseAllowFastFashion,
+          });
+
+          const newFiles = await copyAndReplaceDocsInFolder(
+            destFolderId,
+            catalogNumber,
+            replacements,
+            contractsTask.id
+          );
+
+          console.log("newFiles", newFiles);
+
+          await supabase.from("task_files").insert(newFiles);
+
+          await updateTaskCompletion(
+            contractsTask.id,
+            new Date().toISOString(),
+            contractsTask.endDate!,
+            false
+          );
+        }
       }
     }
 

@@ -1,5 +1,6 @@
 import { getSecret } from "astro:env/server";
 import type { ReleaseTask } from "@/types/ReleaseTask";
+import type { Database } from "@/types/supabase";
 
 // Service account credentials
 const serviceAccountEmail = getSecret("GOOGLE_SERVICE_ACCOUNT_EMAIL");
@@ -215,13 +216,14 @@ interface TextReplacement {
  * @param destFolderId The destination Google Drive folder ID
  * @param catalogNumber The catalog number to use in the new file names (replaces 'ALT000')
  * @param replacements Array of {search, replace} objects for text replacement in each doc
- * @returns Array of new copied doc IDs
+ * @returns Array of new files
  */
 export async function copyAndReplaceDocsInFolder(
   destFolderId: string,
   catalogNumber: string,
-  replacements: TextReplacement[]
-): Promise<string[]> {
+  replacements: TextReplacement[],
+  taskId: string
+): Promise<Database["public"]["Tables"]["task_files"]["Row"][]> {
   const token = await generateServiceAccountToken();
 
   // The 4 specific file names to fetch
@@ -251,7 +253,8 @@ export async function copyAndReplaceDocsInFolder(
     return found;
   });
 
-  const newDocIds: string[] = [];
+  const newFiles: Partial<Database["public"]["Tables"]["task_files"]["Row"]>[] =
+    [];
 
   // 2. Copy each doc to the destination folder with the new name
   for (const doc of docsToCopy) {
@@ -280,7 +283,16 @@ export async function copyAndReplaceDocsInFolder(
       throw new Error(`Failed to copy doc ${doc.id}: ${errorText}`);
     }
     const newDoc = await copyRes.json();
-    newDocIds.push(newDoc.id);
+
+    newFiles.push({
+      name: newName,
+      file_id: newDoc.id,
+      file_created_at: new Date().toISOString(),
+      file_updated_at: new Date().toISOString(),
+      drive_link: `https://drive.google.com/file/d/${newDoc.id}/view`,
+      mime_type: newDoc.mimeType,
+      task_id: taskId,
+    });
 
     // 3. Perform text replacements using the Docs API batchUpdate
     const batchUpdateRes = await fetch(
@@ -307,7 +319,7 @@ export async function copyAndReplaceDocsInFolder(
     }
   }
 
-  return newDocIds;
+  return newFiles;
 }
 
 // List all files in a Google Drive folder

@@ -24,9 +24,8 @@ export const ARTIST_SPECIFIC_TASKS = [
   ReleaseTaskName.PreMastersSubmitted,
 ];
 
-export type DetectableReleaseTask = Extract<
+export type UploadableReleaseTask = Extract<
   ReleaseTaskName,
-  | ReleaseTaskName.ContractCreated
   | ReleaseTaskName.PreMastersSubmitted
   | ReleaseTaskName.MastersSubmitted
   | ReleaseTaskName.ArtworkCreation

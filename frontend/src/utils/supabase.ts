@@ -11,6 +11,8 @@ import { CompletionStatus } from "@/types/CompletionStatus";
 import type { UserReleasePermissionRole } from "@/types/UserReleasePermissionRole";
 import { keysToCamelCase } from "./case";
 import { deduplicateObjectArray } from "./deduplicateObjectArray";
+import { DueDateStatus } from "@/types/DueDateStatus";
+import { getDueDateStatus } from "./getDueDateStatus";
 
 // Initialize Supabase client
 const supabaseUrl = getSecret("SUPABASE_URL");
@@ -164,15 +166,20 @@ export async function getTasks(
 // Update task completion status
 export async function updateTaskCompletion(
   taskId: string,
-  completedAt: string
+  completedAt: string,
+  dueDate: string,
+  completedManually: boolean = true
 ): Promise<void> {
   const { error: taskError } = await supabase
     .from("tasks")
     .update({
       completed_at: completedAt || null,
       completion_status: completedAt
-        ? CompletionStatus.DONE_MANUALLY
+        ? completedManually
+          ? CompletionStatus.DONE_MANUALLY
+          : CompletionStatus.DONE_DETECTED
         : CompletionStatus.TODO,
+      due_date_status: getDueDateStatus(dueDate, !!completedAt),
     })
     .eq("id", taskId);
 
