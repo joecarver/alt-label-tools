@@ -11,8 +11,6 @@ import { CompletionStatus } from "@/types/CompletionStatus";
 import type { UserReleasePermissionRole } from "@/types/UserReleasePermissionRole";
 import { keysToCamelCase } from "./case";
 import { deduplicateObjectArray } from "./deduplicateObjectArray";
-import { DueDateStatus } from "@/types/DueDateStatus";
-import { getDueDateStatus } from "./getDueDateStatus";
 import type { Database } from "@/types/supabase";
 
 // Initialize Supabase client
@@ -171,7 +169,6 @@ export async function getTasks(
 export async function updateTaskCompletion(
   taskId: string,
   completedAt: string,
-  dueDate: string,
   completedManually: boolean = true
 ): Promise<void> {
   const { error: taskError } = await supabase
@@ -183,7 +180,6 @@ export async function updateTaskCompletion(
           ? CompletionStatus.DONE_MANUALLY
           : CompletionStatus.DONE_DETECTED
         : CompletionStatus.TODO,
-      due_date_status: getDueDateStatus(dueDate, !!completedAt),
     })
     .eq("id", taskId);
 

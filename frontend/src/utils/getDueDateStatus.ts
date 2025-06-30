@@ -1,3 +1,4 @@
+import { BadgeColor } from "@/types/BadgeColor";
 import { DueDateStatus } from "@/types/DueDateStatus";
 import { parseISO } from "date-fns";
 
@@ -25,4 +26,19 @@ export const getDueDateStatus = (
     return DueDateStatus.DUE;
   }
   return DueDateStatus.UNKNOWN;
+};
+
+export const getDueDateStatusColor = (status?: DueDateStatus): BadgeColor => {
+  if (!status) {
+    return BadgeColor.GRAY;
+  }
+
+  switch (status) {
+    case DueDateStatus.DUE:
+      return BadgeColor.ORANGE;
+    case DueDateStatus.OVERDUE:
+      return BadgeColor.RED;
+    default:
+      return BadgeColor.GRAY;
+  }
 };

@@ -3,7 +3,6 @@ import { getAuthTokenFromCookies, getUserFromToken } from "@/utils/auth";
 import { getFreshClient } from "@/utils/supabase";
 import { deleteFile } from "@/utils/drive";
 import { CompletionStatus } from "@/types/CompletionStatus";
-import { DueDateStatus } from "@/types/DueDateStatus";
 import { ReleaseTaskName } from "@/types/ReleaseTask";
 
 export const POST: APIRoute = async ({ request, cookies, locals }) => {
@@ -101,7 +100,6 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
       .update({
         completed_at: null,
         completion_status: CompletionStatus.TODO,
-        due_date_status: DueDateStatus.UNKNOWN,
       })
       .eq("id", taskId);
 

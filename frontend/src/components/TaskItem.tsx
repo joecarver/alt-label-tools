@@ -5,7 +5,6 @@ import { DueDateStatus } from "@/types/DueDateStatus";
 import { formatDateRange } from "../utils/date";
 import { ClockIcon, DotsHorizontalIcon } from "@radix-ui/react-icons";
 
-import { getDueDateStatusColor } from "../utils/getStatusColor";
 import { DriveLinkButton } from "./DriveLinkButton";
 import { useState } from "react";
 import styles from "./TaskItem.module.css";
@@ -13,6 +12,10 @@ import { TaskItemCompletionStatus } from "./TaskItemCompletionStatus";
 import GoogleDriveUpload from "./GoogleDriveUpload";
 import { getPermittedMimeTypesForTask } from "@/utils/getPermittedMimeTypesForTask";
 import type { Release } from "@/types/Release";
+import {
+  getDueDateStatus,
+  getDueDateStatusColor,
+} from "@/utils/getDueDateStatus";
 
 interface Props {
   task: ReleaseTask;
@@ -197,8 +200,8 @@ export function TaskItem({
       ? task.completedAt
       : null;
 
-  const isOverdue =
-    task.dueDateStatus === DueDateStatus.OVERDUE && !isCompleted;
+  const dueDateStatus = getDueDateStatus(task.endDate, isCompleted);
+  const isOverdue = dueDateStatus === DueDateStatus.OVERDUE;
 
   const taskClass = isCompleted
     ? styles.taskItemCompleted
@@ -250,7 +253,7 @@ export function TaskItem({
         <Flex gap="1" wrap="wrap">
           <Badge
             size="2"
-            color={getDueDateStatusColor(task.dueDateStatus as DueDateStatus)}
+            color={getDueDateStatusColor(dueDateStatus)}
             variant="soft"
           >
             <ClockIcon />

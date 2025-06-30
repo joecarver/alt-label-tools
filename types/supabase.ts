@@ -306,53 +306,11 @@ export type Database = {
           },
         ]
       }
-      task_statuses: {
-        Row: {
-          color: string
-          completion_status: string
-          created_at: string
-          due_date_status: string
-          file_info: Json | null
-          id: string
-          task_id: string | null
-          updated_at: string
-        }
-        Insert: {
-          color: string
-          completion_status: string
-          created_at?: string
-          due_date_status: string
-          file_info?: Json | null
-          id?: string
-          task_id?: string | null
-          updated_at?: string
-        }
-        Update: {
-          color?: string
-          completion_status?: string
-          created_at?: string
-          due_date_status?: string
-          file_info?: Json | null
-          id?: string
-          task_id?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "task_statuses_task_id_fkey"
-            columns: ["task_id"]
-            isOneToOne: true
-            referencedRelation: "tasks"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       tasks: {
         Row: {
           completed_at: string | null
           completion_status: string | null
           created_at: string
-          due_date_status: string | null
           end_date: string | null
           id: string
           is_detectable: boolean | null
@@ -365,7 +323,6 @@ export type Database = {
           completed_at?: string | null
           completion_status?: string | null
           created_at?: string
-          due_date_status?: string | null
           end_date?: string | null
           id?: string
           is_detectable?: boolean | null
@@ -378,7 +335,6 @@ export type Database = {
           completed_at?: string | null
           completion_status?: string | null
           created_at?: string
-          due_date_status?: string | null
           end_date?: string | null
           id?: string
           is_detectable?: boolean | null
@@ -443,13 +399,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "user_release_permissions_client_id_fkey"
-            columns: ["release_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "user_release_permissions_release_id_fkey"
             columns: ["release_id"]

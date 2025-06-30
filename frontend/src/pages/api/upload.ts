@@ -4,7 +4,6 @@ import type { Database } from "@/types/supabase";
 import { uploadFile } from "../../utils/drive";
 import { getSecret } from "astro:env/server";
 import { CompletionStatus } from "@/types/CompletionStatus";
-import { DueDateStatus } from "@/types/DueDateStatus";
 
 import { shouldTriggerMp3TaggingForUpload } from "@/utils/shouldTriggerMp3Tagging";
 
@@ -66,7 +65,6 @@ export const POST: APIRoute = async ({ request }) => {
         .from("tasks")
         .update({
           completion_status: CompletionStatus.DONE_DETECTED,
-          due_date_status: DueDateStatus.UNKNOWN,
           completed_at: new Date().toISOString(),
         })
         .eq("id", taskId);
