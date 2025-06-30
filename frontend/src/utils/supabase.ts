@@ -317,3 +317,17 @@ export async function getOrCreateUser(email: string) {
   }
   return user;
 }
+
+export async function getUserReleasePermissions(releaseId: string) {
+  const { data, error } = await supabase
+    .from("user_release_permissions")
+    .select("role")
+    .eq("release_id", releaseId);
+
+  if (error) {
+    console.error("Error fetching user release permissions:", error);
+    throw error;
+  }
+
+  return data.map((row) => row.role);
+}

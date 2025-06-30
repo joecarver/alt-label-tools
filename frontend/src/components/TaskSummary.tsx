@@ -4,6 +4,7 @@ import { type ReleaseTask } from "@/types/ReleaseTask";
 import { BadgeColor } from "@/types/BadgeColor";
 import { getTaskSummary } from "../utils/getTaskSummary";
 import { LuListTree } from "react-icons/lu";
+import type { UserReleasePermissionRole } from "@/types/UserReleasePermissionRole";
 
 interface TaskSummaryData {
   completedTasks: number;
@@ -15,9 +16,14 @@ interface TaskSummaryData {
 interface Props {
   releaseId: string;
   initialTasks: ReleaseTask[];
+  userReleasePermissions: UserReleasePermissionRole[];
 }
 
-export function TaskSummary({ releaseId, initialTasks }: Props) {
+export function TaskSummary({
+  releaseId,
+  initialTasks,
+  userReleasePermissions,
+}: Props) {
   const [taskSummary, setTaskSummary] = useState<TaskSummaryData>(
     getTaskSummary(initialTasks)
   );
@@ -28,7 +34,7 @@ export function TaskSummary({ releaseId, initialTasks }: Props) {
       if (customEvent.detail?.releaseId === releaseId) {
         try {
           const response = await fetch(
-            `/api/task-summary?releaseId=${releaseId}`
+            `/api/task-summary?releaseId=${releaseId}&userReleasePermissions=${userReleasePermissions}`
           );
           const data = await response.json();
           setTaskSummary(data);

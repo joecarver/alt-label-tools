@@ -45,7 +45,14 @@ const tasks = await getTasks(
           }
         </Badge>
       </Box>
-      <TaskSummary client:load releaseId={release.id} initialTasks={tasks} />
+      <TaskSummary
+        client:load
+        releaseId={release.id}
+        initialTasks={tasks}
+        userReleasePermissions={release.userReleasePermissions?.map(
+          (permission) => permission.role
+        ) || []}
+      />
     </Flex>
   </Card>
 </a>

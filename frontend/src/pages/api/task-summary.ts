@@ -3,11 +3,13 @@ import { getTaskSummary } from "@/utils/getTaskSummary";
 import { ReleaseTaskName } from "@/types/ReleaseTask";
 import { getTasks } from "@/utils/supabase";
 import type { ReleaseTask } from "@/types/ReleaseTask";
+import type { UserReleasePermissionRole } from "@/types/UserReleasePermissionRole";
 
 export const GET: APIRoute = async ({ url }) => {
   const releaseId = url.searchParams.get("releaseId");
+  const userReleasePermissions = url.searchParams.get("userReleasePermissions");
 
-  if (!releaseId) {
+  if (!releaseId || !userReleasePermissions) {
     return new Response(
       JSON.stringify({ error: "Missing required releaseId" }),
       {
@@ -20,7 +22,10 @@ export const GET: APIRoute = async ({ url }) => {
   }
 
   try {
-    const tasks = await getTasks(releaseId);
+    const tasks = await getTasks(
+      releaseId,
+      userReleasePermissions.split(",") as UserReleasePermissionRole[]
+    );
     const taskSummary = getTaskSummary(tasks);
     const releaseDate =
       tasks.find(

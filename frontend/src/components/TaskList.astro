@@ -15,7 +15,14 @@ const { release, tasks, taskFolderIds } = Astro.props;
 const { isAdmin } = Astro.locals;
 ---
 
-<TaskSummary client:load releaseId={release.id} initialTasks={tasks} />
+<TaskSummary
+  client:load
+  releaseId={release.id}
+  initialTasks={tasks}
+  userReleasePermissions={release.userReleasePermissions?.map(
+    (permission) => permission.role
+  ) || []}
+/>
 
 <Box style={{ backgroundColor: "var(--gray-2)" }} className="task-list">
   <Flex direction="column" gap="4">
