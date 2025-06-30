@@ -9,7 +9,7 @@ export const GET: APIRoute = async ({ url }) => {
   const releaseId = url.searchParams.get("releaseId");
   const userReleasePermissions = url.searchParams.get("userReleasePermissions");
 
-  if (!releaseId || !userReleasePermissions) {
+  if (!releaseId) {
     return new Response(
       JSON.stringify({ error: "Missing required releaseId" }),
       {
@@ -24,7 +24,9 @@ export const GET: APIRoute = async ({ url }) => {
   try {
     const tasks = await getTasks(
       releaseId,
-      userReleasePermissions.split(",") as UserReleasePermissionRole[]
+      userReleasePermissions
+        ? (userReleasePermissions.split(",") as UserReleasePermissionRole[])
+        : undefined
     );
     const taskSummary = getTaskSummary(tasks);
     const releaseDate =
