@@ -4,13 +4,13 @@ import ClientList from "@/components/ClientList.astro";
 import LoadingSpinner from "@/components/LoadingSpinner.astro";
 import ReleaseList from "@/components/ReleaseList.astro";
 
-const { clients, releases } = Astro.locals;
+const { clients, releases, isAdmin } = Astro.locals;
 
-if (clients.length === 1) {
+if (clients.length === 1 && !isAdmin) {
   return Astro.redirect(`/client/${clients[0].id}`);
 }
 
-if (releases.length === 1) {
+if (releases.length === 1 && !isAdmin) {
   return Astro.redirect(`/releases/${releases[0].id}`);
 }
 ---
