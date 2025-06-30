@@ -13,6 +13,7 @@ import { keysToCamelCase } from "./case";
 import { deduplicateObjectArray } from "./deduplicateObjectArray";
 import { DueDateStatus } from "@/types/DueDateStatus";
 import { getDueDateStatus } from "./getDueDateStatus";
+import type { Database } from "@/types/supabase";
 
 // Initialize Supabase client
 const supabaseUrl = getSecret("SUPABASE_URL");
@@ -27,7 +28,7 @@ export function getFreshClient() {
   if (!supabaseUrl || !supabaseKey) {
     throw new Error("Missing Supabase credentials");
   }
-  return createClient(supabaseUrl, supabaseKey, {
+  return createClient<Database>(supabaseUrl, supabaseKey, {
     global: {
       headers: {
         "Cache-Control": "no-cache",
@@ -115,8 +116,11 @@ export async function getReleasesForUser(userId: string): Promise<Release[]> {
     throw releaseError;
   }
 
-  const deduped = deduplicateObjectArray<Release>(releaseData || [], "id");
-  return keysToCamelCase<Release[]>(deduped);
+  const deduped = deduplicateObjectArray<Release>(
+    keysToCamelCase<Release[]>(releaseData) || [],
+    "id"
+  );
+  return deduped;
 }
 
 // Fetch tasks for a specific release
@@ -154,7 +158,7 @@ export async function getTasks(
     }
 
     if (userReleasePermissions.includes("Artist")) {
-      return ARTIST_SPECIFIC_TASKS.includes(task.name);
+      return ARTIST_SPECIFIC_TASKS.includes(task.name as ReleaseTaskName);
     }
 
     return false;

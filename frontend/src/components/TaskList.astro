@@ -12,6 +12,7 @@ interface Props {
 }
 
 const { release, tasks, taskFolderIds } = Astro.props;
+const { isAdmin } = Astro.locals;
 ---
 
 <TaskSummary client:load releaseId={release.id} initialTasks={tasks} />
@@ -31,6 +32,7 @@ const { release, tasks, taskFolderIds } = Astro.props;
             task={task}
             taskFolderIds={taskFolderIds}
             release={release}
+            isAdmin={isAdmin}
           />
         ))
     }

@@ -1,19 +1,9 @@
 ---
-import type { User } from "@supabase/supabase-js";
-import { Badge, Flex, Heading, Link } from "@radix-ui/themes";
-import { getAuthTokenFromCookies } from "../utils/auth";
-import { getUserFromToken } from "../utils/auth";
+import { Badge, Flex, Heading } from "@radix-ui/themes";
 import Avatar from "./Avatar.astro";
-import { isAdmin } from "../utils/authorization";
 import { MdAdminPanelSettings } from "react-icons/md";
 
-// Get user info
-const token = getAuthTokenFromCookies(Astro.cookies);
-let userInfo: User | null = null;
-if (token) {
-  userInfo = await getUserFromToken(token);
-}
-const isUserAdmin = userInfo?.email && isAdmin(userInfo.email);
+const { user, isAdmin } = Astro.locals;
 ---
 
 <header>
@@ -24,13 +14,13 @@ const isUserAdmin = userInfo?.email && isAdmin(userInfo.email);
   </a>
   <Flex align="center" gap="2">
     {
-      isUserAdmin && (
+      isAdmin && (
         <Badge size="3" color="gray" variant="soft">
           <MdAdminPanelSettings />
         </Badge>
       )
     }
-    {userInfo && <Avatar userInfo={userInfo} />}
+    {user && <Avatar userInfo={user} />}
   </Flex>
 </header>
 

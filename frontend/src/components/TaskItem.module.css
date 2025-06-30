@@ -12,4 +12,62 @@
 
 .taskItemNotCompleted {
   background-color: var(--orange-4);
+}
+
+.adminDropdown {
+  position: relative;
+}
+
+.adminDropdownTrigger {
+  list-style: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.adminDropdownTrigger::-webkit-details-marker {
+  display: none;
+}
+
+.adminDropdownTrigger:hover {
+  background-color: var(--gray-4);
+}
+
+.adminDropdownContent {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  background: var(--gray-1);
+  border: 1px solid var(--gray-6);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  min-width: 160px;
+  padding: 4px;
+}
+
+.clearTaskButton {
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  color: var(--red-11);
+  font-size: 0.875rem;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.clearTaskButton:hover:not(:disabled) {
+  background: var(--red-3);
+}
+
+.clearTaskButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 } 

@@ -3,7 +3,7 @@ import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
 import { CompletionStatus } from "@/types/CompletionStatus";
 import { DueDateStatus } from "@/types/DueDateStatus";
 import { formatDateRange } from "../utils/date";
-import { ClockIcon } from "@radix-ui/react-icons";
+import { ClockIcon, DotsHorizontalIcon } from "@radix-ui/react-icons";
 
 import { getDueDateStatusColor } from "../utils/getStatusColor";
 import { DriveLinkButton } from "./DriveLinkButton";
@@ -18,11 +18,18 @@ interface Props {
   task: ReleaseTask;
   taskFolderIds: Record<string, string | null>;
   release: Release;
+  isAdmin?: boolean;
 }
 
-export function TaskItem({ task: initialTask, taskFolderIds, release }: Props) {
+export function TaskItem({
+  task: initialTask,
+  taskFolderIds,
+  release,
+  isAdmin = false,
+}: Props) {
   const [task, setTask] = useState(initialTask);
   const [isLoading, setIsLoading] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
 
   // Helper values from release
   const premastersEmailsSent = release.premasterEmailsSent ?? false;
@@ -79,6 +86,60 @@ export function TaskItem({ task: initialTask, taskFolderIds, release }: Props) {
       alert("Failed to update task completion. Please try again.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleClearTaskStatus = async () => {
+    if (!isAdmin) return;
+
+    if (
+      !confirm(
+        "Are you sure you want to clear this task status? This will delete all files from Google Drive and reset the task completion status."
+      )
+    ) {
+      return;
+    }
+
+    setIsClearing(true);
+    try {
+      const response = await fetch("/api/clear-task-status", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ taskId: task.id }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to clear task status");
+      }
+
+      const result = await response.json();
+
+      // Refresh the task data
+      const updatedTaskResponse = await fetch(`/api/tasks/${task.id}`);
+      const updatedTask = await updatedTaskResponse.json();
+      setTask(updatedTask);
+
+      document.body.dispatchEvent(
+        new CustomEvent("taskCompletionUpdated", {
+          detail: { releaseId: task.releaseId },
+        })
+      );
+
+      alert(
+        `Task status cleared successfully. ${result.filesDeleted} files deleted.`
+      );
+    } catch (error) {
+      console.error("Failed to clear task status:", error);
+      alert(
+        `Failed to clear task status: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    } finally {
+      setIsClearing(false);
     }
   };
 
@@ -157,16 +218,34 @@ export function TaskItem({ task: initialTask, taskFolderIds, release }: Props) {
       <Flex direction="column" gap="1">
         <Flex gap="2" align="center" justify="between">
           <Text weight="medium">{task.name}</Text>
-          {folderId && isUploadable && (
-            <GoogleDriveUpload
-              parentId={folderId}
-              taskId={task.id}
-              taskName={task.name}
-              onUploadComplete={handleUploadComplete}
-              permittedMimeTypes={getPermittedMimeTypesForTask(task)}
-              multiple={true}
-            />
-          )}
+          <Flex gap="2" align="center">
+            {folderId && isUploadable && (
+              <GoogleDriveUpload
+                parentId={folderId}
+                taskId={task.id}
+                taskName={task.name}
+                onUploadComplete={handleUploadComplete}
+                permittedMimeTypes={getPermittedMimeTypesForTask(task)}
+                multiple={true}
+              />
+            )}
+            {isAdmin && (
+              <details className={styles.adminDropdown}>
+                <summary className={styles.adminDropdownTrigger}>
+                  <DotsHorizontalIcon />
+                </summary>
+                <div className={styles.adminDropdownContent}>
+                  <button
+                    onClick={handleClearTaskStatus}
+                    disabled={isClearing}
+                    className={styles.clearTaskButton}
+                  >
+                    {isClearing ? "Clearing..." : "Clear Task Status"}
+                  </button>
+                </div>
+              </details>
+            )}
+          </Flex>
         </Flex>
         <Flex gap="1" wrap="wrap">
           <Badge

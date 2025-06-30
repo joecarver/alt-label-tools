@@ -376,3 +376,23 @@ export async function downloadDriveFile(
   const buffer = await fileRes.arrayBuffer();
   return { buffer, fileName: name, mimeType };
 }
+
+// Delete a file from Google Drive by its ID
+export async function deleteFile(fileId: string): Promise<void> {
+  const token = await generateServiceAccountToken();
+
+  const response = await fetch(
+    `https://www.googleapis.com/drive/v3/files/${fileId}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to delete file: ${errorText}`);
+  }
+}
