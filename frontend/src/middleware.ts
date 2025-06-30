@@ -13,6 +13,7 @@ export async function onRequest(
   const url = new URL(context.request.url);
   if (
     url.pathname === "/login" ||
+    url.pathname === "/api/auth" ||
     url.pathname === "/reset-password" ||
     url.pathname === "/accept-invite"
   ) {
