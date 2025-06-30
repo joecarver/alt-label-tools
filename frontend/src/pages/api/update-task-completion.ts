@@ -34,8 +34,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     await updateTaskCompletion(
       taskId.toString(),
-      (completedAt || "").toString(),
-      dueDate.toString()
+      (completedAt || "").toString()
     );
 
     return new Response(JSON.stringify({ success: true }), {

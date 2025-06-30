@@ -67,7 +67,6 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
       const deletePromises = task.task_files.map(async (file: any) => {
         try {
           await deleteFile(file.file_id);
-          console.log(`Deleted file from Google Drive: ${file.file_id}`);
         } catch (error) {
           console.error(
             `Failed to delete file ${file.file_id} from Google Drive:`,

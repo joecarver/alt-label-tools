@@ -18,7 +18,6 @@ export const DownloadButton = ({
   const [isLoading, setIsLoading] = useState(false);
 
   const handleDownload = async () => {
-    console.log("downloading");
     setIsLoading(true);
     try {
       const res = await fetch(`/api/download-folder?folderId=${folderId}`);

@@ -148,14 +148,11 @@ export const POST: APIRoute = async ({ request }) => {
             contractsTask.id
           );
 
-          console.log("newFiles", newFiles);
-
           await supabase.from("task_files").insert(newFiles);
 
           await updateTaskCompletion(
             contractsTask.id,
             new Date().toISOString(),
-            contractsTask.endDate!,
             false
           );
         }
