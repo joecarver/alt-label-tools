@@ -185,6 +185,44 @@ export function TaskItem({
       }
     }
 
+    if (task.name === ReleaseTaskName.MastersSubmitted) {
+      try {
+        const response = await fetch("/api/handle-master-submission", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            releaseName: release.name,
+            catalogNumber: release.catalogNumber,
+            artists: release.artists,
+            releaseId: task.releaseId,
+            labelName: release.client.name,
+            clientId: release.client.id,
+          }),
+        });
+      } catch (error) {
+        console.error("Failed to handle master submission:", error);
+      }
+    }
+
+    if (task.name === ReleaseTaskName.ArtworkCreation) {
+      try {
+        const response = await fetch("/api/handle-artwork-submission", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            releaseName: release.name,
+            catalogNumber: release.catalogNumber,
+            artists: release.artists,
+            releaseId: task.releaseId,
+            labelName: release.client.name,
+            clientId: release.client.id,
+          }),
+        });
+      } catch (error) {
+        console.error("Failed to handle artwork submission:", error);
+      }
+    }
+
     document.body.dispatchEvent(
       new CustomEvent("taskCompletionUpdated", {
         detail: { releaseId: task.releaseId },
