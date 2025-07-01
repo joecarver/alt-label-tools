@@ -22,6 +22,8 @@ export const ARTIST_SPECIFIC_TASKS = [
   ReleaseTaskName.ReleaseDate,
   ReleaseTaskName.ContractCreated,
   ReleaseTaskName.PreMastersSubmitted,
+  ReleaseTaskName.MastersSubmitted,
+  ReleaseTaskName.ArtworkCreation,
 ];
 
 export type UploadableReleaseTask = Extract<

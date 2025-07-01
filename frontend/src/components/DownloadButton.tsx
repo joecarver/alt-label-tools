@@ -50,7 +50,7 @@ export const DownloadButton = ({
     <Button
       onClick={handleDownload}
       disabled={isLoading}
-      size="2"
+      size="1"
       style={{ cursor: "pointer" }}
     >
       <DownloadIcon />

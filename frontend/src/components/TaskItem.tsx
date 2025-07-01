@@ -16,6 +16,9 @@ import {
   getDueDateStatus,
   getDueDateStatusColor,
 } from "@/utils/getDueDateStatus";
+import { DownloadButton } from "./DownloadButton";
+import { getDownloadFilename } from "@/utils/getDownloadFilename";
+import { getIsUploadableTask } from "@/utils/getIsUploadableTask";
 
 interface Props {
   task: ReleaseTask;
@@ -211,10 +214,17 @@ export function TaskItem({
 
   const folderId = taskFolderIds[task.name];
 
-  const isUploadable =
-    task.name === ReleaseTaskName.PreMastersSubmitted ||
-    task.name === ReleaseTaskName.MastersSubmitted ||
-    task.name === ReleaseTaskName.ArtworkCreation;
+  const isUploadable = getIsUploadableTask(
+    task.name,
+    isAdmin,
+    release.userReleasePermissions.map((permission) => permission.role)
+  );
+
+  const isDownloadable =
+    task.isDetectable &&
+    task.taskFiles &&
+    task.taskFiles.length > 0 &&
+    folderId;
 
   return (
     <Card className={`${styles.taskItem} ${taskClass}`}>
@@ -230,6 +240,13 @@ export function TaskItem({
                 onUploadComplete={handleUploadComplete}
                 permittedMimeTypes={getPermittedMimeTypesForTask(task)}
                 multiple={true}
+              />
+            )}
+            {isDownloadable && folderId && (
+              <DownloadButton
+                folderId={folderId}
+                fileName={getDownloadFilename(release, task.name)}
+                text="Download"
               />
             )}
             {isAdmin && (

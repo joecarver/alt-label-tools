@@ -104,7 +104,7 @@ const GoogleDriveUpload: React.FC<GoogleDriveUploadProps> = ({
   const elementId = `file-upload-${taskId}`;
 
   const getButtonText = () => {
-    if (!isLoading) return "Upload files";
+    if (!isLoading) return "Upload";
     if (!uploadProgress) return "Uploading...";
     return `Uploading ${uploadProgress.current + 1}/${
       uploadProgress.total
@@ -127,7 +127,7 @@ const GoogleDriveUpload: React.FC<GoogleDriveUploadProps> = ({
         onClick={() => document.getElementById(elementId)?.click()}
         disabled={isLoading}
         style={{ cursor: "pointer" }}
-        size="2"
+        size="1"
       >
         <UploadIcon />
         {getButtonText()}
