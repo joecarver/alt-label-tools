@@ -1,5 +1,4 @@
 import type { EmailRequest } from "..";
-import { getSecret } from "astro:env/server";
 
 export interface ArtworkSubmittedEmail {
   artistName: string;
@@ -8,7 +7,7 @@ export interface ArtworkSubmittedEmail {
   releaseName: string;
   catalogNumber: string;
   labelName: string;
-  releaseId: string;
+  releaseUrl: string;
 }
 
 export const artworkSubmitted = ({
@@ -17,11 +16,8 @@ export const artworkSubmitted = ({
   releaseName,
   catalogNumber,
   labelName,
-  releaseId,
+  releaseUrl,
 }: Omit<ArtworkSubmittedEmail, "labelEmail">): EmailRequest => {
-  const siteUrl = getSecret("PUBLIC_SITE_URL") || "https://altlabeltools.com";
-  const releaseUrl = `${siteUrl}/releases/${releaseId}`;
-
   return {
     to: artistEmail,
     from: "info@altlabeltools.com",
@@ -45,11 +41,8 @@ export const notifyLabelArtworkSubmitted = ({
   catalogNumber,
   labelName,
   labelEmail,
-  releaseId,
+  releaseUrl,
 }: Omit<ArtworkSubmittedEmail, "artistEmail">): EmailRequest => {
-  const siteUrl = getSecret("PUBLIC_SITE_URL") || "https://altlabeltools.com";
-  const releaseUrl = `${siteUrl}/releases/${releaseId}`;
-
   return {
     to: labelEmail,
     from: "info@altlabeltools.com",

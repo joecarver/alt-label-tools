@@ -6,6 +6,7 @@ import {
 import { sendEmail } from "@/mailer/index";
 import { getUsersForClient } from "@/utils/supabase";
 import type { Artist } from "@/types/Artist";
+import { getSecret } from "astro:env/server";
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -37,6 +38,9 @@ export const POST: APIRoute = async ({ request }) => {
     const labelUsers = await getUsersForClient(clientId);
     const labelEmails = labelUsers.map((user) => user.email).filter(Boolean);
 
+    const siteUrl = getSecret("PUBLIC_SITE_URL") || "https://altlabeltools.com";
+    const releaseUrl = `${siteUrl}/releases/${releaseId}`;
+
     // Send email to all artists
     for (const artist of artists as Artist[]) {
       const email = mastersSubmitted({
@@ -45,7 +49,7 @@ export const POST: APIRoute = async ({ request }) => {
         releaseName,
         catalogNumber,
         labelName,
-        releaseId,
+        releaseUrl,
       });
       sendEmail(email);
     }
@@ -58,7 +62,7 @@ export const POST: APIRoute = async ({ request }) => {
         catalogNumber,
         labelName,
         labelEmail,
-        releaseId,
+        releaseUrl,
       });
       sendEmail(labelEmailContent);
     }
