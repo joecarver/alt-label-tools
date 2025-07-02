@@ -255,7 +255,7 @@ export function TaskItem({
   const isUploadable = getIsUploadableTask(
     task.name,
     isAdmin,
-    release.userReleasePermissions.map((permission) => permission.role)
+    release.userReleasePermissions?.map((permission) => permission.role) ?? []
   );
 
   const isDownloadable =

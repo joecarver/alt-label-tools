@@ -345,6 +345,69 @@ export async function listFilesInFolder(folderId: string): Promise<any[]> {
   return files;
 }
 
+// List all files in a Google Drive folder recursively (including subfolders)
+export async function listFilesInFolderRecursive(
+  folderId: string
+): Promise<
+  Array<{ id: string; name: string; mimeType: string; path: string }>
+> {
+  const token = await generateServiceAccountToken();
+  const allFiles: Array<{
+    id: string;
+    name: string;
+    mimeType: string;
+    path: string;
+  }> = [];
+
+  async function traverseFolder(
+    currentFolderId: string,
+    currentPath: string = ""
+  ): Promise<void> {
+    let pageToken: string | undefined = undefined;
+
+    do {
+      const url: string =
+        `https://www.googleapis.com/drive/v3/files?q='${currentFolderId}'+in+parents+and+trashed=false&fields=files(id,name,mimeType),nextPageToken` +
+        (pageToken ? `&pageToken=${pageToken}` : "");
+
+      const res: Response = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Failed to list files: ${errorText}`);
+      }
+
+      const data: { files: any[]; nextPageToken?: string } = await res.json();
+
+      for (const file of data.files) {
+        const filePath = currentPath
+          ? `${currentPath}/${file.name}`
+          : file.name;
+
+        if (file.mimeType === "application/vnd.google-apps.folder") {
+          // Recursively traverse subfolders
+          await traverseFolder(file.id, filePath);
+        } else {
+          // Add file to the list
+          allFiles.push({
+            id: file.id,
+            name: file.name,
+            mimeType: file.mimeType,
+            path: filePath,
+          });
+        }
+      }
+
+      pageToken = data.nextPageToken;
+    } while (pageToken);
+  }
+
+  await traverseFolder(folderId);
+  return allFiles;
+}
+
 // Download a file from Google Drive as a buffer
 export async function downloadDriveFile(
   fileId: string

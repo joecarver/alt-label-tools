@@ -1,6 +1,9 @@
 import type { APIRoute } from "astro";
 import JSZip from "jszip";
-import { listFilesInFolder, downloadDriveFile } from "../../utils/drive";
+import {
+  listFilesInFolderRecursive,
+  downloadDriveFile,
+} from "../../utils/drive";
 import { getAuthTokenFromCookies, getUserFromToken } from "../../utils/auth";
 
 export const GET: APIRoute = async ({ request, cookies }) => {
@@ -28,8 +31,8 @@ export const GET: APIRoute = async ({ request, cookies }) => {
       });
     }
 
-    // List all files in the folder
-    const files = await listFilesInFolder(folderId);
+    // List all files in the folder (including subfolders)
+    const files = await listFilesInFolderRecursive(folderId);
     if (!files.length) {
       return new Response(
         JSON.stringify({ error: "No files found in folder" }),
@@ -42,11 +45,9 @@ export const GET: APIRoute = async ({ request, cookies }) => {
     // Download and zip all files
     const zip = new JSZip();
     for (const file of files) {
-      // Only include files (not folders)
-      if (file.mimeType !== "application/vnd.google-apps.folder") {
-        const { buffer, fileName } = await downloadDriveFile(file.id);
-        zip.file(fileName, buffer);
-      }
+      // Use the path from the recursive function to maintain folder structure
+      const { buffer } = await downloadDriveFile(file.id);
+      zip.file(file.path, buffer);
     }
     const zipBuffer = await zip.generateAsync({ type: "uint8array" });
 
