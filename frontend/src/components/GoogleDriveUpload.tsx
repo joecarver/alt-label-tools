@@ -6,6 +6,7 @@ import {
   validateArtworkFileName,
 } from "@/utils/validateFIleName";
 import { ReleaseTaskName } from "@/types/ReleaseTask";
+import type { TaskFile } from "@/types/TaskFile";
 
 interface GoogleDriveUploadProps {
   onUploadComplete?: () => void;
@@ -15,6 +16,7 @@ interface GoogleDriveUploadProps {
   taskName: string;
   permittedMimeTypes: string[];
   multiple?: boolean;
+  existingFiles?: TaskFile[];
 }
 
 const GoogleDriveUpload: React.FC<GoogleDriveUploadProps> = ({
@@ -25,6 +27,7 @@ const GoogleDriveUpload: React.FC<GoogleDriveUploadProps> = ({
   permittedMimeTypes,
   taskName,
   multiple = false,
+  existingFiles,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<{
@@ -64,7 +67,16 @@ const GoogleDriveUpload: React.FC<GoogleDriveUploadProps> = ({
           formData.append("parentId", parentId);
         }
         formData.append("taskId", taskId);
-
+        if (
+          existingFiles &&
+          existingFiles.length > 0 &&
+          existingFiles.find((f) => f.name === file.name)
+        ) {
+          formData.append(
+            "existingFileId",
+            existingFiles.find((f) => f.name === file.name)?.fileId || ""
+          );
+        }
         const response = await fetch("/api/upload", {
           method: "POST",
           body: formData,

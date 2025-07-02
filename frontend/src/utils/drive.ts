@@ -162,15 +162,15 @@ export async function createDriveFolder(
 // Upload a file to Google Drive
 export async function uploadFile(
   file: File,
-  parentId?: string
+  parentId?: string,
+  existingFileId?: string
 ): Promise<string> {
   const token = await generateServiceAccountToken();
 
   // Create file metadata
-  const metadata = {
+  const metadata: Record<string, any> = {
     name: file.name,
     mimeType: file.type,
-    parents: parentId ? [parentId] : undefined,
   };
 
   // Create form data for upload
@@ -181,17 +181,34 @@ export async function uploadFile(
   );
   formData.append("file", file);
 
-  // Upload to Google Drive
-  const response = await fetch(
-    "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    }
-  );
+  let response: Response;
+
+  if (existingFileId && existingFileId !== "") {
+    // Update existing file
+    response = await fetch(
+      `https://www.googleapis.com/upload/drive/v3/files/${existingFileId}?uploadType=multipart`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      }
+    );
+  } else {
+    metadata.parents = parentId ? [parentId] : undefined;
+    // Create new file
+    response = await fetch(
+      "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      }
+    );
+  }
 
   if (!response.ok) {
     const errorText = await response.text();

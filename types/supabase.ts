@@ -271,7 +271,7 @@ export type Database = {
           file_updated_at: string | null
           id: number
           mime_type: string | null
-          name: string | null
+          name: string
           task_id: string | null
         }
         Insert: {
@@ -282,7 +282,7 @@ export type Database = {
           file_updated_at?: string | null
           id?: number
           mime_type?: string | null
-          name?: string | null
+          name: string
           task_id?: string | null
         }
         Update: {
@@ -293,7 +293,7 @@ export type Database = {
           file_updated_at?: string | null
           id?: number
           mime_type?: string | null
-          name?: string | null
+          name?: string
           task_id?: string | null
         }
         Relationships: [

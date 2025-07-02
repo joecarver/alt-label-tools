@@ -5,7 +5,6 @@ import { DueDateStatus } from "@/types/DueDateStatus";
 import { formatDateRange } from "../utils/date";
 import { ClockIcon, DotsHorizontalIcon } from "@radix-ui/react-icons";
 
-import { DriveLinkButton } from "./DriveLinkButton";
 import { useState } from "react";
 import styles from "./TaskItem.module.css";
 import { TaskItemCompletionStatus } from "./TaskItemCompletionStatus";
@@ -19,12 +18,15 @@ import {
 import { DownloadButton } from "./DownloadButton";
 import { getDownloadFilename } from "@/utils/getDownloadFilename";
 import { getIsUploadableTask } from "@/utils/getIsUploadableTask";
+import { type ExpectedFile } from "@/utils/getExpectedFilesForTask";
+import { TaskFilesList } from "./TaskFilesList";
 
 interface Props {
   task: ReleaseTask;
   taskFolderIds: Record<string, string | null>;
   release: Release;
   isAdmin?: boolean;
+  expectedFiles: ExpectedFile[];
 }
 
 export function TaskItem({
@@ -32,6 +34,7 @@ export function TaskItem({
   taskFolderIds,
   release,
   isAdmin = false,
+  expectedFiles,
 }: Props) {
   const [task, setTask] = useState(initialTask);
   const [isLoading, setIsLoading] = useState(false);
@@ -278,6 +281,7 @@ export function TaskItem({
                 onUploadComplete={handleUploadComplete}
                 permittedMimeTypes={getPermittedMimeTypesForTask(task)}
                 multiple={true}
+                existingFiles={task.taskFiles}
               />
             )}
             {isDownloadable && folderId && (
@@ -322,17 +326,7 @@ export function TaskItem({
             onToggle={handleTaskCompletion}
           />
         </Flex>
-        {task.taskFiles && task.taskFiles.length > 0 && (
-          <Flex gap="1" wrap="wrap" direction="column" mt="2">
-            {task.taskFiles.map((file) => (
-              <DriveLinkButton
-                key={file.id}
-                url={file.driveLink || ""}
-                fileName={file.name || ""}
-              />
-            ))}
-          </Flex>
-        )}
+        <TaskFilesList task={task} expectedFiles={expectedFiles} />
       </Flex>
     </Card>
   );

@@ -22,10 +22,3 @@ export const DriveLinkButton = ({ url, fileName }: DriveLinkButtonProps) => {
     </a>
   );
 };
-
-// Add styles using CSS modules or styled-components if needed
-const styles = `
-  .link-button:hover {
-    background-color: var(--color-accent-12);
-  }
-`;

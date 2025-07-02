@@ -4,6 +4,7 @@ import { TaskSummary } from "./TaskSummary";
 import { TaskItem } from "./TaskItem";
 import type { ReleaseTask } from "@/types/ReleaseTask";
 import type { Release } from "@/types/Release";
+import { getExpectedFilesForTask } from "@/utils/getExpectedFilesForTask";
 
 interface Props {
   release: Release;
@@ -40,6 +41,7 @@ const { isAdmin } = Astro.locals;
             taskFolderIds={taskFolderIds}
             release={release}
             isAdmin={isAdmin}
+            expectedFiles={getExpectedFilesForTask(task, tasks)}
           />
         ))
     }

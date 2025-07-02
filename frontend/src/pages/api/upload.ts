@@ -13,6 +13,7 @@ export const POST: APIRoute = async ({ request }) => {
     const file = formData.get("file") as File;
     const parentId = formData.get("parentId") as string;
     const taskId = formData.get("taskId") as string;
+    const existingFileId = formData.get("existingFileId") as string;
 
     if (!file) {
       return new Response(JSON.stringify({ error: "No file provided" }), {
@@ -27,7 +28,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Upload file to Google Drive
-    const fileId = await uploadFile(file, parentId);
+    const fileId = await uploadFile(file, parentId, existingFileId);
 
     // Create Supabase client
     const supabase = createClient<Database>(
@@ -38,17 +39,20 @@ export const POST: APIRoute = async ({ request }) => {
     // Create task_files record
     const { data: taskFile, error: taskFileError } = await supabase
       .from("task_files")
-      .insert({
-        file_id: fileId,
-        task_id: taskId,
-        name: file.name,
-        mime_type: file.type,
-        file_created_at: new Date().toISOString(),
-        file_updated_at: new Date().toISOString(),
-        drive_link: `https://drive.google.com/file/d/${fileId}/view`,
-      })
-      .select()
-      .single();
+      .upsert(
+        {
+          file_id: fileId,
+          task_id: taskId,
+          name: file.name,
+          mime_type: file.type,
+          file_created_at: new Date().toISOString(),
+          file_updated_at: new Date().toISOString(),
+          drive_link: `https://drive.google.com/file/d/${fileId}/view`,
+        },
+        {
+          onConflict: "name, task_id",
+        }
+      );
 
     if (taskFileError) {
       throw taskFileError;
