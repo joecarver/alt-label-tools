@@ -1,0 +1,103 @@
+name: Supabase Database Backup
+
+on:
+  schedule:
+    # Run daily at 2:00 AM UTC
+    - cron: "0 2 * * *"
+  workflow_dispatch: # Allow manual triggers
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Create backup directory
+        run: mkdir -p backups
+
+      - name: Create database dump
+        env:
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          PGHOST: ${{ secrets.SUPABASE_DB_HOST }}
+          PGPORT: ${{ secrets.SUPABASE_DB_PORT }}
+          PGDATABASE: ${{ secrets.SUPABASE_DB_NAME }}
+          PGUSER: ${{ secrets.SUPABASE_DB_USER }}
+        run: |
+          timestamp=$(date -u +"%Y-%m-%dT%H-%M-%SZ")
+          filename="supabase-backup-${timestamp}.dump"
+
+          echo "Creating backup: $filename"
+          pg_dump -Fc -f "backups/$filename"
+
+          echo "Backup size:"
+          ls -lh "backups/$filename"
+
+          echo "filename=$filename" >> $GITHUB_OUTPUT
+
+      - name: Upload backup to R2
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: |
+            timestamp=$(date -u +"%Y-%m-%dT%H-%M-%SZ")
+            filename="supabase-backup-${timestamp}.dump"
+            r2 object put ${{ secrets.R2_BUCKET_NAME }}/$filename --file backups/$filename --content-type application/octet-stream --metadata backup-date=$timestamp,backup-type=postgresql-dump,compression=custom-format
+
+      - name: Clean up old backups
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: |
+            # Keep backups for 14 days
+            cutoff_date=$(date -u -d "14 days ago" +"%Y-%m-%d")
+            echo "Cleaning up backups older than $cutoff_date"
+
+            # List objects and delete old ones
+            r2 object list ${{ secrets.R2_BUCKET_NAME }} --prefix supabase-backup- | while read -r line; do
+              if [[ $line == supabase-backup-* ]]; then
+                # Extract date from filename (format: supabase-backup-YYYY-MM-DDTHH-MM-SSZ.dump)
+                file_date=$(echo $line | sed 's/supabase-backup-\([0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}\)T.*/\1/')
+                if [[ $file_date < $cutoff_date ]]; then
+                  echo "Deleting old backup: $line"
+                  r2 object delete ${{ secrets.R2_BUCKET_NAME }}/$line
+                fi
+              fi
+            done
+
+      - name: List current backups
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: |
+            echo "Current backups in R2:"
+            r2 object list ${{ secrets.R2_BUCKET_NAME }} --prefix supabase-backup- | sort -r
+
+      - name: Cleanup local files
+        run: rm -rf backups/
+
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "✅ Backup completed successfully at $(date -u)"
+          echo "Backup file: supabase-backup-$(date -u +"%Y-%m-%dT%H-%M-%SZ").dump"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Backup failed at $(date -u)"
+          echo "Check the logs for more details"
