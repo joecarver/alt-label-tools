@@ -4,6 +4,8 @@ Enhanced Bandcamp Automation Script with Music Upload Functionality
 Now supports uploading releases and tracks from Supabase database
 """
 
+#test
+
 import logging
 import time
 import os
