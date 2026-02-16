@@ -70,4 +70,27 @@
 .clearTaskButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-} 
+}
+
+.bandcampUploadButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: 1px solid var(--blue-8);
+  background: var(--blue-3);
+  color: var(--blue-11);
+  font-size: 0.8rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.bandcampUploadButton:hover:not(:disabled) {
+  background: var(--blue-4);
+}
+
+.bandcampUploadButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

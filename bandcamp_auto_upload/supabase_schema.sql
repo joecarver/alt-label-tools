@@ -1,0 +1,6 @@
+-- No additional Supabase tables needed.
+-- Bandcamp credentials are stored as environment variables on the uploader service:
+--   BANDCAMP_USERNAME, BANDCAMP_PASSWORD, BANDCAMP_ACCOUNT_NAME
+--
+-- The bandcamp_url for each release is read from the artists table
+-- (artists.bandcamp_url already exists in the main schema).

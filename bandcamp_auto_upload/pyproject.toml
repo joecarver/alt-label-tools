@@ -1,0 +1,15 @@
+[project]
+name = "automated-label-tools"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "2captcha-python>=1.5.1",
+    "selenium>=4.37.0",
+    "supabase>=2.22.0",
+    "fastapi>=0.115.0",
+    "uvicorn>=0.34.0",
+    "google-api-python-client>=2.150.0",
+    "google-auth>=2.35.0",
+]

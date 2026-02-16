@@ -3,7 +3,7 @@ import { ReleaseTaskName, type ReleaseTask } from "@/types/ReleaseTask";
 import { CompletionStatus } from "@/types/CompletionStatus";
 import { DueDateStatus } from "@/types/DueDateStatus";
 import { formatDateRange } from "../utils/date";
-import { ClockIcon, DotsHorizontalIcon } from "@radix-ui/react-icons";
+import { ClockIcon, DotsHorizontalIcon, UploadIcon } from "@radix-ui/react-icons";
 
 import { useState } from "react";
 import styles from "./TaskItem.module.css";
@@ -39,6 +39,7 @@ export function TaskItem({
   const [task, setTask] = useState(initialTask);
   const [isLoading, setIsLoading] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
+  const [isBandcampUploading, setIsBandcampUploading] = useState(false);
 
   // Helper values from release
   const premastersEmailsSent = release.premasterEmailsSent ?? false;
@@ -233,6 +234,49 @@ export function TaskItem({
     );
   };
 
+  const handleBandcampUpload = async () => {
+    if (!isAdmin) return;
+
+    if (
+      !confirm(
+        "This will upload the release to Bandcamp as a draft. Continue?"
+      )
+    ) {
+      return;
+    }
+
+    setIsBandcampUploading(true);
+    try {
+      const response = await fetch("/api/trigger-bandcamp-upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          releaseId: task.releaseId,
+          taskId: task.id,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || "Failed to trigger Bandcamp upload"
+        );
+      }
+
+      const result = await response.json();
+      alert(result.message);
+    } catch (error) {
+      console.error("Failed to trigger Bandcamp upload:", error);
+      alert(
+        `Failed to trigger Bandcamp upload: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    } finally {
+      setIsBandcampUploading(false);
+    }
+  };
+
   const isCompleted =
     task.completionStatus === CompletionStatus.DONE_DETECTED ||
     task.completionStatus === CompletionStatus.DONE_MANUALLY;
@@ -291,6 +335,20 @@ export function TaskItem({
                 text="Download"
               />
             )}
+            {isAdmin &&
+              task.name === ReleaseTaskName.UploadToBandcamp &&
+              !isCompleted && (
+                <button
+                  onClick={handleBandcampUpload}
+                  disabled={isBandcampUploading}
+                  className={styles.bandcampUploadButton}
+                >
+                  <UploadIcon />
+                  {isBandcampUploading
+                    ? "Uploading..."
+                    : "Upload to Bandcamp"}
+                </button>
+              )}
             {isAdmin && (
               <details className={styles.adminDropdown}>
                 <summary className={styles.adminDropdownTrigger}>
